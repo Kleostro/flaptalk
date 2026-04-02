@@ -1,4 +1,4 @@
-import { prisma } from 'src/db/prisma';
+import { prisma } from '@api/db/prisma';
 import Elysia from 'elysia';
 
 export class UsersService {

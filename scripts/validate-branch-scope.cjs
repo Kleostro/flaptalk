@@ -74,15 +74,40 @@ function getDiffFiles(range) {
     .filter(Boolean);
 }
 
-function getFallbackBaseRef() {
-  const candidates = ['@{upstream}', 'origin/develop', 'develop', 'origin/main', 'main'];
+function getBaseCandidates() {
+  return ['origin/develop', 'develop', 'origin/main', 'main'];
+}
+
+function resolveRevision(candidate) {
+  try {
+    return runGit(['rev-parse', '--verify', candidate]);
+  } catch {
+    return '';
+  }
+}
+
+function getMergeBase(base, head) {
+  try {
+    return runGit(['merge-base', base, head]);
+  } catch {
+    return '';
+  }
+}
+
+function getBranchBaseRef(head) {
+  const candidates = getBaseCandidates();
 
   for (const candidate of candidates) {
-    try {
-      runGit(['rev-parse', '--verify', candidate]);
-      return candidate;
-    } catch {
+    const resolvedBase = resolveRevision(candidate);
+
+    if (!resolvedBase) {
       continue;
+    }
+
+    const mergeBase = getMergeBase(candidate, head);
+
+    if (mergeBase) {
+      return mergeBase;
     }
   }
 
@@ -91,16 +116,22 @@ function getFallbackBaseRef() {
 
 function getChangedFiles(base, head) {
   if (base) {
-    return getDiffFiles(`${base}...${head}`);
+    const mergeBase = getMergeBase(base, head) || resolveRevision(base);
+
+    if (!mergeBase) {
+      return [];
+    }
+
+    return getDiffFiles(`${mergeBase}...${head}`);
   }
 
-  const fallbackBase = getFallbackBaseRef();
+  const branchBase = getBranchBaseRef(head);
 
-  if (!fallbackBase) {
+  if (!branchBase) {
     return [];
   }
 
-  return getDiffFiles(`${fallbackBase}...${head}`);
+  return getDiffFiles(`${branchBase}...${head}`);
 }
 
 function getWorkingTreeFiles() {
