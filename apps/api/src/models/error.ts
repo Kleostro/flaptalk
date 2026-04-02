@@ -1,4 +1,4 @@
-import { t } from "elysia";
+import { t } from 'elysia';
 
 export const ErrorResponse = t.Object({
   code: t.String(),
@@ -6,5 +6,5 @@ export const ErrorResponse = t.Object({
 });
 
 export const ErrorModel = {
-  "error.response": ErrorResponse,
+  'error.response': ErrorResponse,
 };

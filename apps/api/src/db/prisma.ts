@@ -1,10 +1,9 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaPg } from '@prisma/adapter-pg';
 
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient } from '../generated/prisma/client';
 
 const databaseUrl =
-  process.env["DATABASE_URL"] ??
-  "postgresql://maxzabaluev@localhost:5432/flaptalk?schema=public";
+  process.env['DATABASE_URL'] ?? 'postgresql://maxzabaluev@localhost:5432/flaptalk?schema=public';
 
 const adapter = new PrismaPg({
   connectionString: databaseUrl,
@@ -20,6 +19,6 @@ export const prisma =
     adapter,
   });
 
-if (process.env["NODE_ENV"] !== "production") {
+if (process.env['NODE_ENV'] !== 'production') {
   globalForPrisma.prisma = prisma;
 }

@@ -75,12 +75,6 @@
             }
           },
           "defaultConfiguration": "development"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "skip": true
-          }
         }
       }
     }

@@ -1,11 +1,11 @@
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia';
 
-import { prisma } from "../db/prisma";
+import { prisma } from '../db/prisma';
 
 export const prismaPlugin = new Elysia({
-  name: "flaptalk.prisma",
+  name: 'flaptalk.prisma',
 })
-  .decorate("prisma", prisma)
+  .decorate('prisma', prisma)
   .onStop(async () => {
     await prisma.$disconnect();
   });

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { t } from "elysia";
 
 import { __transformDate__ } from "./__transformDate__";
