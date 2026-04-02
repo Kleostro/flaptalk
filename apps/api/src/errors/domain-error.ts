@@ -5,6 +5,6 @@ export class DomainError extends Error {
     message: string,
   ) {
     super(message);
-    this.name = "DomainError";
+    this.name = 'DomainError';
   }
 }

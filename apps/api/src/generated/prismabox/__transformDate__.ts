@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { t } from "elysia";
 export const __transformDate__ = (options?: Parameters<typeof t.String>[0]) =>
   t

@@ -4,16 +4,20 @@
     "module": "ES2022",
     "moduleResolution": "bundler",
     "strict": true,
+    "exactOptionalPropertyTypes": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "skipLibCheck": true,
     "types": ["bun-types"],
     "baseUrl": ".",
     "paths": {
-      "@backend": ["./backend/src"],
-      "@backend/*": ["./backend/src/*"],
-      "@frontend": ["./frontend/src"],
-      "@frontend/*": ["./frontend/src/*"]
+      "@api": ["./apps/api/src"],
+      "@api/*": ["./apps/api/src/*"],
+      "@web": ["./apps/web/src"],
+      "@web/*": ["./apps/web/src/*"]
     }
   }
 }

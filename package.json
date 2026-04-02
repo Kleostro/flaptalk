@@ -4,13 +4,32 @@
   "workspaces": [
     "apps/*"
   ],
-  "packageManager": "bun@1.2.23",
+  "packageManager": "bun@1.3.10",
+  "engines": {
+    "node": ">=22.0.0",
+    "bun": ">=1.3.10"
+  },
   "scripts": {
     "dev:api": "bun run --cwd apps/api dev",
     "start:api": "bun run --cwd apps/api start",
-    "dev:web": "cd apps/web && PATH=\"/opt/homebrew/opt/node@20/bin:$PATH\" ./node_modules/.bin/ng serve",
-    "build:web": "cd apps/web && CI=1 NG_CLI_ANALYTICS=false PATH=\"/opt/homebrew/opt/node@20/bin:$PATH\" ./node_modules/.bin/ng build",
-    "test:web": "cd apps/web && CI=1 NG_CLI_ANALYTICS=false PATH=\"/opt/homebrew/opt/node@20/bin:$PATH\" ./node_modules/.bin/ng test",
+    "dev:web": "bun run --cwd apps/web dev",
+    "build:api": "bun run --cwd apps/api build",
+    "build:web": "bun run --cwd apps/web build",
+    "build": "bun run build:api && bun run build:web",
+    "lint:fast": "oxlint . --deny-warnings --ignore-pattern node_modules --ignore-pattern dist --ignore-pattern .angular --ignore-pattern coverage --ignore-pattern apps/api/src/generated",
+    "lint:unused": "knip",
+    "lint:web": "bun run --cwd apps/web lint",
+    "stylelint:web": "bun run --cwd apps/web stylelint",
+    "typecheck:web": "bun run --cwd apps/web typecheck",
+    "typecheck:api": "bun run --cwd apps/api typecheck",
+    "test:web": "bun run --cwd apps/web test",
+    "lint": "bun run lint:web && bun run stylelint:web",
+    "typecheck": "bun run typecheck:api && bun run typecheck:web",
+    "test": "bun run test:web",
+    "format": "./apps/web/node_modules/.bin/prettier --write .",
+    "format:check": "./apps/web/node_modules/.bin/prettier --check .",
+    "quality": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run build",
+    "quality:extended": "bun run quality && bun run lint:fast && bun run lint:unused",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f postgres",
@@ -22,8 +41,17 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "husky": "^9.1.7",
+    "knip": "^6.2.0",
     "lint-staged": "^15.5.1",
-    "validate-branch-name": "^1.3.2"
+    "oxlint": "^1.58.0",
+    "prettier": "^3.8.1"
+  },
+  "lint-staged": {
+    "*.{cjs,css,html,js,json,md,mjs,scss,ts,yaml,yml}": "./apps/web/node_modules/.bin/prettier --write",
+    "apps/web/src/**/*.{ts,html}": "bun run --cwd apps/web lint:fix",
+    "apps/web/src/**/*.{scss,css}": "bun run --cwd apps/web stylelint:fix"
   }
 }

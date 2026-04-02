@@ -1,15 +1,15 @@
-import { cors } from "@elysiajs/cors";
-import { swagger } from "@elysiajs/swagger";
-import { Elysia } from "elysia";
-
-import { DomainError } from "./errors/domain-error";
-import { ErrorModel } from "./models/error";
-import { prismaPlugin } from "./plugins/prisma";
-import { usersModule } from "./modules/users";
+import { cors } from '@elysiajs/cors';
+import { swagger } from '@elysiajs/swagger';
+import { Elysia } from 'elysia';
+import { DomainError } from './errors/domain-error';
+import { ErrorModel } from './models/error';
+import { prismaPlugin } from './plugins/prisma';
+import { usersModule } from './modules/users';
+import type { ErrorContext } from 'elysia';
 
 export const createApp = () =>
   new Elysia({
-    name: "corux.api",
+    name: 'corux.api',
   })
     .model(ErrorModel)
     .use(prismaPlugin)
@@ -23,14 +23,14 @@ export const createApp = () =>
       swagger({
         documentation: {
           info: {
-            title: "FlapTalk API",
-            version: "0.1.0",
-            description: "FlapTalk",
+            title: 'FlapTalk API',
+            version: '0.1.0',
+            description: 'FlapTalk',
           },
         },
       }),
     )
-    .onError(({ error, code, set }) => {
+    .onError(({ error, code, set }: ErrorContext) => {
       if (error instanceof DomainError) {
         set.status = error.status;
 
@@ -40,11 +40,11 @@ export const createApp = () =>
         };
       }
 
-      if (code === "VALIDATION") {
+      if (code === 'VALIDATION') {
         set.status = 400;
 
         return {
-          code: "validation_error",
+          code: 'validation_error',
           message: error.message,
         };
       }
@@ -52,7 +52,7 @@ export const createApp = () =>
       return undefined;
     })
     .use(usersModule)
-    .get("/", () => ({
-      name: "FlapTalk API",
-      version: "0.1.0",
+    .get('/', () => ({
+      name: 'FlapTalk API',
+      version: '0.1.0',
     }));

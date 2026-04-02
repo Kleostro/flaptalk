@@ -3,10 +3,8 @@ ci:
       - changed-files:
           - any-glob-to-any-file: '.github/*'
           - any-glob-to-any-file: '.husky/*'
-          - any-glob-to-any-file: '.husky_scripts/*'
-          - any-glob-to-any-file: '.lintstagedrc'
+          - any-glob-to-any-file: 'husky_scripts/*'
           - any-glob-to-any-file: '.commitlintrc.json'
-          - any-glob-to-any-file: '.validate-branch-name.cjs'
       - head-branch:
           - '^ci'
 
@@ -47,16 +45,16 @@ styling:
       - any-glob-to-any-file: '**/*.scss'
 
 sprint1:
-  - head-branch: 'RS-01'
+  - head-branch: 'FT-01|FTB-01|FTW-01'
 
 sprint2:
-  - head-branch: 'RS-02'
+  - head-branch: 'FT-02|FTB-02|FTW-02'
 
 sprint3:
-  - head-branch: 'RS-03'
+  - head-branch: 'FT-03|FTB-03|FTW-03'
 
 sprint4:
-  - head-branch: 'RS-04'
+  - head-branch: 'FT-04|FTB-04|FTW-04'
 
 sprint5:
-  - head-branch: 'RS-05'
+  - head-branch: 'FT-05|FTB-05|FTW-05'
