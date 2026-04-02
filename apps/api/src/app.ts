@@ -5,11 +5,10 @@ import { DomainError } from './errors/domain-error';
 import { ErrorModel } from './models/error';
 import { prismaPlugin } from './plugins/prisma';
 import { usersModule } from './modules/users';
-import type { ErrorContext } from 'elysia';
 
 export const createApp = () =>
   new Elysia({
-    name: 'corux.api',
+    name: 'flaptalk.api',
   })
     .model(ErrorModel)
     .use(prismaPlugin)
@@ -30,7 +29,7 @@ export const createApp = () =>
         },
       }),
     )
-    .onError(({ error, code, set }: ErrorContext) => {
+    .onError(({ error, code, set }: any) => {
       if (error instanceof DomainError) {
         set.status = error.status;
 
