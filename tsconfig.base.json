@@ -12,7 +12,6 @@
     "noUnusedParameters": true,
     "skipLibCheck": true,
     "types": ["bun-types"],
-    "baseUrl": ".",
     "paths": {
       "@api": ["./apps/api/src"],
       "@api/*": ["./apps/api/src/*"],
