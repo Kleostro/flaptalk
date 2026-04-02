@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "types": ["bun-types"],
+    "baseUrl": ".",
+    "paths": {
+      "@backend": ["./backend/src"],
+      "@backend/*": ["./backend/src/*"],
+      "@frontend": ["./frontend/src"],
+      "@frontend/*": ["./frontend/src/*"]
+    }
+  }
+}

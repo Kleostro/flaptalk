@@ -1,0 +1,29 @@
+{
+  "name": "flaptalk",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "packageManager": "bun@1.2.23",
+  "scripts": {
+    "dev:api": "bun run --cwd apps/api dev",
+    "start:api": "bun run --cwd apps/api start",
+    "dev:web": "cd apps/web && PATH=\"/opt/homebrew/opt/node@20/bin:$PATH\" ./node_modules/.bin/ng serve",
+    "build:web": "cd apps/web && CI=1 NG_CLI_ANALYTICS=false PATH=\"/opt/homebrew/opt/node@20/bin:$PATH\" ./node_modules/.bin/ng build",
+    "test:web": "cd apps/web && CI=1 NG_CLI_ANALYTICS=false PATH=\"/opt/homebrew/opt/node@20/bin:$PATH\" ./node_modules/.bin/ng test",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "prisma:generate": "bun run --cwd apps/api prisma:generate",
+    "prisma:migrate": "bun run --cwd apps/api prisma:migrate",
+    "prisma:format": "bun run --cwd apps/api prisma:format",
+    "prisma:seed": "bun run --cwd apps/api prisma:seed",
+    "prisma:push": "bun run --cwd apps/api prisma:push",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.1",
+    "validate-branch-name": "^1.3.2"
+  }
+}

@@ -1,0 +1,62 @@
+ci:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file: '.github/*'
+          - any-glob-to-any-file: '.husky/*'
+          - any-glob-to-any-file: '.husky_scripts/*'
+          - any-glob-to-any-file: '.lintstagedrc'
+          - any-glob-to-any-file: '.commitlintrc.json'
+          - any-glob-to-any-file: '.validate-branch-name.cjs'
+      - head-branch:
+          - '^ci'
+
+chore:
+  - any:
+      - changed-files:
+          - any-glob-to-all-files: '*'
+      - head-branch:
+          - '^chore'
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: '**/*.md'
+
+feature:
+  - head-branch:
+      - '^feat'
+
+fix:
+  - head-branch:
+      - '^fix'
+      - '^hotfix'
+
+performance:
+  - head-branch:
+      - '^perf'
+
+refactor:
+  - head-branch:
+      - '^refactor'
+
+style:
+  - head-branch:
+      - '^style'
+
+styling:
+  - changed-files:
+      - any-glob-to-any-file: '**/*.scss'
+
+sprint1:
+  - head-branch: 'RS-01'
+
+sprint2:
+  - head-branch: 'RS-02'
+
+sprint3:
+  - head-branch: 'RS-03'
+
+sprint4:
+  - head-branch: 'RS-04'
+
+sprint5:
+  - head-branch: 'RS-05'
