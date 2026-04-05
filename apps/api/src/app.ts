@@ -6,6 +6,13 @@ import { ErrorModel } from './models/error';
 import { prismaPlugin } from './plugins/prisma';
 import { usersModule } from './modules/users';
 
+const localhostOrigins = [/^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/];
+
+const allowedOrigins = (process.env['WEB_ORIGIN'] ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 export const createApp = () =>
   new Elysia({
     name: 'flaptalk.api',
@@ -14,7 +21,7 @@ export const createApp = () =>
     .use(prismaPlugin)
     .use(
       cors({
-        origin: [/^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/],
+        origin: [...localhostOrigins, ...allowedOrigins],
         credentials: true,
       }),
     )
@@ -55,3 +62,7 @@ export const createApp = () =>
       name: 'FlapTalk API',
       version: '0.1.0',
     }));
+
+export const app = createApp();
+
+export type App = typeof app;

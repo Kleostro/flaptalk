@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
 
-import { routes } from '@/app/app.routes';
+import { routes } from '@web/app/app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
