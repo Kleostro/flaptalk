@@ -97,6 +97,8 @@ jobs:
             mkdir -p deploy-bundle/deploy deploy-bundle/scripts
             cp deploy/docker-compose.api.yml deploy-bundle/deploy/docker-compose.api.yml
             cp scripts/deploy-api-docker.sh deploy-bundle/scripts/deploy-api-docker.sh
+          elif [[ -f deploy-bundle/deploy/docker-compose.api.yml && -f deploy-bundle/scripts/deploy-api-docker.sh ]]; then
+            echo "Deploy assets already downloaded with directory structure."
           else
             mkdir -p deploy-bundle/deploy deploy-bundle/scripts
             cp deploy-bundle/docker-compose.api.yml deploy-bundle/deploy/docker-compose.api.yml
