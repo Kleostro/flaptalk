@@ -90,8 +90,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "deploy/docker-compose.api.yml,scripts/deploy-api-docker.sh"
-          target: "/opt/flaptalk"
+          source: 'deploy/docker-compose.api.yml,scripts/deploy-api-docker.sh'
+          target: '/opt/flaptalk'
           strip_components: 0
 
       - name: Deploy image on server
