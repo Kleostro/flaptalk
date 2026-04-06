@@ -18,6 +18,10 @@ RUN bun run --cwd apps/api prisma:generate
 ENV NODE_ENV=production
 ENV PORT=3000
 
+RUN chown -R bun:bun /app
+
+USER bun
+
 EXPOSE 3000
 
 CMD ["bun", "run", "start:api"]

@@ -39,17 +39,16 @@ jobs:
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event.workflow_run.head_branch == 'main' && 'production' || 'develop') }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-
       - name: Resolve target environment
         id: target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_ENVIRONMENT: ${{ inputs.environment }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            TARGET_ENV="${{ inputs.environment }}"
-          elif [[ "${{ github.event.workflow_run.head_branch }}" == "main" ]]; then
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TARGET_ENV="$INPUT_ENVIRONMENT"
+          elif [[ "$WORKFLOW_RUN_HEAD_BRANCH" == "main" ]]; then
             TARGET_ENV="production"
           else
             TARGET_ENV="develop"
@@ -59,12 +58,16 @@ jobs:
 
       - name: Normalize deploy metadata
         id: deploy
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_IMAGE_TAG: ${{ inputs.image_tag }}
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           IMAGE_NAME="ghcr.io/${GITHUB_REPOSITORY,,}/api"
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.image_tag }}" ]]; then
-            IMAGE_TAG="${{ inputs.image_tag }}"
-          elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-            IMAGE_TAG="${{ github.event.workflow_run.head_sha }}"
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && -n "$INPUT_IMAGE_TAG" ]]; then
+            IMAGE_TAG="$INPUT_IMAGE_TAG"
+          elif [[ "$EVENT_NAME" == "workflow_run" ]]; then
+            IMAGE_TAG="$WORKFLOW_RUN_HEAD_SHA"
           else
             IMAGE_TAG="${GITHUB_SHA}"
           fi
@@ -72,6 +75,33 @@ jobs:
           echo "image_name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
           echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
           echo "api_image=${IMAGE_NAME}:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Download deploy assets
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          name: deploy-assets-${{ github.event.workflow_run.head_sha }}
+          path: deploy-bundle
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Prepare manual deploy assets
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v4
+
+      - name: Stage deploy assets for upload
+        run: |
+          if [[ -f deploy/docker-compose.api.yml ]]; then
+            rm -rf deploy-bundle
+            mkdir -p deploy-bundle/deploy deploy-bundle/scripts
+            cp deploy/docker-compose.api.yml deploy-bundle/deploy/docker-compose.api.yml
+            cp scripts/deploy-api-docker.sh deploy-bundle/scripts/deploy-api-docker.sh
+          else
+            mkdir -p deploy-bundle/deploy deploy-bundle/scripts
+            cp deploy-bundle/docker-compose.api.yml deploy-bundle/deploy/docker-compose.api.yml
+            cp deploy-bundle/deploy-api-docker.sh deploy-bundle/scripts/deploy-api-docker.sh
+          fi
 
       - name: Create deploy directory on server
         uses: appleboy/ssh-action@v1.2.0
@@ -90,9 +120,9 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: 'deploy/docker-compose.api.yml,scripts/deploy-api-docker.sh'
+          source: 'deploy-bundle/deploy/docker-compose.api.yml,deploy-bundle/scripts/deploy-api-docker.sh'
           target: '/opt/flaptalk'
-          strip_components: 0
+          strip_components: 1
 
       - name: Deploy image on server
         uses: appleboy/ssh-action@v1.2.0

@@ -1,14 +1,10 @@
 name: Publish API Image
 
 on:
-  workflow_run:
-    workflows:
-      - CI
+  push:
     branches:
       - main
       - develop
-    types:
-      - completed
   workflow_dispatch:
 
 permissions:
@@ -21,14 +17,11 @@ concurrency:
 
 jobs:
   publish:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Normalize image name
         id: image
@@ -68,3 +61,12 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: true
           sbom: true
+
+      - name: Upload deploy assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-assets-${{ github.sha }}
+          path: |
+            deploy/docker-compose.api.yml
+            scripts/deploy-api-docker.sh
+          if-no-files-found: error
