@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { logger } from '../observability/logger';
 
 async function main() {}
 
@@ -7,7 +8,9 @@ main()
     await prisma.$disconnect();
   })
   .catch(async (error) => {
-    console.error(error);
+    logger.error('db.seed.failed', {
+      error,
+    });
     await prisma.$disconnect();
     process.exit(1);
   });

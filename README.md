@@ -25,6 +25,7 @@ The repository is set up for local development, split CI for API and web, contai
 - **Web**: Angular application built with Bun-based workspace tooling
 - **Database**: PostgreSQL, with Prisma migrations and Neon as the current production target
 - **Deployment**: Docker image published to GHCR and deployed to a VPS over SSH
+- **Observability**: structured JSON logs, health/readiness endpoints, uptime workflow
 
 ### Current production model
 
@@ -170,7 +171,10 @@ The backend is built with:
 
 - listens on `PORT` or defaults to `3000`
 - connects to the database on startup
-- exposes `/` as a basic health/info route
+- emits structured JSON logs for request lifecycle and application events
+- exposes `/` as a basic info route
+- exposes `/health` as a liveness endpoint
+- exposes `/ready` as a readiness endpoint with a database check
 - exposes `/users`
 - enables Swagger docs through Elysia Swagger
 
@@ -189,6 +193,13 @@ PORT="3000"
 DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DATABASE?sslmode=require&channel_binding=require"
 WEB_ORIGIN="https://your-frontend-domain.com"
 ```
+
+### Observability
+
+- logs are emitted as structured JSON from [logger.ts](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/apps/api/src/observability/logger.ts)
+- request start, completion, failure, and readiness failures are logged with context such as `requestId`, `path`, `method`, and duration
+- `/health` is the liveness endpoint used by deploy verification
+- `/ready` is the readiness endpoint used for database-aware checks
 
 ## 🖥️ Web
 
@@ -289,6 +300,8 @@ The repository uses split pipelines to avoid rebuilding everything on every chan
 - API image publish: [publish-api-image.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/publish-api-image.yml)
 - API deploy: [deploy-api-production.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/deploy-api-production.yml)
 - Security scan: [semgrep.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/semgrep.yml)
+- Dependency review: [dependency-review.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/dependency-review.yml)
+- API uptime monitor: [api-uptime.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/api-uptime.yml)
 
 ### What triggers what
 
@@ -325,6 +338,14 @@ Examples:
 6. server pulls the immutable image
 7. server runs Prisma migrations
 8. server restarts the API container
+
+### Rollback model
+
+The deploy workflow supports manual rollback through `workflow_dispatch`.
+
+Use `Run workflow` in GitHub Actions and pass a previous image tag, usually a commit SHA, in the `image_tag` input.
+
+That redeploys an earlier immutable image from GHCR without rebuilding the application on the VPS.
 
 ## 🐳 API Deployment
 
@@ -366,6 +387,11 @@ If deployment succeeds and the server/firewall allows traffic, the API should be
 ```text
 http://YOUR_SERVER_IP:3000
 ```
+
+### Health verification
+
+- local on server: `http://127.0.0.1:3000/health`
+- external: `http://YOUR_SERVER_IP:3000/health`
 
 ## ☁️ Server Setup
 
@@ -532,16 +558,25 @@ bun run build:api
 ```bash
 docker compose -f /opt/flaptalk/deploy/docker-compose.api.yml ps
 docker compose -f /opt/flaptalk/deploy/docker-compose.api.yml logs --tail=100 api
-curl http://127.0.0.1:3000/
+curl http://127.0.0.1:3000/health
+curl http://127.0.0.1:3000/ready
 curl http://127.0.0.1:3000/users
 ```
 
 ### Check API externally
 
 ```bash
-curl http://YOUR_SERVER_IP:3000/
+curl http://YOUR_SERVER_IP:3000/health
+curl http://YOUR_SERVER_IP:3000/ready
 curl http://YOUR_SERVER_IP:3000/users
 ```
+
+### Monitoring and alerts
+
+- scheduled uptime checks run through [api-uptime.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/api-uptime.yml)
+- configure the repository variable `API_HEALTHCHECK_URL` to point to the production `/health` endpoint
+- on failure the workflow opens or updates a GitHub issue
+- on recovery the workflow comments on the alert issue and closes it
 
 ### Check whether port `3000` is already occupied
 

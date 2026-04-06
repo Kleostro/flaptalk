@@ -1,48 +1,60 @@
-## PR Title ✨
+## Summary
 
-📍 conforms with the following format:
+Describe the change in 2-5 concise bullet points.
 
-- [ ] prefix (following the [convention](https://www.conventionalcommits.org/en/v1.0.0-beta.2/): `ci`, `chore`, `docs`, `feat`, `fix`, `perf`, `refactor`, `style`, `test`)
-- [ ] sprint and issue number (e.g. `FT-01-02`, where `01` - is the sprint number and `02` - is the issue number)
-- [ ] short description
+- TBD
+- TBD
 
-👀 Example: `feat(FT-01-02): description`
+## Why
 
-## PR Description 🧙‍♂️
+What problem does this solve? What user, product, or engineering need does it address?
 
-_Add a comprehensive description of the changes in the PR_ 🤔
+## Scope
 
-#### Affected Scope 💡
+- [ ] API
+- [ ] Web
+- [ ] CI/CD
+- [ ] Infrastructure / deployment
+- [ ] Documentation
 
-Provide affected modules or areas
+## Validation
 
-#### Styles 🎨
+List the checks you ran locally or in CI.
 
-Provide any style changes details
+```bash
+# examples
+bun run lint:api
+bun run typecheck:api
+bun run build:api
 
-#### Screenshots/Demo 📸
+bun run lint:web
+bun run stylelint:web
+bun run typecheck:web
+bun run test:web
+bun run build:web
+```
 
-If necessary provide screenshots or a demo link to visually demonstrate the changes
+## Screenshots / Demo
 
-#### Documentation Updates 📖
+If the change affects UI or behavior, add screenshots, recordings, or request/response examples.
 
-Specify if any documentation updates are required and provide details on what needs to be updated
+## Deployment Notes
 
-#### Provide any other relevant information 🦉
+Mention anything reviewers or release owners should know:
 
-## Auto-Review 🤖
+- schema or migration changes
+- new environment variables
+- healthcheck or monitoring changes
+- rollback image tag considerations
+- rollback notes
+- data backfill requirements
 
-- [x] The labels have been added 🎨
-      [![Pull Request Labeler](https://github.com/kleostro/Flaptalk/actions/workflows/labeler.yml/badge.svg)](https://github.com/kleostro/Flaptalk/actions/workflows/labeler.yml)
-- [x] My code doesn't generate any errors or warnings ⚠️
-      [![Code Formatter](https://github.com/kleostro/Flaptalk/actions/workflows/format.yml/badge.svg)](https://github.com/kleostro/Flaptalk/actions/workflows/format.yml)
-- [x] My code builds successfully ⚙️
-      [![Netlify Status](https://api.netlify.com/api/v1/badges/c2d017fb-a7d0-4279-981d-918587dde979/deploy-status)](https://app.netlify.com/sites/flaptalk/deploys)
+## Checklist
 
-## Self-Check 🌟
-
-- [ ] I wrote the correct title for the PR 🗝️
-- [ ] I wrote a comprehensive description for the PR 📜
-- [ ] I have performed a self-review of my own code ✅
-- [ ] I have commented my code where needed 📝
-- [ ] I am happy with my PR and ready to merge ❤️‍🔥
+- [ ] PR title follows the repository convention
+- [ ] branch name matches the expected scope
+- [ ] I performed a self-review
+- [ ] I updated docs if needed
+- [ ] I added or updated tests where appropriate
+- [ ] I called out health, logging, alerting, or Sentry implications if relevant
+- [ ] I noted migration or rollout implications if relevant
