@@ -14,29 +14,52 @@ Web:
 
 ### API на VPS Timeweb Cloud через Docker
 
-В проекте поддерживается один production-вариант для API: Docker на VPS Timeweb Cloud с внешней базой данных в Neon.
+В проекте настроена более долгосрочная production-схема:
+- CI проверяет код в GitHub Actions
+- отдельный workflow собирает API image и публикует его в GHCR
+- production deploy выполняется из GitHub Actions по SSH на VPS
+- сервер не делает `git pull` и не собирает образ из исходников
+- runtime-секреты живут только на сервере в `/etc/flaptalk/api.env`
 
-Это означает:
-- API собирается из [Dockerfile](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/Dockerfile)
-- контейнер запускается через [deploy/docker-compose.api.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/deploy/docker-compose.api.yml)
-- production env хранится вне репозитория, например в `/etc/flaptalk/api.env`
-- обновление выполняется через [scripts/deploy-api-docker.sh](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/scripts/deploy-api-docker.sh)
+#### Что уже настроено в репозитории
 
-#### Что подготовить
+Основные файлы:
+- CI: [.github/workflows/ci.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/ci.yml)
+- публикация API image: [.github/workflows/publish-api-image.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/publish-api-image.yml)
+- production deploy: [.github/workflows/deploy-api-production.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/deploy-api-production.yml)
+- Docker image: [Dockerfile](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/Dockerfile)
+- production compose: [deploy/docker-compose.api.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/deploy/docker-compose.api.yml)
+- remote deploy script: [scripts/deploy-api-docker.sh](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/scripts/deploy-api-docker.sh)
 
-Перед началом у вас должны быть:
+#### Как теперь устроен production deploy
+
+Поток такой:
+1. вы пушите код в GitHub
+2. workflow `CI` прогоняет проверки
+3. workflow `Publish API Image` собирает immutable image и публикует его в `ghcr.io`
+4. workflow `Deploy API Production` подключается к VPS по SSH
+5. на сервер копируются свежие deploy-файлы
+6. сервер делает `docker pull` готового image
+7. сервер запускает `prisma migrate deploy`
+8. сервер поднимает контейнер API
+9. workflow проверяет health endpoint
+
+Это заметно безопаснее и стабильнее, чем:
+- хранить production checkout на сервере
+- делать `git pull` руками
+- пересобирать образ прямо на VPS
+
+#### Что нужно подготовить один раз
+
+Нужно:
 - VPS в Timeweb Cloud с Ubuntu 24.04
-- SSH-доступ к серверу
-- репозиторий проекта на GitHub
 - база данных Neon
-- при желании домен для API, но для первого запуска он не обязателен
+- GitHub repository
+- production branch `main`
+- GitHub Environment `production`
+- GitHub secrets для SSH-деплоя
 
-Рекомендуемая конфигурация сервера на старте:
-- 1 vCPU
-- 2 GB RAM
-- 20+ GB SSD
-
-#### Шаг 1. Подготовить сервер
+#### Шаг 1. Подготовить VPS
 
 Подключитесь к серверу:
 
@@ -44,12 +67,12 @@ Web:
 ssh root@YOUR_SERVER_IP
 ```
 
-Обновите систему и установите Docker:
+Установите Docker и базовые утилиты:
 
 ```bash
 apt update
 apt upgrade -y
-apt install -y git curl docker.io docker-compose-v2 postgresql-client
+apt install -y curl git docker.io docker-compose-v2 postgresql-client
 systemctl enable docker
 systemctl start docker
 ```
@@ -60,45 +83,27 @@ systemctl start docker
 docker compose version
 ```
 
-#### Шаг 2. Создать пользователя и каталоги
+Создайте каталог под deploy-артефакты и runtime env:
+
+```bash
+mkdir -p /opt/flaptalk/deploy /etc/flaptalk
+```
+
+Если хотите управлять сервером не из-под `root`, создайте пользователя:
 
 ```bash
 useradd -m -s /bin/bash flaptalk
-mkdir -p /var/www/flaptalk /etc/flaptalk
-chown -R flaptalk:flaptalk /var/www/flaptalk
-```
-
-Если хотите пользоваться `sudo` из-под `flaptalk`:
-
-```bash
 usermod -aG sudo flaptalk
 usermod -aG docker flaptalk
+chown -R flaptalk:flaptalk /opt/flaptalk
 ```
 
-После добавления в группу `docker` лучше перелогиниться.
-
-#### Шаг 3. Клонировать репозиторий
-
-Под пользователем `flaptalk`:
-
-```bash
-su - flaptalk
-cd /var/www/flaptalk
-git clone https://github.com/YOUR_GITHUB_USERNAME/flaptalk.git .
-```
-
-Проверьте, что Docker-файлы на месте:
-
-```bash
-find deploy -maxdepth 2 -type f | sort
-```
-
-#### Шаг 4. Создать production env
+#### Шаг 2. Создать runtime env на сервере
 
 Создайте файл:
 
 ```bash
-sudo nano /etc/flaptalk/api.env
+nano /etc/flaptalk/api.env
 ```
 
 Пример:
@@ -110,18 +115,18 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DATABASE?sslmode=require
 WEB_ORIGIN="https://your-frontend-domain.com"
 ```
 
-Важно:
-- оборачивайте значения в кавычки
-- это особенно важно для `DATABASE_URL`, потому что в строке могут быть `&` и другие спецсимволы shell
-- для Prisma миграций лучше использовать direct URL Neon, если Neon показывает и pooled, и direct варианты
-
-Если домена и фронтенда пока нет, `WEB_ORIGIN` можно временно оставить пустым:
+Если домена и фронтенда пока нет:
 
 ```env
 WEB_ORIGIN=""
 ```
 
-Проверьте, что env читается:
+Важно:
+- значения лучше оборачивать в кавычки
+- для `DATABASE_URL` это обязательно из-за `&` и других спецсимволов
+- production secrets не нужно хранить в git и GitHub repository secrets, если они нужны только runtime-контейнеру
+
+Проверка:
 
 ```bash
 set -a
@@ -130,127 +135,173 @@ set +a
 echo "$DATABASE_URL"
 ```
 
-#### Шаг 5. Собрать образ
+#### Шаг 3. Настроить GitHub Environment и secrets
 
-В корне проекта:
+В GitHub откройте:
+- `Settings` -> `Environments` -> `New environment`
+- создайте environment `production`
+
+Добавьте туда secrets:
+- `SSH_HOST`
+- `SSH_PORT`
+- `SSH_USER`
+- `SSH_PRIVATE_KEY`
+
+Рекомендуется:
+- включить required reviewers для environment `production`
+- деплоить production из `main`
+
+Что означают secrets:
+- `SSH_HOST`: IP или hostname VPS
+- `SSH_PORT`: обычно `22`
+- `SSH_USER`: пользователь для деплоя, например `flaptalk`
+- `SSH_PRIVATE_KEY`: приватный SSH-ключ, которым GitHub Actions подключается к серверу
+
+#### Шаг 4. Подготовить SSH-доступ для GitHub Actions
+
+На своей машине создайте отдельный deploy key:
 
 ```bash
-cd /var/www/flaptalk
-docker compose -f deploy/docker-compose.api.yml build api
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/flaptalk_deploy
 ```
 
-#### Шаг 6. Применить Prisma migrations
+Потом:
+- содержимое `~/.ssh/flaptalk_deploy` положите в secret `SSH_PRIVATE_KEY`
+- содержимое `~/.ssh/flaptalk_deploy.pub` добавьте на сервер в `~/.ssh/authorized_keys` пользователя деплоя
 
-Запустите миграции в одноразовом контейнере:
+Пример на сервере:
 
 ```bash
-cd /var/www/flaptalk
-set -a
-source /etc/flaptalk/api.env
-set +a
-docker compose -f deploy/docker-compose.api.yml run --rm api bunx prisma migrate deploy
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+nano ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
 ```
 
-Что должно появиться в Neon:
-- `_prisma_migrations`
-- `users`
+#### Шаг 5. Как работает publish image
 
-Проверка SQL-запросом:
+Workflow [publish-api-image.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/publish-api-image.yml):
+- логинится в GHCR через short-lived GitHub token
+- собирает Docker image
+- публикует его с immutable tag по SHA коммита
 
-```bash
-psql "$DATABASE_URL" -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';"
+Итоговый image имеет вид:
+
+```text
+ghcr.io/OWNER/REPOSITORY/api:<commit-sha>
 ```
 
-#### Шаг 7. Запустить API
+Например:
 
-```bash
-cd /var/www/flaptalk
-set -a
-source /etc/flaptalk/api.env
-set +a
-docker compose -f deploy/docker-compose.api.yml up -d api
+```text
+ghcr.io/kleostro/flaptalk/api:e30e4ac038b95fa267a524e576a2a877d75e3c2c
 ```
 
-Проверка контейнера:
+#### Шаг 6. Как работает production deploy
+
+Workflow [deploy-api-production.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.github/workflows/deploy-api-production.yml):
+- запускается автоматически на push в `main`
+- или вручную через `workflow_dispatch`
+- копирует на сервер только deploy-файлы
+- передаёт в deploy-скрипт `API_IMAGE`
+- логинится в GHCR через временный GitHub token
+- делает `docker pull`
+- применяет Prisma migrations
+- поднимает контейнер
+- проверяет `http://127.0.0.1:3000/`
+
+#### Ежедневная работа
+
+##### Обычная разработка
+
+В VS Code:
 
 ```bash
-docker compose -f deploy/docker-compose.api.yml ps
-docker compose -f deploy/docker-compose.api.yml logs -f api
+git status
+git add -A
+git commit -m "Your change"
+git push origin your-branch
 ```
 
-Проверка API на сервере:
+Откройте Pull Request в `main`.
+
+Что произойдёт:
+- `CI` проверит код
+- security workflows продолжат работать отдельно
+
+##### Production deploy
+
+После merge в `main`:
+- image соберётся автоматически
+- production deploy выполнится автоматически через GitHub Actions
+
+То есть на сервер больше не нужно заходить для обычного деплоя.
+
+##### Ручной redeploy
+
+Если нужно повторно выкатить уже собранный image:
+- откройте `Actions` -> `Deploy API Production`
+- нажмите `Run workflow`
+- при необходимости укажите `image_tag`
+
+Это полезно для:
+- повторного деплоя того же commit
+- отката на предыдущий SHA image
+
+#### Что делает deploy-api-docker.sh
+
+[scripts/deploy-api-docker.sh](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/scripts/deploy-api-docker.sh) теперь используется как server-side deploy runner.
+
+Он:
+- принимает `API_IMAGE`
+- загружает runtime env из `/etc/flaptalk/api.env`
+- при необходимости логинится в GHCR
+- делает `docker compose pull`
+- запускает `prisma migrate deploy`
+- поднимает контейнер
+- чистит неиспользуемые image
+
+То есть этот скрипт больше не про `git pull`, а про безопасный запуск уже собранного production-артефакта.
+
+#### Как проверить production вручную
+
+На сервере:
 
 ```bash
+docker compose -f /opt/flaptalk/deploy/docker-compose.api.yml ps
+docker compose -f /opt/flaptalk/deploy/docker-compose.api.yml logs --tail=100 api
 curl http://127.0.0.1:3000/
 curl http://127.0.0.1:3000/users
 ```
 
-#### Как работает сеть
-
-По умолчанию compose-файл публикует контейнер так:
-
-```yaml
-ports:
-  - "127.0.0.1:3000:3000"
-```
-
-Это значит:
-- API доступен на самом сервере по `127.0.0.1:3000`
-- извне порт `3000` не открыт
-- это безопаснее для production
-
-Если вы хотите временно тестировать API напрямую по внешнему IP без Nginx, поменяйте mapping на:
-
-```yaml
-ports:
-  - "3000:3000"
-```
-
-После этого пересоберите и перезапустите контейнер:
+Проверка таблиц в Neon:
 
 ```bash
-docker compose -f deploy/docker-compose.api.yml up -d --build api
+set -a
+source /etc/flaptalk/api.env
+set +a
+psql "$DATABASE_URL" -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';"
 ```
-
-Тогда проверить с вашего компьютера можно будет так:
-
-```bash
-curl http://YOUR_SERVER_IP:3000/
-curl http://YOUR_SERVER_IP:3000/users
-```
-
-#### Как обновлять приложение
-
-Для обычного обновления:
-
-```bash
-cd /var/www/flaptalk
-chmod +x scripts/deploy-api-docker.sh
-./scripts/deploy-api-docker.sh
-```
-
-Скрипт делает:
-- `git pull`
-- пересборку образа
-- запуск `prisma migrate deploy`
-- перезапуск контейнера API
 
 #### Что делать при ошибке `public.users does not exist`
 
 Проверьте по порядку:
-1. загружен ли `/etc/flaptalk/api.env`
-2. ведёт ли `DATABASE_URL` в нужную production-базу Neon
-3. выполнена ли команда `docker compose -f deploy/docker-compose.api.yml run --rm api bunx prisma migrate deploy`
-4. есть ли в базе `_prisma_migrations` и `users`
+1. корректен ли `/etc/flaptalk/api.env`
+2. смотрит ли `DATABASE_URL` в нужную production-базу Neon
+3. прошёл ли job `Deploy API Production`
+4. успешно ли отработал шаг `prisma migrate deploy`
+5. есть ли в БД `_prisma_migrations` и `users`
 
-#### Какие файлы использовать
+#### Почему эта схема лучше
 
-Для Docker-деплоя API используйте:
-- [Dockerfile](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/Dockerfile)
-- [.dockerignore](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/.dockerignore)
-- [deploy/api.env.example](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/deploy/api.env.example)
-- [deploy/docker-compose.api.yml](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/deploy/docker-compose.api.yml)
-- [scripts/deploy-api-docker.sh](/Users/maxzabaluev/Desktop/flaptalk/flaptalk/scripts/deploy-api-docker.sh)
+По сравнению с ручным деплоем на сервере она даёт:
+- immutable artifacts вместо сборки на VPS
+- меньше production secrets в CI
+- минимум секретов в git
+- audited deploy history в GitHub Actions
+- короткоживущий registry token вместо постоянной ручной авторизации
+- предсказуемый rollback по image tag
+- меньший риск “у меня на сервере была не та версия кода”
 
 ### Cloudflare Pages web
 

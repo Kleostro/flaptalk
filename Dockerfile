@@ -2,6 +2,9 @@ FROM oven/bun:1.3.10 AS base
 
 WORKDIR /app
 
+ARG DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/flaptalk?schema=public"
+ENV DATABASE_URL="${DATABASE_URL}"
+
 COPY package.json bun.lock ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/web/package.json apps/web/package.json
