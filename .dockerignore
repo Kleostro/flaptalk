@@ -1,0 +1,10 @@
+.git
+.github
+node_modules
+apps/api/node_modules
+apps/web/node_modules
+apps/web/.angular
+apps/web/dist
+apps/api/dist
+.DS_Store
+coverage
