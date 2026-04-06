@@ -181,6 +181,7 @@ The backend is built with:
 ### API environment variables
 
 - `DATABASE_URL` — PostgreSQL connection string
+- `DIRECT_DATABASE_URL` — direct PostgreSQL connection string for Prisma migrations and administrative operations
 - `WEB_ORIGIN` — comma-separated allowed CORS origins
 - `PORT` — API port
 - `NODE_ENV` — runtime mode
@@ -191,6 +192,7 @@ Example:
 NODE_ENV="production"
 PORT="3000"
 DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DATABASE?sslmode=require&channel_binding=require"
+DIRECT_DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DATABASE?sslmode=require&channel_binding=require"
 WEB_ORIGIN="https://your-frontend-domain.com"
 ```
 
@@ -259,9 +261,10 @@ The table `public.users` does not exist in the current database
 check:
 
 1. `DATABASE_URL` points to the expected production database
-2. Prisma migrations were applied
-3. `_prisma_migrations` exists
-4. `users` exists in the `public` schema
+2. `DIRECT_DATABASE_URL` points to a reachable direct database endpoint if you use Neon or another pooler-based provider
+3. Prisma migrations were applied
+4. `_prisma_migrations` exists
+5. `users` exists in the `public` schema
 
 Quick SQL check:
 
