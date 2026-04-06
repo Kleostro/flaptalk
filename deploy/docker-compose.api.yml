@@ -6,4 +6,4 @@ services:
     env_file:
       - /etc/flaptalk/api.env
     ports:
-      - '127.0.0.1:3000:3000'
+      - '3000:3000'
