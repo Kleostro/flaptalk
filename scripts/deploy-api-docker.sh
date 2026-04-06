@@ -40,7 +40,7 @@ echo "Pulling API image $API_IMAGE..."
 docker compose -f "$COMPOSE_FILE" pull api
 
 echo "Applying Prisma migrations..."
-docker compose -f "$COMPOSE_FILE" run --rm api bunx prisma migrate deploy
+docker compose -f "$COMPOSE_FILE" run --rm api sh -lc 'cd apps/api && bunx prisma migrate deploy'
 
 echo "Restarting API container..."
 docker compose -f "$COMPOSE_FILE" up -d api
