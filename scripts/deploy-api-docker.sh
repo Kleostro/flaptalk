@@ -40,7 +40,19 @@ echo "Pulling API image $API_IMAGE..."
 docker compose -f "$COMPOSE_FILE" pull api
 
 echo "Applying Prisma migrations..."
-docker compose -f "$COMPOSE_FILE" run --rm api sh -lc 'cd apps/api && bunx prisma migrate deploy'
+max_attempts=3
+attempt=1
+
+until docker compose -f "$COMPOSE_FILE" run --rm api sh -lc 'cd apps/api && bunx prisma migrate deploy'; do
+  if [[ "$attempt" -ge "$max_attempts" ]]; then
+    echo "Prisma migrations failed after ${max_attempts} attempts." >&2
+    exit 1
+  fi
+
+  echo "Prisma migrations attempt ${attempt} failed. Retrying in 10 seconds..." >&2
+  attempt=$((attempt + 1))
+  sleep 10
+done
 
 echo "Restarting API container..."
 docker compose -f "$COMPOSE_FILE" up -d api
