@@ -2,10 +2,28 @@ name: Semgrep
 
 on:
   pull_request:
+    paths:
+      - 'apps/**'
+      - 'deploy/**'
+      - 'scripts/**'
+      - 'Dockerfile'
+      - 'package.json'
+      - 'bun.lock'
+      - 'tsconfig.base.json'
+      - '.github/workflows/**'
   push:
     branches:
       - main
       - develop
+    paths:
+      - 'apps/**'
+      - 'deploy/**'
+      - 'scripts/**'
+      - 'Dockerfile'
+      - 'package.json'
+      - 'bun.lock'
+      - 'tsconfig.base.json'
+      - '.github/workflows/**'
 
 jobs:
   semgrep:

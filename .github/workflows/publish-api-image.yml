@@ -5,6 +5,17 @@ on:
     branches:
       - main
       - develop
+    paths:
+      - 'apps/api/**'
+      - 'Dockerfile'
+      - 'deploy/**'
+      - 'scripts/deploy-api-docker.sh'
+      - 'package.json'
+      - 'bun.lock'
+      - 'tsconfig.base.json'
+      - '.github/workflows/ci-api.yml'
+      - '.github/workflows/publish-api-image.yml'
+      - '.github/workflows/deploy-api-production.yml'
   workflow_dispatch:
 
 permissions:
