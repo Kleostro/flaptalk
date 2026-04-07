@@ -147,11 +147,14 @@ jobs:
 
       - name: Verify health endpoint
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          API_IMAGE: ${{ steps.deploy.outputs.api_image }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          envs: API_IMAGE
           script: |
             for attempt in {1..12}; do
               if curl --fail --silent http://127.0.0.1:3000/health >/dev/null; then
