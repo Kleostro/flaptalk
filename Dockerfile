@@ -26,6 +26,7 @@ WORKDIR /app
 COPY --from=build --chown=bun:bun /app/node_modules ./node_modules
 COPY --from=build --chown=bun:bun /app/apps/api ./apps/api
 COPY --from=build --chown=bun:bun /app/package.json ./package.json
+COPY --from=build --chown=bun:bun /app/tsconfig.base.json ./tsconfig.base.json
 
 ENV NODE_ENV=production
 ENV PORT=3000
