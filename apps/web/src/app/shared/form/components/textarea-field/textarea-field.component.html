@@ -1,0 +1,23 @@
+<label class="textarea-field" [attr.for]="inputId()">
+  <span class="textarea-field__label">{{ label() }}</span>
+
+  <textarea
+    [id]="inputId()"
+    class="textarea-field__control"
+    [attr.aria-describedby]="hint() ? inputId() + '-hint' : null"
+    [attr.aria-invalid]="hasErrors()"
+    [attr.autocomplete]="autocomplete()"
+    [class.textarea-field__control--invalid]="hasErrors()"
+    [formField]="field()"
+    [placeholder]="placeholder()"
+    [rows]="rows()"
+  ></textarea>
+
+  @if (hint()) {
+    <span class="textarea-field__hint" [id]="inputId() + '-hint'">
+      {{ hint() }}
+    </span>
+  }
+
+  <app-form-field-errors [errors]="mergedErrors()" [isVisible]="showErrors()" />
+</label>

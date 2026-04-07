@@ -1,0 +1,6 @@
+<app-switcher
+  [ariaLabel]="switcherAriaLabel"
+  [options]="options()"
+  [value]="currentTheme()"
+  (valueChange)="selectTheme($event)"
+/>

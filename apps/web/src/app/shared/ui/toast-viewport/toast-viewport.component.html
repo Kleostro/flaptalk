@@ -1,0 +1,40 @@
+<aside aria-live="polite" class="toast-viewport">
+  @for (toast of toasts(); track toast.id) {
+    <section
+      class="toast-viewport__item"
+      [class.toast-viewport__item--error]="toast.level === toastLevel.error"
+      [class.toast-viewport__item--hidden]="!toast.visible"
+      [class.toast-viewport__item--info]="toast.level === toastLevel.info"
+      [class.toast-viewport__item--success]="toast.level === toastLevel.success"
+    >
+      <span class="toast-viewport__item-accent"></span>
+
+      <div class="toast-viewport__item-body">
+        <div class="toast-viewport__item-heading">
+          <span class="toast-viewport__item-icon" aria-hidden="true">
+            @if (toast.level === toastLevel.success) {
+              Success
+            } @else if (toast.level === toastLevel.error) {
+              Error
+            } @else {
+              Info
+            }
+          </span>
+
+          <p class="toast-viewport__item-title">{{ toast.title }}</p>
+        </div>
+
+        <p class="toast-viewport__item-message">{{ toast.message }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="toast-viewport__item-close"
+        aria-label="Dismiss notification"
+        (click)="dismiss(toast.id)"
+      >
+        Close
+      </button>
+    </section>
+  }
+</aside>

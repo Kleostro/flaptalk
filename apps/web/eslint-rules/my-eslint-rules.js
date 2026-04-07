@@ -64,7 +64,14 @@ export const myEslintRules = {
       ],
     },
   ],
-  'max-len': ['error', { code: 120, ignoreComments: true }],
+  'max-len': [
+    'error',
+    {
+      code: 120,
+      ignoreComments: true,
+      ignorePattern: String.raw`^\s*(import|export)\s.+\sfrom\s.+$`,
+    },
+  ],
   'max-lines-per-function': ['error', { max: 40, skipBlankLines: true, skipComments: true }],
   'no-console': ['error', { allow: ['warn', 'error'] }],
   'no-empty-function': 'error',
