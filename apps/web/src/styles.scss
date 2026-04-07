@@ -1,0 +1,171 @@
+:root {
+  --font-size-caption: 0.9375rem;
+  --font-size-label: 1rem;
+  --font-size-body: 1.0625rem;
+  --font-size-title: 4.5rem;
+  --font-size-subtitle: 1.375rem;
+  --font-size-eyebrow: 0.9375rem;
+  --font-size-button: 1rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4.5rem;
+  --space-4xl: 6rem;
+  --page-gutter: 1.25rem;
+  --page-gutter-wide: 2.5rem;
+  --page-max-inline: 108rem;
+  --panel-padding: 2.25rem;
+  --panel-padding-compact: 1.75rem;
+  --control-height-md: 3.25rem;
+  --control-height-lg: 4rem;
+  --control-padding-inline: 1.5rem;
+  --control-padding-inline-sm: 1.125rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-pill: 999rem;
+  --motion-duration-fast: 180ms;
+  --shadow-soft: 0 1.5rem 4rem -2rem oklch(24% 0.04 260deg / 28%);
+  --shadow-panel: 0 2.5rem 5rem -2.5rem oklch(10% 0.03 255deg / 52%);
+  --shadow-interactive: 0 1.25rem 2.5rem -1.5rem
+    color-mix(in oklch, var(--accent-primary) 55%, transparent);
+  --shadow-switcher: 0 0.75rem 1.5rem -1rem oklch(4% 0.01 260deg / 48%);
+  --focus-ring: 0 0 0 0.25rem color-mix(in oklch, var(--accent-primary) 22%, transparent);
+  --border-width-thin: 0.0625rem;
+  --surface-backdrop: oklch(99% 0.01 95deg);
+  --surface-base: oklch(98.5% 0.006 95deg);
+  --surface-elevated: oklch(100% 0 0deg / 72%);
+  --surface-muted: oklch(95% 0.01 250deg);
+  --surface-contrast: oklch(18% 0.03 260deg);
+  --text-primary: oklch(23% 0.03 260deg);
+  --text-secondary: oklch(45% 0.03 255deg);
+  --text-strong: oklch(18% 0.03 260deg);
+  --text-inverse: oklch(97% 0.01 95deg);
+  --accent-primary: oklch(59% 0.14 248deg);
+  --accent-secondary: oklch(69% 0.1 206deg);
+  --accent-soft: oklch(95% 0.03 220deg);
+  --button-primary-background: oklch(63% 0.13 248deg);
+  --button-primary-background-hover: oklch(59% 0.13 248deg);
+  --button-primary-border-strong: oklch(52% 0.11 248deg);
+  --button-primary-shadow: oklch(37% 0.07 248deg);
+  --button-primary-text: oklch(98% 0.01 95deg);
+  --button-disabled-background: oklch(88% 0.01 250deg);
+  --button-disabled-border: oklch(82% 0.01 250deg);
+  --button-disabled-text: oklch(60% 0.02 255deg);
+  --button-secondary-background: oklch(100% 0 0deg / 80%);
+  --button-secondary-border: oklch(84% 0.02 250deg);
+  --outline-subtle: oklch(87% 0.02 250deg);
+  --outline-strong: oklch(68% 0.07 220deg);
+  --danger: oklch(62% 0.2 25deg);
+  --success: oklch(66% 0.14 150deg);
+  font-family: 'Avenir Next', 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --surface-backdrop: oklch(16% 0.02 260deg);
+  --surface-base: oklch(20% 0.025 260deg);
+  --surface-elevated: oklch(26% 0.03 260deg / 84%);
+  --surface-muted: oklch(30% 0.02 255deg);
+  --surface-contrast: oklch(92% 0.01 95deg);
+  --text-primary: oklch(94% 0.01 95deg);
+  --text-secondary: oklch(76% 0.02 255deg);
+  --text-strong: oklch(10% 0.02 255deg);
+  --text-inverse: oklch(18% 0.03 260deg);
+  --accent-primary: oklch(73% 0.12 248deg);
+  --accent-secondary: oklch(78% 0.1 206deg);
+  --accent-soft: oklch(29% 0.05 220deg);
+  --button-primary-background: oklch(68% 0.12 248deg);
+  --button-primary-background-hover: oklch(72% 0.13 248deg);
+  --button-primary-border-strong: oklch(58% 0.1 248deg);
+  --button-primary-shadow: oklch(34% 0.05 248deg);
+  --button-primary-text: oklch(98% 0.01 95deg);
+  --button-disabled-background: oklch(30% 0.02 255deg);
+  --button-disabled-border: oklch(36% 0.02 255deg);
+  --button-disabled-text: oklch(56% 0.02 255deg);
+  --button-secondary-background: oklch(24% 0.03 258deg / 92%);
+  --button-secondary-border: oklch(38% 0.02 255deg);
+  --outline-subtle: oklch(38% 0.02 255deg);
+  --outline-strong: oklch(75% 0.08 220deg);
+  --danger: oklch(72% 0.18 25deg);
+  --success: oklch(76% 0.12 155deg);
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+  min-block-size: 100%;
+  font-size: clamp(12px, 0.8vw, 50px);
+  background:
+    radial-gradient(
+      circle at top,
+      color-mix(in oklch, var(--accent-secondary) 18%, transparent),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      color-mix(in oklch, var(--accent-primary) 16%, transparent),
+      transparent 28%
+    ),
+    var(--surface-backdrop);
+}
+
+@media (width >=48rem) {
+  :root {
+    --page-gutter: 2rem;
+    --page-gutter-wide: 3.5rem;
+    --panel-padding: 2.5rem;
+    --font-size-title: 5rem;
+  }
+}
+
+@media (width >=80rem) {
+  :root {
+    --page-gutter: 3rem;
+    --page-gutter-wide: 5rem;
+    --panel-padding: 3rem;
+    --font-size-title: 5.5rem;
+  }
+}
+
+body {
+  min-block-size: 100vh;
+  margin: 0;
+
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+  color: var(--text-primary);
+
+  background: transparent;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-inline-size: 100%;
+}

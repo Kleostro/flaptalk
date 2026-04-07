@@ -1,0 +1,11 @@
+<a
+  class="ui-link"
+  [attr.aria-label]="ariaLabel()"
+  [class.ui-link--inline]="appearance() === 'inline'"
+  [class.ui-link--subtle]="appearance() === 'subtle'"
+  [routerLink]="route()"
+>
+  <span class="ui-link__label">
+    <ng-content />
+  </span>
+</a>

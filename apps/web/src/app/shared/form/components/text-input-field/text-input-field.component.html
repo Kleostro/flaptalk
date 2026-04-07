@@ -1,0 +1,23 @@
+<label class="text-input-field" [attr.for]="inputId()">
+  <span class="text-input-field__label">{{ label() }}</span>
+
+  <input
+    [id]="inputId()"
+    class="text-input-field__control"
+    [attr.aria-describedby]="hint() ? inputId() + '-hint' : null"
+    [attr.aria-invalid]="hasErrors()"
+    [attr.autocomplete]="autocomplete()"
+    [class.text-input-field__control--invalid]="hasErrors()"
+    [formField]="field()"
+    [placeholder]="placeholder()"
+    [type]="type()"
+  />
+
+  @if (hint()) {
+    <span class="text-input-field__hint" [id]="inputId() + '-hint'">
+      {{ hint() }}
+    </span>
+  }
+
+  <app-form-field-errors [errors]="mergedErrors()" [isVisible]="showErrors()" />
+</label>

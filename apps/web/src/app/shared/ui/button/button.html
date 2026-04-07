@@ -1,0 +1,15 @@
+<button
+  class="ui-button"
+  [class.ui-button--fluid]="fluid()"
+  [class.ui-button--large]="size() === 'large'"
+  [class.ui-button--medium]="size() === 'medium'"
+  [class.ui-button--primary]="appearance() === 'primary'"
+  [class.ui-button--secondary]="appearance() === 'secondary'"
+  [class.ui-button--tertiary]="appearance() === 'tertiary'"
+  [disabled]="disabled()"
+  [type]="type()"
+>
+  <span class="ui-button__label">
+    <ng-content />
+  </span>
+</button>

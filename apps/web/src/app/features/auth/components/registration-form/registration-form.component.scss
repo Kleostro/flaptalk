@@ -1,0 +1,32 @@
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+
+  &__requirements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+
+    margin: 0;
+    padding: 0;
+
+    font-size: var(--font-size-caption);
+    color: var(--text-secondary);
+    list-style: none;
+
+    li {
+      padding-block: 0.625rem;
+      padding-inline: 0.875rem;
+      border: var(--border-width-thin) solid
+        color-mix(in oklch, var(--outline-subtle) 72%, transparent);
+      border-radius: var(--radius-pill);
+
+      background: color-mix(in oklch, var(--surface-elevated) 74%, transparent);
+    }
+  }
+
+  &__submit {
+    margin-block-start: var(--space-sm);
+  }
+}

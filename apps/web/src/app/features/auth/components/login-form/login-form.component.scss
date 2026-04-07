@@ -1,0 +1,98 @@
+.auth-form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-xl);
+
+  min-block-size: 100%;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  &__eyebrow {
+    margin: 0;
+
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__description {
+    max-inline-size: 36rem;
+    margin: 0;
+
+    font-size: var(--font-size-label);
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  &__fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+
+  &__support {
+    margin-block-start: auto;
+    padding: var(--space-lg);
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+    border-radius: var(--radius-lg);
+
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--surface-elevated) 82%, transparent),
+      color-mix(in oklch, var(--surface-base) 88%, transparent)
+    );
+  }
+
+  &__support-title {
+    margin: 0 0 var(--space-md);
+
+    font-size: var(--font-size-label);
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text-primary);
+  }
+
+  &__highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+
+    li {
+      padding-block: 0.625rem;
+      padding-inline: 0.875rem;
+      border: var(--border-width-thin) solid
+        color-mix(in oklch, var(--outline-subtle) 72%, transparent);
+      border-radius: var(--radius-pill);
+
+      font-size: var(--font-size-caption);
+      line-height: 1.4;
+      color: var(--text-secondary);
+
+      background: color-mix(in oklch, var(--surface-elevated) 78%, transparent);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  &__submit {
+    margin-block-start: 0;
+  }
+}

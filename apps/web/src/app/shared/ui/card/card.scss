@@ -1,0 +1,36 @@
+:host {
+  display: flex;
+  flex: 1 1 auto;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: 100%;
+}
+
+.card {
+  position: relative;
+
+  display: flex;
+  flex: 1 1 auto;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: 100%;
+  padding: var(--panel-padding);
+  border: var(--border-width-thin) solid color-mix(in oklch, var(--outline-subtle) 82%, transparent);
+  border-radius: var(--radius-xl);
+
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--surface-elevated) 92%, transparent),
+    color-mix(in oklch, var(--surface-base) 94%, transparent)
+  );
+  backdrop-filter: blur(1.5rem);
+  box-shadow: var(--shadow-panel);
+}
+
+@media (width < 48rem) {
+  .card {
+    padding: var(--panel-padding-compact);
+  }
+}
