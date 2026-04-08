@@ -1,6 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 
-import { TOAST_LEVEL } from '@web/app/core/models/toast-level.type';
+import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { ToastService } from '@web/app/core/services/toast.service';
 import { AUTH_PAGE_CONTENT } from '@web/app/features/auth/constants/auth.constants';
 import { AuthPageShellComponent } from '@web/app/features/auth/components/auth-page-shell/auth-page-shell.component';
@@ -18,6 +27,8 @@ import { AuthFormFactoryService } from '@web/app/features/auth/services/auth-for
 export class RegistrationPageComponent {
   private readonly authFacadeService = inject(AuthFacadeService);
   private readonly authFormFactoryService = inject(AuthFormFactoryService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
   private readonly toastService = inject(ToastService);
 
   public readonly registrationModel = this.authFormFactoryService.createRegistrationModel();
@@ -37,31 +48,13 @@ export class RegistrationPageComponent {
   public readonly isInvalid = computed(
     () => this.registrationForm().invalid() || this.passwordMismatch(),
   );
-  public readonly isPending = signal(false);
+  public readonly isPending = computed(() => this.authFacadeService.isRegisterPending());
   public readonly isSubmitted = signal(false);
   public readonly showErrors = computed(
     () => this.isSubmitted() || this.registrationForm().touched(),
   );
 
-  private showToast(
-    level: (typeof TOAST_LEVEL)[keyof typeof TOAST_LEVEL],
-    title: string,
-    message: string,
-  ): void {
-    if (level === TOAST_LEVEL.success) {
-      this.toastService.success({ message, title });
-      return;
-    }
-
-    if (level === TOAST_LEVEL.error) {
-      this.toastService.error({ message, title });
-      return;
-    }
-
-    this.toastService.info({ message, title });
-  }
-
-  public async submit(event: Event): Promise<void> {
+  public submit(event: Event): void {
     event.preventDefault();
     this.isSubmitted.set(true);
 
@@ -73,18 +66,23 @@ export class RegistrationPageComponent {
       return;
     }
 
-    this.isPending.set(true);
-
-    try {
-      const result = await this.authFacadeService.register(this.registrationModel());
-      this.showToast(result.level, result.title, result.message);
-    } catch {
-      this.toastService.error({
-        message: 'Something went wrong while preparing the registration flow.',
-        title: 'Registration failed',
+    this.authFacadeService
+      .register(this.registrationModel())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: (error: unknown) => {
+          this.toastService.error({
+            message:
+              error instanceof Error
+                ? error.message
+                : 'Something went wrong while preparing the registration flow.',
+            title: 'Registration failed',
+          });
+        },
+        next: (result) => {
+          this.toastService.success(result);
+          void this.router.navigateByUrl(`/${APP_ROUTE_PATHS.workspace}`);
+        },
       });
-    } finally {
-      this.isPending.set(false);
-    }
   }
 }

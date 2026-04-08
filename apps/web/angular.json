@@ -77,7 +77,8 @@
               "buildTarget": "flaptalk-web:build:production"
             },
             "development": {
-              "buildTarget": "flaptalk-web:build:development"
+              "buildTarget": "flaptalk-web:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

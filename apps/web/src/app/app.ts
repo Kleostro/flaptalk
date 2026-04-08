@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ThemeService } from '@web/app/core/services/theme.service';
 import { ToastViewportComponent } from '@web/app/shared/ui/toast-viewport/toast-viewport.component';
 
 @Component({
@@ -9,4 +10,6 @@ import { ToastViewportComponent } from '@web/app/shared/ui/toast-viewport/toast-
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
-export class App {}
+export class App {
+  protected readonly themeService = inject(ThemeService);
+}

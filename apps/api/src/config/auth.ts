@@ -1,4 +1,4 @@
-const DEFAULT_AUTH_COOKIE_NAME = 'flaptalk_session';
+const DEFAULT_AUTH_COOKIE_NAME = 'flaptalk_local_session';
 const DEFAULT_AUTH_SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 const DEVELOPMENT_AUTH_SECRET = 'flaptalk-development-auth-secret-change-me';
 

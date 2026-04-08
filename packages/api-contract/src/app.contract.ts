@@ -1,8 +1,8 @@
 import { Elysia, t } from 'elysia';
 
-import { AuthModel, createSessionCookieModel } from '@flaptalk/api-contract/models/auth';
-import { ErrorModel } from '@flaptalk/api-contract/models/error';
-import { UsersModel } from '@flaptalk/api-contract/models/users';
+import { AuthModel, createSessionCookieModel } from './models/auth';
+import { ErrorModel } from './models/error';
+import { UsersModel } from './models/users';
 
 function createContractUser() {
   return {
