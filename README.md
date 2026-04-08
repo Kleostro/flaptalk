@@ -473,25 +473,19 @@ Related files:
 
 ### Branch naming and scope validation
 
-Branch names are not just cosmetic here. The repository validates that the branch prefix matches the detected scope of changed files.
-
-Supported prefixes:
-
-- `FTB` -> backend-only changes
-- `FTW` -> frontend-only changes
-- `FT` -> project-wide or mixed changes
+Branch names are not just cosmetic here. The repository validates a single shared `FT` prefix across the monorepo.
 
 Allowed branch shape:
 
 ```text
-<type>/<prefix>-<sprint>-<task>/<description>
+<type>/FT-<sprint>-<task>/<description>
 ```
 
 Example branch names:
 
 ```text
-feat/FTB-01-03/add_users_endpoint
-fix/FTW-02-04/fix_login_layout
+feat/FT-01-03/add_users_endpoint
+fix/FT-02-04/fix_login_layout
 chore/FT-03-01/update_workspace_config
 ```
 
@@ -503,9 +497,7 @@ Allowed exceptions:
 
 How scope is detected:
 
-- changes only in `apps/api/**` -> `FTB`
-- changes only in `apps/web/**` -> `FTW`
-- mixed or root-level changes -> `FT`
+- all repository changes map to the shared `FT` prefix
 
 If the branch name does not match the detected scope:
 
@@ -515,7 +507,7 @@ If the branch name does not match the detected scope:
 Rename example:
 
 ```bash
-git branch -m "fix/FTB-01-01/rename_me"
+git branch -m "fix/FT-01-01/rename_me"
 ```
 
 ### Typical flow

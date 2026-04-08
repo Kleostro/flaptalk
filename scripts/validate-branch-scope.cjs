@@ -3,7 +3,7 @@
 const { execFileSync } = require('node:child_process');
 
 const BRANCH_PATTERN =
-  /^(ci|chore|docs|feat|fix|perf|refactor|style|test)\/(FT|FTB|FTW)-0[1-9]-\d{2}\/[a-z_]+$/;
+  /^(ci|chore|docs|feat|fix|perf|refactor|style|test)\/FT-0[1-9]-\d{2}\/[a-z_]+$/;
 const ALLOWED_STATIC_BRANCHES = new Set(['main', 'develop']);
 const ALLOWED_BRANCH_PREFIXES = ['sprint-'];
 
@@ -156,25 +156,7 @@ function getWorkingTreeFiles() {
   return [...files];
 }
 
-function getRequiredPrefix(files) {
-  const hasApiChanges = files.some((file) => file.startsWith('apps/api/'));
-  const hasWebChanges = files.some((file) => file.startsWith('apps/web/'));
-  const hasProjectWideChanges = files.some(
-    (file) => !file.startsWith('apps/api/') && !file.startsWith('apps/web/'),
-  );
-
-  if (hasProjectWideChanges || (hasApiChanges && hasWebChanges) || !files.length) {
-    return 'FT';
-  }
-
-  if (hasApiChanges) {
-    return 'FTB';
-  }
-
-  if (hasWebChanges) {
-    return 'FTW';
-  }
-
+function getRequiredPrefix(_files) {
   return 'FT';
 }
 
@@ -193,7 +175,7 @@ function isBranchNameValid(branch, requiredPrefix) {
     return {
       valid: false,
       reason:
-        'Branch name must match "<type>/<prefix>-<sprint>-<task>/<description>", for example "feat/FTB-01-03/add_users_endpoint".',
+        'Branch name must match "<type>/FT-<sprint>-<task>/<description>", for example "feat/FT-01-03/add_users_endpoint".',
     };
   }
 
