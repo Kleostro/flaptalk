@@ -175,6 +175,7 @@ The backend is built with:
 - exposes `/` as a basic info route
 - exposes `/health` as a liveness endpoint
 - exposes `/ready` as a readiness endpoint with a database check
+- exposes `/auth/register`, `/auth/login`, `/auth/me`, `/auth/logout`
 - exposes `/users`
 - enables Swagger docs through Elysia Swagger
 
@@ -183,6 +184,9 @@ The backend is built with:
 - `DATABASE_URL` — PostgreSQL connection string
 - `DIRECT_DATABASE_URL` — direct PostgreSQL connection string for Prisma migrations and administrative operations
 - `WEB_ORIGIN` — comma-separated allowed CORS origins
+- `AUTH_JWT_SECRET` — secret used to sign authentication JWT cookies
+- `AUTH_COOKIE_NAME` — optional cookie name override for the auth session cookie
+- `AUTH_SESSION_TTL_SECONDS` — optional auth session lifetime in seconds
 - `PORT` — API port
 - `NODE_ENV` — runtime mode
 
@@ -194,6 +198,9 @@ PORT="3000"
 DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DATABASE?sslmode=require&channel_binding=require"
 DIRECT_DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DATABASE?sslmode=require&channel_binding=require"
 WEB_ORIGIN="https://your-frontend-domain.com"
+AUTH_JWT_SECRET="replace-with-a-long-random-secret"
+AUTH_COOKIE_NAME="flaptalk_session"
+AUTH_SESSION_TTL_SECONDS="604800"
 ```
 
 ### Observability
