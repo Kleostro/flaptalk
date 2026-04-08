@@ -1,11 +1,11 @@
 import { treaty } from '@elysiajs/eden';
 
-import type { App } from '@api/app';
+import type { AppContract } from '@flaptalk/api-contract';
 import { environment } from '@web/environments/environment';
 
 export const resolveApiUrl = (): string => environment.apiBaseUrl;
 
-export const api = treaty<App>(resolveApiUrl(), {
+export const api = treaty<AppContract>(resolveApiUrl(), {
   fetcher: (input, init) =>
     fetch(input, {
       ...init,

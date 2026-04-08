@@ -15,6 +15,8 @@
     "paths": {
       "@api": ["./apps/api/src"],
       "@api/*": ["./apps/api/src/*"],
+      "@flaptalk/api-contract": ["./packages/api-contract/src/index.ts"],
+      "@flaptalk/api-contract/*": ["./packages/api-contract/src/*"],
       "@web": ["./apps/web/src"],
       "@web/*": ["./apps/web/src/*"]
     }
