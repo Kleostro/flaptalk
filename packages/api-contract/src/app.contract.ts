@@ -3,12 +3,25 @@ import { Elysia, t } from 'elysia';
 import { AuthModel, createSessionCookieModel } from './models/auth';
 import { ErrorModel } from './models/error';
 import { UsersModel } from './models/users';
+import { WorkspacesModel } from './models/workspaces';
 
 function createContractUser() {
   return {
     createdAt: new Date(0).toISOString(),
     email: 'contract@flaptalk.app',
     id: 0,
+    updatedAt: new Date(0).toISOString(),
+  };
+}
+
+function createContractWorkspace() {
+  return {
+    createdAt: new Date(0).toISOString(),
+    description: 'Private community for structured discussions.',
+    id: 0,
+    name: 'FlapTalk Founders',
+    ownerId: 0,
+    slug: 'flaptalk-founders',
     updatedAt: new Date(0).toISOString(),
   };
 }
@@ -45,6 +58,7 @@ export const appContract = new Elysia({
   .model(ErrorModel)
   .model(AuthModel)
   .model(UsersModel)
+  .model(WorkspacesModel)
   .group('/auth', (app) =>
     app
       .post(
@@ -105,6 +119,60 @@ export const appContract = new Elysia({
         200: 'users.list.response',
       },
     }),
+  )
+  .group('/workspaces', (app) =>
+    app
+      .post(
+        '/',
+        () => ({
+          role: 'owner' as const,
+          workspace: createContractWorkspace(),
+        }),
+        {
+          body: 'workspaces.create.body',
+          cookie: sessionCookieModel,
+          response: {
+            200: 'workspaces.create.response',
+            401: 'error.response',
+          },
+        },
+      )
+      .get(
+        '/me',
+        () => ({
+          workspaces: [
+            {
+              role: 'owner' as const,
+              workspace: createContractWorkspace(),
+            },
+          ],
+        }),
+        {
+          cookie: sessionCookieModel,
+          response: {
+            200: 'workspaces.list.response',
+            401: 'error.response',
+          },
+        },
+      )
+      .get(
+        '/:workspaceId',
+        () => ({
+          role: 'owner' as const,
+          workspace: createContractWorkspace(),
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            workspaceId: t.Numeric(),
+          }),
+          response: {
+            200: 'workspaces.single.response',
+            401: 'error.response',
+            404: 'error.response',
+          },
+        },
+      ),
   )
   .get(
     '/health',
