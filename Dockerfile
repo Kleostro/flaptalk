@@ -8,6 +8,7 @@ ENV DATABASE_URL="${DATABASE_URL}"
 COPY package.json bun.lock ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/web/package.json apps/web/package.json
+COPY packages/api-contract/package.json packages/api-contract/package.json
 
 RUN bun install --frozen-lockfile
 
@@ -25,6 +26,7 @@ WORKDIR /app
 
 COPY --from=build --chown=bun:bun /app/node_modules ./node_modules
 COPY --from=build --chown=bun:bun /app/apps/api ./apps/api
+COPY --from=build --chown=bun:bun /app/packages/api-contract ./packages/api-contract
 COPY --from=build --chown=bun:bun /app/package.json ./package.json
 COPY --from=build --chown=bun:bun /app/tsconfig.base.json ./tsconfig.base.json
 
