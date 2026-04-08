@@ -1,7 +1,7 @@
 import { t } from 'elysia';
 
-import { AUTH_FORM_LIMITS, DEFAULT_AUTH_COOKIE_NAME } from '@flaptalk/api-contract/constants/auth';
-import { PublicUserModel } from '@flaptalk/api-contract/models/users';
+import { AUTH_FORM_LIMITS, DEFAULT_AUTH_COOKIE_NAME } from '../constants/auth';
+import { PublicUserModel } from './users';
 
 export const RegisterRequestBodyModel = t.Object({
   email: t.String({

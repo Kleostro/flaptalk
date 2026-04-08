@@ -4,7 +4,6 @@ import { AUTH_FORM_MODE } from '@web/app/features/auth/types/auth-form-mode.type
 export const AUTH_FORM_LIMITS = {
   passwordMaxLength: 64,
   passwordMinLength: 10,
-  submissionDelayMs: 900,
 } as const;
 
 export const AUTH_FIELD_AUTOCOMPLETE = {
@@ -72,8 +71,8 @@ export const AUTH_PAGE_CONTENT = {
     alternateActionRoute: `/${APP_ROUTE_PATHS.login}`,
     alternateActionText: 'Already have an account?',
     description:
-      'Create your workspace profile with a clean auth baseline that is ready for real backend' +
-      ' integration and future flows.',
+      'Create your workspace profile and start with the same session flow the API already uses' +
+      ' in production-ready auth scenarios.',
     eyebrow: 'Create account',
     mode: AUTH_FORM_MODE.registration,
     pendingSubmitLabel: 'Creating workspace access...',

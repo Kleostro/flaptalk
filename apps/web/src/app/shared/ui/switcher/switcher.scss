@@ -1,7 +1,14 @@
 .ui-switcher {
   --switcher-gap: var(--space-2xs);
   --switcher-padding: var(--space-2xs);
-  --switcher-track-inline-size: calc(100% - (var(--switcher-padding) * 2));
+  --switcher-button-min-inline-size: 5.25rem;
+  --switcher-buttons-inline-size: calc(
+    var(--switcher-button-min-inline-size) * var(--switcher-option-count)
+  );
+  --switcher-gap-total: calc(var(--switcher-gap) * (var(--switcher-option-count) - 1));
+  --switcher-track-inline-size: calc(
+    var(--switcher-buttons-inline-size) + var(--switcher-gap-total)
+  );
   /* stylelint-disable scss/operator-no-newline-after */
   --switcher-segment-inline-size: calc(
     (
@@ -14,10 +21,12 @@
 
   position: relative;
 
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: repeat(var(--switcher-option-count), minmax(0, 1fr));
   gap: var(--switcher-gap);
-  align-items: center;
+  align-items: stretch;
 
+  inline-size: calc(var(--switcher-track-inline-size) + (var(--switcher-padding) * 2));
   padding: var(--switcher-padding);
   border: var(--border-width-thin) solid color-mix(in oklch, var(--outline-subtle) 84%, transparent);
   border-radius: var(--radius-pill);
@@ -62,11 +71,10 @@
     z-index: 1;
 
     display: inline-flex;
-    flex: 1 1 0;
     align-items: center;
     justify-content: center;
 
-    min-inline-size: 5.25rem;
+    min-inline-size: var(--switcher-button-min-inline-size);
     min-block-size: var(--control-height-md);
     padding-inline: var(--control-padding-inline-sm);
     border: 0;

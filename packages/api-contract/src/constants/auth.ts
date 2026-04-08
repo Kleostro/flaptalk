@@ -1,4 +1,4 @@
-export const DEFAULT_AUTH_COOKIE_NAME = 'flaptalk_session';
+export const DEFAULT_AUTH_COOKIE_NAME = 'flaptalk_local_session';
 
 export const AUTH_FORM_LIMITS = {
   emailMaxLength: 320,

@@ -11,13 +11,15 @@ import {
   RegisterRequestBodyModel,
 } from '@flaptalk/api-contract';
 import {
+  type AuthJwtVerifier,
   authPlugin,
   clearAuthCookie,
   createAuthTokenPayload,
+  resolveAuthSession,
   setAuthCookie,
 } from '@api/modules/auth/plugin';
 import { authService } from '@api/modules/auth/service';
-import type { AuthSession, LoginCredentials, RegisterCredentials } from '@api/modules/auth/types';
+import type { LoginCredentials, RegisterCredentials } from '@api/modules/auth/types';
 
 const sessionCookieModel = createSessionCookieModel(authConfig.cookieName);
 
@@ -88,12 +90,14 @@ export const authModule = new Elysia({
   )
   .get(
     '/me',
-    async (context) => {
-      const authSession = (
-        context as typeof context & {
-          readonly authSession?: AuthSession | null;
-        }
-      ).authSession;
+    async ({
+      authJwt,
+      cookie,
+    }: {
+      readonly authJwt: AuthJwtVerifier;
+      readonly cookie: Record<string, { value?: string | undefined }>;
+    }) => {
+      const authSession = await resolveAuthSession({ authJwt, cookie });
 
       if (!authSession) {
         throw new DomainError(401, 'auth_unauthorized', 'Authentication is required.');

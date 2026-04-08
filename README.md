@@ -199,7 +199,7 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DATABASE?sslmode=require
 DIRECT_DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DATABASE?sslmode=require&channel_binding=require"
 WEB_ORIGIN="https://your-frontend-domain.com"
 AUTH_JWT_SECRET="replace-with-a-long-random-secret"
-AUTH_COOKIE_NAME="flaptalk_session"
+AUTH_COOKIE_NAME="flaptalk_local_session"
 AUTH_SESSION_TTL_SECONDS="604800"
 ```
 
