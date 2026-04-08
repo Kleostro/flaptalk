@@ -1,0 +1,32 @@
+enum WorkspaceMemberRole {
+  OWNER
+  MEMBER
+}
+
+model Workspace {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String?
+  ownerId     Int      @map("owner_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members     WorkspaceMember[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          Int                 @id @default(autoincrement())
+  workspaceId Int                 @map("workspace_id")
+  userId      Int                 @map("user_id")
+  role        WorkspaceMemberRole @default(MEMBER)
+  joinedAt    DateTime            @default(now()) @map("joined_at")
+  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User                @relation("WorkspaceMembershipUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@map("workspace_members")
+}
