@@ -6,6 +6,7 @@ import { ErrorModel } from '@flaptalk/api-contract';
 import { DomainError } from './errors/domain-error';
 import { authModule } from './modules/auth';
 import { usersModule } from './modules/users';
+import { workspacesModule } from './modules/workspaces';
 import { logger } from './observability/logger';
 import { prismaPlugin } from './plugins/prisma';
 
@@ -97,6 +98,7 @@ export const createApp = () =>
     })
     .use(authModule)
     .use(usersModule)
+    .use(workspacesModule)
     .get('/health', () => ({
       service: 'flaptalk-api',
       status: 'ok',

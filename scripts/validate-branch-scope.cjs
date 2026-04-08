@@ -3,9 +3,56 @@
 const { execFileSync } = require('node:child_process');
 
 const BRANCH_PATTERN =
-  /^(ci|chore|docs|feat|fix|perf|refactor|style|test)\/(FT|FTB|FTW)-0[1-9]-\d{2}\/[a-z_]+$/;
+  /^(ci|chore|docs|feat|fix|perf|refactor|style|test)\/FT-0[1-9]-\d{2}\/[a-z_]+$/;
 const ALLOWED_STATIC_BRANCHES = new Set(['main', 'develop']);
 const ALLOWED_BRANCH_PREFIXES = ['sprint-'];
+const SUPPORTS_COLOR = process.stdout.isTTY && process.env.NO_COLOR !== '1';
+const ANSI = {
+  blue: '\x1b[34m',
+  cyan: '\x1b[36m',
+  dim: '\x1b[90m',
+  green: '\x1b[32m',
+  red: '\x1b[31m',
+  reset: '\x1b[0m',
+  white: '\x1b[97m',
+  yellow: '\x1b[33m',
+};
+
+function colorize(color, value) {
+  if (!SUPPORTS_COLOR) {
+    return value;
+  }
+
+  return `${ANSI[color]}${value}${ANSI.reset}`;
+}
+
+function formatLabel(label) {
+  return colorize('cyan', label);
+}
+
+function formatValue(value, color = 'white') {
+  return colorize(color, value);
+}
+
+function formatStatus(status, tone) {
+  return `${colorize(tone, '●')} ${colorize(tone, status)}`;
+}
+
+function formatFiles(files) {
+  if (!files.length) {
+    return colorize('dim', '(not detected)');
+  }
+
+  return files.map((file) => `  ${colorize('dim', '•')} ${file}`).join('\n');
+}
+
+function printBlock(lines, writer = console.log) {
+  writer('');
+
+  for (const line of lines) {
+    writer(line);
+  }
+}
 
 function parseArgs(argv) {
   const args = {
@@ -156,25 +203,7 @@ function getWorkingTreeFiles() {
   return [...files];
 }
 
-function getRequiredPrefix(files) {
-  const hasApiChanges = files.some((file) => file.startsWith('apps/api/'));
-  const hasWebChanges = files.some((file) => file.startsWith('apps/web/'));
-  const hasProjectWideChanges = files.some(
-    (file) => !file.startsWith('apps/api/') && !file.startsWith('apps/web/'),
-  );
-
-  if (hasProjectWideChanges || (hasApiChanges && hasWebChanges) || !files.length) {
-    return 'FT';
-  }
-
-  if (hasApiChanges) {
-    return 'FTB';
-  }
-
-  if (hasWebChanges) {
-    return 'FTW';
-  }
-
+function getRequiredPrefix(_files) {
   return 'FT';
 }
 
@@ -193,7 +222,7 @@ function isBranchNameValid(branch, requiredPrefix) {
     return {
       valid: false,
       reason:
-        'Branch name must match "<type>/<prefix>-<sprint>-<task>/<description>", for example "feat/FTB-01-03/add_users_endpoint".',
+        'Branch name must match "<type>/FT-<sprint>-<task>/<description>", for example "feat/FT-01-03/add_users_endpoint".',
     };
   }
 
@@ -229,9 +258,14 @@ function main() {
       : getChangedFiles(base, head);
 
   if (source === 'working-tree' && !files.length) {
-    console.log('Branch validation skipped.');
-    console.log(`Branch: ${branch}`);
-    console.log('No local changes detected, so required prefix cannot be inferred yet.');
+    printBlock([
+      formatStatus('Branch validation skipped', 'yellow'),
+      `${formatLabel('Branch')} ${formatValue(branch)}`,
+      `${formatLabel('Reason')} ${colorize(
+        'dim',
+        'No local changes detected, so there is nothing to validate yet.',
+      )}`,
+    ]);
     return;
   }
 
@@ -239,17 +273,26 @@ function main() {
   const result = isBranchNameValid(branch, requiredPrefix);
 
   if (!result.valid) {
-    console.error('Branch validation failed.');
-    console.error(`Branch: ${branch}`);
-    console.error(`Required prefix: ${requiredPrefix}`);
-    console.error(`Files: ${files.length ? files.join(', ') : '(not detected)'}`);
-    console.error(result.reason);
+    printBlock(
+      [
+        formatStatus('Branch validation failed', 'red'),
+        `${formatLabel('Branch')} ${formatValue(branch, 'red')}`,
+        `${formatLabel('Required prefix')} ${formatValue(requiredPrefix)}`,
+        formatLabel('Changed files'),
+        formatFiles(files),
+        `${formatLabel('Reason')} ${result.reason}`,
+      ],
+      console.error,
+    );
     process.exit(1);
   }
 
-  console.log('Branch validation passed.');
-  console.log(`Branch: ${branch}`);
-  console.log(`Required prefix: ${requiredPrefix}`);
+  printBlock([
+    formatStatus('Branch validation passed', 'green'),
+    `${formatLabel('Branch')} ${formatValue(branch, 'green')}`,
+    `${formatLabel('Required prefix')} ${formatValue(requiredPrefix)}`,
+    `${formatLabel('Changed files')} ${formatValue(String(files.length), 'blue')}`,
+  ]);
 }
 
 main();

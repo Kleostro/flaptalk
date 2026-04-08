@@ -4,35 +4,32 @@ import { __transformDate__ } from "./__transformDate__";
 
 import { __nullable__ } from "./__nullable__";
 
-export const UserPlain = t.Object(
+export const WorkspacePlain = t.Object(
   {
     id: t.Integer(),
-    email: t.String(),
-    hashedPassword: t.String(),
+    name: t.String(),
+    slug: t.String(),
+    description: __nullable__(t.String()),
+    ownerId: t.Integer(),
     createdAt: t.Date(),
     updatedAt: t.Date(),
   },
   { additionalProperties: false },
 );
 
-export const UserRelations = t.Object(
+export const WorkspaceRelations = t.Object(
   {
-    ownedWorkspaces: t.Array(
-      t.Object(
-        {
-          id: t.Integer(),
-          name: t.String(),
-          slug: t.String(),
-          description: __nullable__(t.String()),
-          ownerId: t.Integer(),
-          createdAt: t.Date(),
-          updatedAt: t.Date(),
-        },
-        { additionalProperties: false },
-      ),
+    owner: t.Object(
+      {
+        id: t.Integer(),
+        email: t.String(),
+        hashedPassword: t.String(),
+        createdAt: t.Date(),
+        updatedAt: t.Date(),
+      },
       { additionalProperties: false },
     ),
-    workspaceMemberships: t.Array(
+    members: t.Array(
       t.Object(
         {
           id: t.Integer(),
@@ -51,35 +48,38 @@ export const UserRelations = t.Object(
   { additionalProperties: false },
 );
 
-export const UserPlainInputCreate = t.Object(
-  { email: t.String(), hashedPassword: t.String() },
-  { additionalProperties: false },
-);
-
-export const UserPlainInputUpdate = t.Object(
-  { email: t.Optional(t.String()), hashedPassword: t.Optional(t.String()) },
-  { additionalProperties: false },
-);
-
-export const UserRelationsInputCreate = t.Object(
+export const WorkspacePlainInputCreate = t.Object(
   {
-    ownedWorkspaces: t.Optional(
-      t.Object(
-        {
-          connect: t.Array(
-            t.Object(
-              {
-                id: t.Integer({ additionalProperties: false }),
-              },
-              { additionalProperties: false },
-            ),
-            { additionalProperties: false },
-          ),
-        },
-        { additionalProperties: false },
-      ),
+    name: t.String(),
+    slug: t.String(),
+    description: t.Optional(__nullable__(t.String())),
+  },
+  { additionalProperties: false },
+);
+
+export const WorkspacePlainInputUpdate = t.Object(
+  {
+    name: t.Optional(t.String()),
+    slug: t.Optional(t.String()),
+    description: t.Optional(__nullable__(t.String())),
+  },
+  { additionalProperties: false },
+);
+
+export const WorkspaceRelationsInputCreate = t.Object(
+  {
+    owner: t.Object(
+      {
+        connect: t.Object(
+          {
+            id: t.Integer({ additionalProperties: false }),
+          },
+          { additionalProperties: false },
+        ),
+      },
+      { additionalProperties: false },
     ),
-    workspaceMemberships: t.Optional(
+    members: t.Optional(
       t.Object(
         {
           connect: t.Array(
@@ -99,35 +99,21 @@ export const UserRelationsInputCreate = t.Object(
   { additionalProperties: false },
 );
 
-export const UserRelationsInputUpdate = t.Partial(
+export const WorkspaceRelationsInputUpdate = t.Partial(
   t.Object(
     {
-      ownedWorkspaces: t.Partial(
-        t.Object(
-          {
-            connect: t.Array(
-              t.Object(
-                {
-                  id: t.Integer({ additionalProperties: false }),
-                },
-                { additionalProperties: false },
-              ),
-              { additionalProperties: false },
-            ),
-            disconnect: t.Array(
-              t.Object(
-                {
-                  id: t.Integer({ additionalProperties: false }),
-                },
-                { additionalProperties: false },
-              ),
-              { additionalProperties: false },
-            ),
-          },
-          { additionalProperties: false },
-        ),
+      owner: t.Object(
+        {
+          connect: t.Object(
+            {
+              id: t.Integer({ additionalProperties: false }),
+            },
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
       ),
-      workspaceMemberships: t.Partial(
+      members: t.Partial(
         t.Object(
           {
             connect: t.Array(
@@ -157,7 +143,7 @@ export const UserRelationsInputUpdate = t.Partial(
   ),
 );
 
-export const UserWhere = t.Partial(
+export const WorkspaceWhere = t.Partial(
   t.Recursive(
     (Self) =>
       t.Object(
@@ -166,30 +152,32 @@ export const UserWhere = t.Partial(
           NOT: t.Union([Self, t.Array(Self, { additionalProperties: false })]),
           OR: t.Array(Self, { additionalProperties: false }),
           id: t.Integer(),
-          email: t.String(),
-          hashedPassword: t.String(),
+          name: t.String(),
+          slug: t.String(),
+          description: t.String(),
+          ownerId: t.Integer(),
           createdAt: t.Date(),
           updatedAt: t.Date(),
         },
         { additionalProperties: false },
       ),
-    { $id: "User" },
+    { $id: "Workspace" },
   ),
 );
 
-export const UserWhereUnique = t.Recursive(
+export const WorkspaceWhereUnique = t.Recursive(
   (Self) =>
     t.Intersect(
       [
         t.Partial(
           t.Object(
-            { id: t.Integer(), email: t.String() },
+            { id: t.Integer(), slug: t.String() },
             { additionalProperties: false },
           ),
           { additionalProperties: false },
         ),
         t.Union(
-          [t.Object({ id: t.Integer() }), t.Object({ email: t.String() })],
+          [t.Object({ id: t.Integer() }), t.Object({ slug: t.String() })],
           { additionalProperties: false },
         ),
         t.Partial(
@@ -210,8 +198,10 @@ export const UserWhereUnique = t.Recursive(
           t.Object(
             {
               id: t.Integer(),
-              email: t.String(),
-              hashedPassword: t.String(),
+              name: t.String(),
+              slug: t.String(),
+              description: t.String(),
+              ownerId: t.Integer(),
               createdAt: t.Date(),
               updatedAt: t.Date(),
             },
@@ -221,46 +211,50 @@ export const UserWhereUnique = t.Recursive(
       ],
       { additionalProperties: false },
     ),
-  { $id: "User" },
+  { $id: "Workspace" },
 );
 
-export const UserSelect = t.Partial(
+export const WorkspaceSelect = t.Partial(
   t.Object(
     {
       id: t.Boolean(),
-      email: t.Boolean(),
-      hashedPassword: t.Boolean(),
+      name: t.Boolean(),
+      slug: t.Boolean(),
+      description: t.Boolean(),
+      ownerId: t.Boolean(),
       createdAt: t.Boolean(),
       updatedAt: t.Boolean(),
-      ownedWorkspaces: t.Boolean(),
-      workspaceMemberships: t.Boolean(),
+      owner: t.Boolean(),
+      members: t.Boolean(),
       _count: t.Boolean(),
     },
     { additionalProperties: false },
   ),
 );
 
-export const UserInclude = t.Partial(
+export const WorkspaceInclude = t.Partial(
   t.Object(
-    {
-      ownedWorkspaces: t.Boolean(),
-      workspaceMemberships: t.Boolean(),
-      _count: t.Boolean(),
-    },
+    { owner: t.Boolean(), members: t.Boolean(), _count: t.Boolean() },
     { additionalProperties: false },
   ),
 );
 
-export const UserOrderBy = t.Partial(
+export const WorkspaceOrderBy = t.Partial(
   t.Object(
     {
       id: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
-      email: t.Union([t.Literal("asc"), t.Literal("desc")], {
+      name: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
-      hashedPassword: t.Union([t.Literal("asc"), t.Literal("desc")], {
+      slug: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      description: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      ownerId: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
       createdAt: t.Union([t.Literal("asc"), t.Literal("desc")], {
@@ -274,16 +268,16 @@ export const UserOrderBy = t.Partial(
   ),
 );
 
-export const User = t.Composite([UserPlain, UserRelations], {
+export const Workspace = t.Composite([WorkspacePlain, WorkspaceRelations], {
   additionalProperties: false,
 });
 
-export const UserInputCreate = t.Composite(
-  [UserPlainInputCreate, UserRelationsInputCreate],
+export const WorkspaceInputCreate = t.Composite(
+  [WorkspacePlainInputCreate, WorkspaceRelationsInputCreate],
   { additionalProperties: false },
 );
 
-export const UserInputUpdate = t.Composite(
-  [UserPlainInputUpdate, UserRelationsInputUpdate],
+export const WorkspaceInputUpdate = t.Composite(
+  [WorkspacePlainInputUpdate, WorkspaceRelationsInputUpdate],
   { additionalProperties: false },
 );
