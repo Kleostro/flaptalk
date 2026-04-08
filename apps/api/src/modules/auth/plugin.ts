@@ -102,7 +102,7 @@ export function setAuthCookie(
     httpOnly: true,
     maxAge: authConfig.sessionTtlSeconds,
     path: authConfig.cookiePath,
-    sameSite: 'lax',
+    sameSite: authConfig.isSecureCookie ? 'none' : 'lax',
     secure: authConfig.isSecureCookie,
     value: token,
   });

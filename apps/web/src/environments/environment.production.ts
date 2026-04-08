@@ -1,3 +1,3 @@
 export const environment = {
-  apiBaseUrl: 'https://flaptalk.onrender.com',
+  apiBaseUrl: 'https://api.flap-talk.ru',
 } as const;
