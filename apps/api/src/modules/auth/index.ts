@@ -1,14 +1,15 @@
 import { Elysia } from 'elysia';
 
+import { authConfig } from '@api/config/auth';
 import { DomainError } from '@api/errors/domain-error';
-import { ErrorModel } from '@api/models/error';
 import { AUTH_ROUTE_TAG } from '@api/modules/auth/constants';
 import {
   AuthModel,
-  loginRequestBodyModel,
-  registerRequestBodyModel,
-  sessionCookieModel,
-} from '@api/modules/auth/model';
+  createSessionCookieModel,
+  ErrorModel,
+  LoginRequestBodyModel,
+  RegisterRequestBodyModel,
+} from '@flaptalk/api-contract';
 import {
   authPlugin,
   clearAuthCookie,
@@ -17,6 +18,8 @@ import {
 } from '@api/modules/auth/plugin';
 import { authService } from '@api/modules/auth/service';
 import type { AuthSession, LoginCredentials, RegisterCredentials } from '@api/modules/auth/types';
+
+const sessionCookieModel = createSessionCookieModel(authConfig.cookieName);
 
 export const authModule = new Elysia({
   name: 'flaptalk.auth.routes',
@@ -44,7 +47,7 @@ export const authModule = new Elysia({
       return authenticatedUser;
     },
     {
-      body: registerRequestBodyModel,
+      body: RegisterRequestBodyModel,
       detail: {
         tags: [AUTH_ROUTE_TAG],
       },
@@ -73,7 +76,7 @@ export const authModule = new Elysia({
       return authenticatedUser;
     },
     {
-      body: loginRequestBodyModel,
+      body: LoginRequestBodyModel,
       detail: {
         tags: [AUTH_ROUTE_TAG],
       },

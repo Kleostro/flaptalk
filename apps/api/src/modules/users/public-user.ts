@@ -1,6 +1,7 @@
-import { t, type Static } from 'elysia';
+import type { Static } from 'elysia';
 
 import type { Prisma } from '@api/generated/prisma/client';
+import { PublicUserModel } from '@flaptalk/api-contract';
 
 export const publicUserSelect = {
   createdAt: true,
@@ -8,19 +9,6 @@ export const publicUserSelect = {
   id: true,
   updatedAt: true,
 } satisfies Prisma.UserSelect;
-
-export const PublicUserModel = t.Object({
-  createdAt: t.String({
-    format: 'date-time',
-  }),
-  email: t.String({
-    format: 'email',
-  }),
-  id: t.Numeric(),
-  updatedAt: t.String({
-    format: 'date-time',
-  }),
-});
 
 export type PublicUser = Static<typeof PublicUserModel>;
 

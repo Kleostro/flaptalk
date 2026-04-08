@@ -1,9 +1,9 @@
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
+import { ErrorModel } from '@flaptalk/api-contract';
 
 import { DomainError } from './errors/domain-error';
-import { ErrorModel } from './models/error';
 import { authModule } from './modules/auth';
 import { usersModule } from './modules/users';
 import { logger } from './observability/logger';

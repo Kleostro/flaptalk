@@ -1,55 +1,21 @@
 import { Elysia, t } from 'elysia';
 
-import { ErrorModel } from '@api/models/error';
+import { AuthModel, createSessionCookieModel } from '@flaptalk/api-contract/models/auth';
+import { ErrorModel } from '@flaptalk/api-contract/models/error';
+import { UsersModel } from '@flaptalk/api-contract/models/users';
 
-const contractPublicUserModel = t.Object({
-  createdAt: t.String({
-    format: 'date-time',
-  }),
-  email: t.String({
-    format: 'email',
-  }),
-  id: t.Numeric(),
-  updatedAt: t.String({
-    format: 'date-time',
-  }),
-});
+function createContractUser() {
+  return {
+    createdAt: new Date(0).toISOString(),
+    email: 'contract@flaptalk.app',
+    id: 0,
+    updatedAt: new Date(0).toISOString(),
+  };
+}
 
-const contractAuthenticatedUserModel = t.Object({
-  user: contractPublicUserModel,
-});
+const sessionCookieModel = createSessionCookieModel();
 
-const contractRegisterBodyModel = t.Object({
-  email: t.String({
-    format: 'email',
-    maxLength: 320,
-  }),
-  password: t.String({
-    maxLength: 72,
-    minLength: 10,
-  }),
-});
-
-const contractLoginBodyModel = t.Object({
-  email: t.String({
-    format: 'email',
-    maxLength: 320,
-  }),
-  password: t.String({
-    maxLength: 72,
-    minLength: 1,
-  }),
-});
-
-const contractSessionCookieModel = t.Cookie({
-  flaptalk_session: t.Optional(t.String()),
-});
-
-const contractLogoutResponseModel = t.Object({
-  success: t.Literal(true),
-});
-
-const contractHealthResponseModel = t.Object({
+const HealthResponseModel = t.Object({
   service: t.String(),
   status: t.String(),
   timestamp: t.String({
@@ -58,7 +24,7 @@ const contractHealthResponseModel = t.Object({
   version: t.String(),
 });
 
-const contractReadyResponseModel = t.Object({
+const ReadyResponseModel = t.Object({
   checks: t.Object({
     database: t.String(),
   }),
@@ -68,38 +34,17 @@ const contractReadyResponseModel = t.Object({
   }),
 });
 
-const contractRootResponseModel = t.Object({
+const RootResponseModel = t.Object({
   name: t.String(),
   version: t.String(),
 });
-
-function createContractUser(): {
-  readonly createdAt: string;
-  readonly email: string;
-  readonly id: number;
-  readonly updatedAt: string;
-} {
-  return {
-    createdAt: new Date(0).toISOString(),
-    email: 'contract@flaptalk.app',
-    id: 0,
-    updatedAt: new Date(0).toISOString(),
-  };
-}
 
 export const appContract = new Elysia({
   name: 'flaptalk.api.contract',
 })
   .model(ErrorModel)
-  .model({
-    'auth.login.body': contractLoginBodyModel,
-    'auth.logout.response': contractLogoutResponseModel,
-    'auth.me.response': contractAuthenticatedUserModel,
-    'auth.register.body': contractRegisterBodyModel,
-    'auth.session.response': contractAuthenticatedUserModel,
-    'users.entity': contractPublicUserModel,
-    'users.list.response': t.Array(contractPublicUserModel),
-  })
+  .model(AuthModel)
+  .model(UsersModel)
   .group('/auth', (app) =>
     app
       .post(
@@ -134,7 +79,7 @@ export const appContract = new Elysia({
           user: createContractUser(),
         }),
         {
-          cookie: contractSessionCookieModel,
+          cookie: sessionCookieModel,
           response: {
             200: 'auth.me.response',
             401: 'error.response',
@@ -147,7 +92,7 @@ export const appContract = new Elysia({
           success: true as const,
         }),
         {
-          cookie: contractSessionCookieModel,
+          cookie: sessionCookieModel,
           response: {
             200: 'auth.logout.response',
           },
@@ -170,7 +115,7 @@ export const appContract = new Elysia({
       version: '0.1.0',
     }),
     {
-      response: contractHealthResponseModel,
+      response: HealthResponseModel,
     },
   )
   .get(
@@ -184,8 +129,8 @@ export const appContract = new Elysia({
     }),
     {
       response: {
-        200: contractReadyResponseModel,
-        503: contractReadyResponseModel,
+        200: ReadyResponseModel,
+        503: ReadyResponseModel,
       },
     },
   )
@@ -196,7 +141,7 @@ export const appContract = new Elysia({
       version: '0.1.0',
     }),
     {
-      response: contractRootResponseModel,
+      response: RootResponseModel,
     },
   );
 

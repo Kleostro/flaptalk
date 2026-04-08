@@ -1,6 +1,6 @@
 import type { Static } from 'elysia';
 
-import type { PublicUserModel } from '@api/modules/users/public-user';
+import type { PublicUserModel } from '@flaptalk/api-contract';
 
 import { AUTH_TOKEN_TYPE } from './constants';
 

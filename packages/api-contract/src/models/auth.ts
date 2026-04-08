@@ -1,11 +1,9 @@
 import { t } from 'elysia';
 
-import { authConfig } from '@api/config/auth';
-import { PublicUserModel } from '@api/modules/users/public-user';
+import { AUTH_FORM_LIMITS, DEFAULT_AUTH_COOKIE_NAME } from '@flaptalk/api-contract/constants/auth';
+import { PublicUserModel } from '@flaptalk/api-contract/models/users';
 
-import { AUTH_FORM_LIMITS } from './constants';
-
-export const registerRequestBodyModel = t.Object({
+export const RegisterRequestBodyModel = t.Object({
   email: t.String({
     format: 'email',
     maxLength: AUTH_FORM_LIMITS.emailMaxLength,
@@ -16,7 +14,7 @@ export const registerRequestBodyModel = t.Object({
   }),
 });
 
-export const loginRequestBodyModel = t.Object({
+export const LoginRequestBodyModel = t.Object({
   email: t.String({
     format: 'email',
     maxLength: AUTH_FORM_LIMITS.emailMaxLength,
@@ -27,24 +25,24 @@ export const loginRequestBodyModel = t.Object({
   }),
 });
 
-export const sessionCookieModel = t.Cookie({
-  [authConfig.cookieName]: t.Optional(t.String()),
-});
-
 export const AuthenticatedUserModel = t.Object({
   user: PublicUserModel,
 });
 
-export const authLogoutResponseModel = t.Object({
+export const AuthLogoutResponseModel = t.Object({
   success: t.Literal(true),
 });
 
+export function createSessionCookieModel(cookieName = DEFAULT_AUTH_COOKIE_NAME) {
+  return t.Cookie({
+    [cookieName]: t.Optional(t.String()),
+  });
+}
+
 export const AuthModel = {
-  'auth.cookie': sessionCookieModel,
-  'auth.login.body': loginRequestBodyModel,
+  'auth.login.body': LoginRequestBodyModel,
+  'auth.logout.response': AuthLogoutResponseModel,
   'auth.me.response': AuthenticatedUserModel,
-  'auth.logout.response': authLogoutResponseModel,
-  'auth.register.body': registerRequestBodyModel,
+  'auth.register.body': RegisterRequestBodyModel,
   'auth.session.response': AuthenticatedUserModel,
-  'users.public': PublicUserModel,
 };

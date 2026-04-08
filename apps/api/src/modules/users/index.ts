@@ -1,7 +1,8 @@
 import Elysia from 'elysia';
+import { UsersModel } from '@flaptalk/api-contract';
+
 import { usersService } from './service';
 import type { UsersService } from './service';
-import { UsersModel } from './model';
 
 export const usersModule = new Elysia({
   name: 'flaptalk.contacts',

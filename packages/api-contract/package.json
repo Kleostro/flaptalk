@@ -1,0 +1,13 @@
+{
+  "name": "@flaptalk/api-contract",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "elysia": "^1.4.28"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  }
+}
