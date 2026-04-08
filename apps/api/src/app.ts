@@ -4,6 +4,7 @@ import { Elysia } from 'elysia';
 
 import { DomainError } from './errors/domain-error';
 import { ErrorModel } from './models/error';
+import { authModule } from './modules/auth';
 import { usersModule } from './modules/users';
 import { logger } from './observability/logger';
 import { prismaPlugin } from './plugins/prisma';
@@ -94,6 +95,7 @@ export const createApp = () =>
 
       return undefined;
     })
+    .use(authModule)
     .use(usersModule)
     .get('/health', () => ({
       service: 'flaptalk-api',
