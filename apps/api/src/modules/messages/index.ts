@@ -3,6 +3,7 @@ import { Elysia } from 'elysia';
 import { authPlugin, type AuthJwtVerifier } from '@api/modules/auth/plugin';
 import { messagesService, type MessagesServiceType } from '@api/modules/messages/service';
 import {
+  MessageParamsModel,
   requireAuthenticatedUserId,
   RoomParamsModel,
   workspaceSessionCookieModel,
@@ -16,14 +17,13 @@ import {
 
 export const messagesModule = new Elysia({
   name: 'flaptalk.messages.routes',
-  prefix: '/rooms',
 })
   .use(authPlugin)
   .use(messagesService)
   .model(ErrorModel)
   .model(MessagesModel)
   .post(
-    '/:roomId/messages',
+    '/rooms/:roomId/messages',
     async ({
       authJwt,
       body,
@@ -59,7 +59,7 @@ export const messagesModule = new Elysia({
     },
   )
   .get(
-    '/:roomId/messages',
+    '/rooms/:roomId/messages',
     async ({
       authJwt,
       cookie,
@@ -85,6 +85,38 @@ export const messagesModule = new Elysia({
       params: RoomParamsModel,
       response: {
         200: 'messages.list.response',
+        401: 'error.response',
+        404: 'error.response',
+      },
+    },
+  )
+  .get(
+    '/messages/:messageId/thread',
+    async ({
+      authJwt,
+      cookie,
+      messagesService,
+      params,
+    }: {
+      readonly authJwt: AuthJwtVerifier;
+      readonly cookie: Record<string, { value?: string | undefined }>;
+      readonly messagesService: MessagesServiceType;
+      readonly params: {
+        readonly messageId: number;
+      };
+    }) => {
+      const userId = await requireAuthenticatedUserId({ authJwt, cookie });
+
+      return messagesService.getThreadForMessageMember({
+        messageId: params.messageId,
+        userId,
+      });
+    },
+    {
+      cookie: workspaceSessionCookieModel,
+      params: MessageParamsModel,
+      response: {
+        200: 'messages.thread.response',
         401: 'error.response',
         404: 'error.response',
       },

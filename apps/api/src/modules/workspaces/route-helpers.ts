@@ -15,6 +15,10 @@ export const RoomParamsModel = t.Object({
   roomId: t.Numeric(),
 });
 
+export const MessageParamsModel = t.Object({
+  messageId: t.Numeric(),
+});
+
 export async function requireAuthenticatedUserId(context: {
   readonly authJwt: AuthJwtVerifier;
   readonly cookie: Record<string, { value?: string | undefined }>;

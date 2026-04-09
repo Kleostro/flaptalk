@@ -23,6 +23,7 @@ export const UserRelations = t.Object(
           id: t.Integer(),
           roomId: t.Integer(),
           authorId: t.Integer(),
+          parentMessageId: __nullable__(t.Integer()),
           body: t.String(),
           createdAt: t.Date(),
           updatedAt: t.Date(),
