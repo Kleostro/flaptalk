@@ -13,6 +13,7 @@ model Workspace {
   updatedAt   DateTime @updatedAt @map("updated_at")
   owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members     WorkspaceMember[]
+  rooms       Room[]
 
   @@map("workspaces")
 }
@@ -29,4 +30,19 @@ model WorkspaceMember {
   @@unique([workspaceId, userId])
   @@index([userId])
   @@map("workspace_members")
+}
+
+model Room {
+  id          Int       @id @default(autoincrement())
+  workspaceId Int       @map("workspace_id")
+  name        String
+  slug        String
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+  @@map("rooms")
 }

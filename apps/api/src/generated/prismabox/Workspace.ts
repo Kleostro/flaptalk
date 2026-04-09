@@ -44,6 +44,21 @@ export const WorkspaceRelations = t.Object(
       ),
       { additionalProperties: false },
     ),
+    rooms: t.Array(
+      t.Object(
+        {
+          id: t.Integer(),
+          workspaceId: t.Integer(),
+          name: t.String(),
+          slug: t.String(),
+          description: __nullable__(t.String()),
+          createdAt: t.Date(),
+          updatedAt: t.Date(),
+        },
+        { additionalProperties: false },
+      ),
+      { additionalProperties: false },
+    ),
   },
   { additionalProperties: false },
 );
@@ -95,6 +110,22 @@ export const WorkspaceRelationsInputCreate = t.Object(
         { additionalProperties: false },
       ),
     ),
+    rooms: t.Optional(
+      t.Object(
+        {
+          connect: t.Array(
+            t.Object(
+              {
+                id: t.Integer({ additionalProperties: false }),
+              },
+              { additionalProperties: false },
+            ),
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
   },
   { additionalProperties: false },
 );
@@ -114,6 +145,31 @@ export const WorkspaceRelationsInputUpdate = t.Partial(
         { additionalProperties: false },
       ),
       members: t.Partial(
+        t.Object(
+          {
+            connect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+            disconnect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+          },
+          { additionalProperties: false },
+        ),
+      ),
+      rooms: t.Partial(
         t.Object(
           {
             connect: t.Array(
@@ -226,6 +282,7 @@ export const WorkspaceSelect = t.Partial(
       updatedAt: t.Boolean(),
       owner: t.Boolean(),
       members: t.Boolean(),
+      rooms: t.Boolean(),
       _count: t.Boolean(),
     },
     { additionalProperties: false },
@@ -234,7 +291,12 @@ export const WorkspaceSelect = t.Partial(
 
 export const WorkspaceInclude = t.Partial(
   t.Object(
-    { owner: t.Boolean(), members: t.Boolean(), _count: t.Boolean() },
+    {
+      owner: t.Boolean(),
+      members: t.Boolean(),
+      rooms: t.Boolean(),
+      _count: t.Boolean(),
+    },
     { additionalProperties: false },
   ),
 );

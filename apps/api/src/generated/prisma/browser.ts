@@ -32,3 +32,8 @@ export type Workspace = Prisma.WorkspaceModel
  * 
  */
 export type WorkspaceMember = Prisma.WorkspaceMemberModel
+/**
+ * Model Room
+ * 
+ */
+export type Room = Prisma.RoomModel

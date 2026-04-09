@@ -5,6 +5,7 @@ import { ErrorModel } from '@flaptalk/api-contract';
 
 import { DomainError } from './errors/domain-error';
 import { authModule } from './modules/auth';
+import { roomsModule } from './modules/rooms';
 import { usersModule } from './modules/users';
 import { workspacesModule } from './modules/workspaces';
 import { logger } from './observability/logger';
@@ -99,6 +100,7 @@ export const createApp = () =>
     .use(authModule)
     .use(usersModule)
     .use(workspacesModule)
+    .use(roomsModule)
     .get('/health', () => ({
       service: 'flaptalk-api',
       status: 'ok',
