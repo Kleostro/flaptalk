@@ -11,6 +11,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { ToastService } from '@web/app/core/services/toast.service';
 import { WorkspaceRoomFeedComponent } from '@web/app/features/workspaces/components/workspace-room-feed/workspace-room-feed.component';
+import { WorkspaceThreadPanelComponent } from '@web/app/features/workspaces/components/workspace-thread-panel/workspace-thread-panel.component';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
 import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/services/workspace-form.factory.service';
 import { ButtonComponent } from '@web/app/shared/ui/button/button';
@@ -26,6 +27,7 @@ import { TextareaFieldComponent } from '@web/app/shared/form/components/textarea
     ShellPanelHeaderComponent,
     TextareaFieldComponent,
     WorkspaceRoomFeedComponent,
+    WorkspaceThreadPanelComponent,
   ],
   selector: 'app-workspace-room-page',
   styleUrl: './workspace-room-page.component.scss',
@@ -43,6 +45,9 @@ export class WorkspaceRoomPageComponent {
     this.workspaceFacadeService.currentWorkspaceRole(),
   );
   public readonly hasMessages = computed(() => this.workspaceFacadeService.hasMessages());
+  public readonly hasSelectedThread = computed(() =>
+    this.workspaceFacadeService.hasSelectedThread(),
+  );
   public readonly isCreateMessagePending = computed(() =>
     this.workspaceFacadeService.isCreateMessagePending(),
   );
@@ -50,12 +55,16 @@ export class WorkspaceRoomPageComponent {
     this.workspaceFacadeService.isMessageCollectionPending(),
   );
   public readonly isMessageFormSubmitted = signal(false);
+  public readonly isReplyFormSubmitted = signal(false);
+  public readonly isThreadPending = computed(() => this.workspaceFacadeService.isThreadPending());
   public readonly messageCount = computed(() => this.workspaceFacadeService.messageCount());
   public readonly messageModel = this.workspaceFormFactoryService.createMessageModel();
   public readonly messageForm = this.workspaceFormFactoryService.createMessageForm(
     this.messageModel,
   );
   public readonly messages = computed(() => this.workspaceFacadeService.messages());
+  public readonly replyModel = this.workspaceFormFactoryService.createMessageModel();
+  public readonly replyForm = this.workspaceFormFactoryService.createMessageForm(this.replyModel);
   public readonly roomHealthRows = computed(() => [
     {
       label: 'Messages',
@@ -67,12 +76,21 @@ export class WorkspaceRoomPageComponent {
     },
     {
       label: 'Thread layer',
-      value: 'Next',
+      value: this.hasSelectedThread() ? 'Open' : 'Ready',
     },
   ]);
   public readonly selectedRoom = computed(() => this.workspaceFacadeService.selectedRoom());
+  public readonly selectedThreadReplies = computed(() =>
+    this.workspaceFacadeService.selectedThreadReplies(),
+  );
+  public readonly selectedThreadRootMessage = computed(() =>
+    this.workspaceFacadeService.selectedThreadRootMessage(),
+  );
   public readonly showMessageFormErrors = computed(
     () => this.isMessageFormSubmitted() || this.messageForm().touched(),
+  );
+  public readonly showReplyFormErrors = computed(
+    () => this.isReplyFormSubmitted() || this.replyForm().touched(),
   );
 
   constructor() {
@@ -83,6 +101,111 @@ export class WorkspaceRoomPageComponent {
         this.workspaceFacadeService.selectRoom(roomId);
       }
     });
+  }
+
+  private getCurrentRoomId(): null | number {
+    return this.selectedRoom()?.id ?? null;
+  }
+
+  private getReplyContext(): null | { readonly roomId: number; readonly rootMessageId: number } {
+    const rootMessageId = this.selectedThreadRootMessage()?.id ?? null;
+
+    if (!rootMessageId) {
+      this.toastService.error({
+        message: 'Open a thread first before replying.',
+        title: 'Thread required',
+      });
+      return null;
+    }
+
+    const roomId = this.getCurrentRoomId();
+
+    if (!roomId) {
+      this.toastService.error({
+        message: 'We could not resolve the current room.',
+        title: 'Room unavailable',
+      });
+      return null;
+    }
+
+    return { roomId, rootMessageId };
+  }
+
+  private handleMessageError(error: unknown, title: string, fallbackMessage: string): void {
+    this.toastService.error({
+      message: error instanceof Error ? error.message : fallbackMessage,
+      title,
+    });
+  }
+
+  private resetReplyForm(rootMessageId: number): void {
+    this.replyModel.set({
+      body: '',
+      parentMessageId: rootMessageId,
+    });
+    this.isReplyFormSubmitted.set(false);
+  }
+
+  private sendReply(roomId: number, rootMessageId: number): void {
+    this.workspaceFacadeService
+      .createMessage(roomId, {
+        ...this.replyModel(),
+        parentMessageId: rootMessageId,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: (error: unknown) => {
+          this.handleMessageError(
+            error,
+            'Reply failed',
+            'We could not send the reply. Please try again.',
+          );
+        },
+        next: (result) => {
+          this.resetReplyForm(rootMessageId);
+          this.toastService.success({
+            ...result,
+            message: 'Your reply is now attached to the thread.',
+            title: 'Reply sent',
+          });
+        },
+      });
+  }
+
+  private sendRoomMessage(message: {
+    readonly body: string;
+    readonly parentMessageId: null | number;
+  }): void {
+    const roomId = this.getCurrentRoomId();
+
+    if (!roomId) {
+      this.toastService.error({
+        message: 'We could not resolve the current room.',
+        title: 'Room unavailable',
+      });
+      return;
+    }
+
+    this.workspaceFacadeService
+      .createMessage(roomId, message)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: (error: unknown) => {
+          this.handleMessageError(
+            error,
+            'Message failed',
+            'We could not send the message. Please try again.',
+          );
+        },
+        next: (result) => {
+          this.messageModel.set({
+            body: '',
+            parentMessageId: null,
+          });
+          this.isMessageFormSubmitted.set(false);
+          this.toastService.success(result);
+        },
+      });
   }
 
   public createMessage(event: Event): void {
@@ -97,36 +220,36 @@ export class WorkspaceRoomPageComponent {
       return;
     }
 
-    const roomId = this.selectedRoom()?.id;
+    this.sendRoomMessage(this.messageModel());
+  }
 
-    if (!roomId) {
+  public createReply(event: Event): void {
+    event.preventDefault();
+    this.isReplyFormSubmitted.set(true);
+
+    if (this.replyForm().invalid()) {
       this.toastService.error({
-        message: 'We could not resolve the current room.',
-        title: 'Room unavailable',
+        message: 'Write a reply before sending it into the thread.',
+        title: 'Reply is empty',
       });
       return;
     }
 
-    this.workspaceFacadeService
-      .createMessage(roomId, this.messageModel())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        error: (error: unknown) => {
-          this.toastService.error({
-            message:
-              error instanceof Error
-                ? error.message
-                : 'We could not send the message. Please try again.',
-            title: 'Message failed',
-          });
-        },
-        next: (result) => {
-          this.messageModel.set({
-            body: '',
-          });
-          this.isMessageFormSubmitted.set(false);
-          this.toastService.success(result);
-        },
-      });
+    const replyContext = this.getReplyContext();
+
+    if (!replyContext) {
+      return;
+    }
+
+    this.sendReply(replyContext.roomId, replyContext.rootMessageId);
+  }
+
+  public openThread(messageId: number): void {
+    this.isReplyFormSubmitted.set(false);
+    this.replyModel.set({
+      body: '',
+      parentMessageId: messageId,
+    });
+    this.workspaceFacadeService.selectThread(messageId);
   }
 }

@@ -40,6 +40,11 @@
     background: color-mix(in oklch, var(--surface-base) 12%, transparent);
   }
 
+  &__message-item--active {
+    border-color: color-mix(in oklch, var(--accent-primary) 24%, var(--outline-subtle));
+    background: color-mix(in oklch, var(--surface-accent) 32%, transparent);
+  }
+
   &__message-avatar {
     display: inline-grid;
     place-items: center;
@@ -90,6 +95,40 @@
     span {
       font-size: 0.82rem;
       color: var(--text-secondary);
+    }
+  }
+
+  &__message-actions {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  &__thread-button {
+    cursor: pointer;
+
+    min-block-size: 2.2rem;
+    padding-inline: 0.9rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 76%, transparent);
+    border-radius: var(--radius-pill);
+
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+
+    background: color-mix(in oklch, var(--surface-base) 18%, transparent);
+
+    transition:
+      border-color var(--motion-duration-fast) ease,
+      color var(--motion-duration-fast) ease,
+      background-color var(--motion-duration-fast) ease;
+
+    &:hover,
+    &:focus-visible {
+      border-color: color-mix(in oklch, var(--accent-primary) 28%, var(--outline-subtle));
+      color: var(--text-primary);
+      background: color-mix(in oklch, var(--surface-accent) 42%, transparent);
+      outline: none;
     }
   }
 }

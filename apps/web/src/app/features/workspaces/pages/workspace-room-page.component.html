@@ -27,9 +27,11 @@
         <app-shell-panel-header tag="Room feed" [title]="selectedRoom()?.name ?? 'Room feed'" />
 
         <app-workspace-room-feed
+          [activeThreadMessageId]="selectedThreadRootMessage()?.id ?? null"
           [isPending]="isMessageCollectionPending()"
           [messages]="messages()"
           [room]="selectedRoom()"
+          (selectThread)="openThread($event)"
         />
       </div>
     </app-card>
@@ -59,6 +61,42 @@
   </section>
 
   <section class="workspace-room-page__secondary-column">
+    <app-card>
+      <div class="workspace-room-page__panel">
+        <app-shell-panel-header
+          [tag]="hasSelectedThread() ? 'Live' : 'Thread'"
+          title="Thread panel"
+        />
+
+        <app-workspace-thread-panel
+          [isPending]="isThreadPending()"
+          [replies]="selectedThreadReplies()"
+          [rootMessage]="selectedThreadRootMessage()"
+        />
+
+        @if (hasSelectedThread()) {
+          <form class="workspace-room-page__reply-form" (submit)="createReply($event)">
+            <app-shell-panel-header tag="Reply" title="Continue thread" />
+
+            <app-textarea-field
+              autocomplete="off"
+              [field]="replyForm.body"
+              hint="Replies attach directly to the selected thread root."
+              inputId="thread-reply-body"
+              label="Reply"
+              placeholder="Add context, answer the question, or continue the discussion."
+              [rows]="4"
+              [showErrors]="showReplyFormErrors()"
+            />
+
+            <app-button [disabled]="isCreateMessagePending()" [fluid]="true" type="submit">
+              {{ isCreateMessagePending() ? 'Sending reply...' : 'Send reply' }}
+            </app-button>
+          </form>
+        }
+      </div>
+    </app-card>
+
     <app-card>
       <div class="workspace-room-page__panel">
         <app-shell-panel-header tag="Context" title="Room details" />

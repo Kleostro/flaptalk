@@ -31,6 +31,7 @@ export class WorkspaceFormFactoryService {
   public createMessageModel(): WritableSignal<CreateMessage> {
     return signal({
       body: '',
+      parentMessageId: null,
     });
   }
 

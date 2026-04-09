@@ -25,9 +25,9 @@ export class WorkspaceFacadeService {
     params: () => this.workspaceRequestVersion(),
     stream: () => this.workspaceApiService.getMyWorkspaces(),
   });
-
   public readonly workspaces = computed(() => this.workspaceCollectionResource.value());
   public readonly currentWorkspaceAccess = computed(() => this.workspaces()[0] ?? null);
+
   public readonly currentWorkspace = computed(
     () => this.currentWorkspaceAccess()?.workspace ?? null,
   );
@@ -45,7 +45,6 @@ export class WorkspaceFacadeService {
         ? of([])
         : this.workspaceApiService.getWorkspaceRooms(params.workspaceId),
   });
-
   public readonly rooms = computed(() => this.roomCollectionResource.value());
   public readonly selectedRoom = computed(() => {
     const selectedRoomId = this.selectedRoomIdState();
@@ -56,6 +55,7 @@ export class WorkspaceFacadeService {
 
     return this.rooms().find((room) => room.id === selectedRoomId) ?? null;
   });
+
   private readonly messageCollectionResource = rxResource<
     Message[],
     { readonly roomId: null | number; readonly version: number }
@@ -68,6 +68,22 @@ export class WorkspaceFacadeService {
     stream: ({ params }) =>
       params.roomId === null ? of([]) : this.workspaceApiService.getRoomMessages(params.roomId),
   });
+  private readonly selectedThreadMessageIdState = signal<null | number>(null);
+  private readonly threadRequestVersion = signal(0);
+  private readonly threadResource = rxResource<
+    null | { readonly replies: Message[]; readonly rootMessage: Message },
+    { readonly messageId: null | number; readonly version: number }
+  >({
+    defaultValue: null,
+    params: () => ({
+      messageId: this.selectedThreadMessageIdState(),
+      version: this.threadRequestVersion(),
+    }),
+    stream: ({ params }) =>
+      params.messageId === null
+        ? of(null)
+        : this.workspaceApiService.getMessageThread(params.messageId),
+  });
   public readonly currentWorkspaceRole = computed(
     () => this.currentWorkspaceAccess()?.role ?? null,
   );
@@ -78,6 +94,11 @@ export class WorkspaceFacadeService {
   public readonly hasMessages = computed(() => this.messageCount() > 0);
   public readonly roomCount = computed(() => this.rooms().length);
   public readonly hasRooms = computed(() => this.roomCount() > 0);
+  public readonly selectedThread = computed(() => this.threadResource.value());
+  public readonly selectedThreadRootMessage = computed(
+    () => this.selectedThread()?.rootMessage ?? null,
+  );
+  public readonly hasSelectedThread = computed(() => this.selectedThreadRootMessage() !== null);
   public readonly hasWorkspace = computed(() => this.currentWorkspace() !== null);
   public readonly isCreateMessagePending = computed(() => this.createMessagePendingState());
   public readonly isCreateRoomPending = computed(() => this.createRoomPendingState());
@@ -86,12 +107,19 @@ export class WorkspaceFacadeService {
     this.messageCollectionResource.isLoading(),
   );
   public readonly isRoomCollectionPending = computed(() => this.roomCollectionResource.isLoading());
+  public readonly isThreadPending = computed(() => this.threadResource.isLoading());
   public readonly isWorkspaceCollectionPending = computed(() =>
     this.workspaceCollectionResource.isLoading(),
   );
+  public readonly selectedThreadReplies = computed(() => this.selectedThread()?.replies ?? []);
 
   public clearSelectedRoom(): void {
+    this.clearSelectedThread();
     this.selectedRoomIdState.set(null);
+  }
+
+  public clearSelectedThread(): void {
+    this.selectedThreadMessageIdState.set(null);
   }
 
   public createMessage(roomId: number, message: CreateMessage): Observable<AuthSubmissionResult> {
@@ -99,7 +127,23 @@ export class WorkspaceFacadeService {
 
     return this.workspaceApiService.createMessage(roomId, message).pipe(
       tap((createdMessage) => {
-        this.messageCollectionResource.set([...this.messages(), createdMessage]);
+        if (createdMessage.parentMessageId === null) {
+          this.messageCollectionResource.set([...this.messages(), createdMessage]);
+          return;
+        }
+
+        const selectedThreadRootMessage = this.selectedThreadRootMessage();
+
+        if (selectedThreadRootMessage?.id === createdMessage.parentMessageId) {
+          const selectedThread = this.selectedThread();
+
+          if (selectedThread) {
+            this.threadResource.set({
+              replies: [...selectedThread.replies, createdMessage],
+              rootMessage: selectedThread.rootMessage,
+            });
+          }
+        }
       }),
       map(() => ({
         level: TOAST_LEVEL.success,
@@ -118,6 +162,7 @@ export class WorkspaceFacadeService {
     return this.workspaceApiService.createRoom(workspaceId, room).pipe(
       tap((createdRoom) => {
         this.roomCollectionResource.set([...this.rooms(), createdRoom]);
+        this.clearSelectedThread();
         this.selectedRoomIdState.set(createdRoom.id);
       }),
       map((createdRoom) => ({
@@ -140,6 +185,8 @@ export class WorkspaceFacadeService {
         this.messageCollectionResource.set([]);
         this.roomCollectionResource.set([]);
         this.selectedRoomIdState.set(null);
+        this.threadResource.set(null);
+        this.selectedThreadMessageIdState.set(null);
       }),
       map((createdWorkspaceAccess) => ({
         level: TOAST_LEVEL.success,
@@ -160,11 +207,20 @@ export class WorkspaceFacadeService {
     this.roomRequestVersion.update((version) => version + 1);
   }
 
+  public refreshThread(): void {
+    this.threadRequestVersion.update((version) => version + 1);
+  }
+
   public refreshWorkspaces(): void {
     this.workspaceRequestVersion.update((version) => version + 1);
   }
 
   public selectRoom(roomId: number): void {
+    this.clearSelectedThread();
     this.selectedRoomIdState.set(roomId);
+  }
+
+  public selectThread(messageId: number): void {
+    this.selectedThreadMessageIdState.set(messageId);
   }
 }
