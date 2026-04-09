@@ -10,16 +10,6 @@ function normalizeMessageBody(body: string): string {
   return body.trim().replace(/\s+/g, ' ');
 }
 
-type MessagePersistenceRecord = Parameters<typeof serializeMessage>[0];
-type PrismaMessageDelegate = {
-  create(args: unknown): Promise<unknown>;
-  findMany(args: unknown): Promise<unknown>;
-};
-
-function getPrismaMessageDelegate(): PrismaMessageDelegate {
-  return (prisma as typeof prisma & { message: PrismaMessageDelegate }).message;
-}
-
 export class MessagesService {
   private async getRoomMembership(params: { readonly roomId: number; readonly userId: number }) {
     return prisma.room.findUnique({
@@ -55,14 +45,14 @@ export class MessagesService {
       throw new DomainError(404, 'room_not_found', 'Room not found.');
     }
 
-    const createdMessage = (await getPrismaMessageDelegate().create({
+    const createdMessage = await prisma.message.create({
       data: {
         authorId: params.userId,
         body: normalizeMessageBody(params.message.body),
         roomId: params.roomId,
       },
       select: messageSelect,
-    })) as MessagePersistenceRecord;
+    });
 
     return serializeMessage(createdMessage);
   }
@@ -77,7 +67,7 @@ export class MessagesService {
       throw new DomainError(404, 'room_not_found', 'Room not found.');
     }
 
-    const messages = (await getPrismaMessageDelegate().findMany({
+    const messages = await prisma.message.findMany({
       orderBy: [
         {
           createdAt: 'asc',
@@ -90,7 +80,7 @@ export class MessagesService {
       where: {
         roomId: params.roomId,
       },
-    })) as MessagePersistenceRecord[];
+    });
 
     return {
       messages: messages.map((message) => serializeMessage(message)),
