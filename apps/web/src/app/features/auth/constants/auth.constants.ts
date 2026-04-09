@@ -46,10 +46,19 @@ export const AUTH_PASSWORD_REQUIREMENTS = [
 ] as const;
 
 export const AUTH_LOGIN_FORM_CONTENT = {
-  description:
-    'Use your work email to restore workspace context, recent activity, and secure access in one step.',
+  description: 'Use your work email to restore workspace access and return to the product shell.',
   eyebrow: 'Workspace sign-in',
-  highlights: ['Secure workspace access', 'Recent context restored', 'Device-to-device continuity'],
+  highlights: [
+    'Workspace access secured',
+    'Session context restored',
+    'Ready for rooms and threads',
+  ],
+} as const;
+
+export const AUTH_REGISTRATION_FORM_CONTENT = {
+  description:
+    'Create workspace access now, then continue into the shell where setup, rooms, and summaries will follow.',
+  eyebrow: 'Workspace account',
 } as const;
 
 export const AUTH_PAGE_CONTENT = {
@@ -57,26 +66,23 @@ export const AUTH_PAGE_CONTENT = {
     alternateActionLabel: 'Create account',
     alternateActionRoute: `/${APP_ROUTE_PATHS.register}`,
     alternateActionText: 'New to Flaptalk?',
-    description:
-      'Log in to continue your conversations, manage workspace access, and move between devices' +
-      ' without losing context.',
+    description: 'Enter the workspace shell and restore the session tied to your account.',
     eyebrow: 'Welcome back',
     mode: AUTH_FORM_MODE.login,
     pendingSubmitLabel: 'Checking access...',
     submitLabel: 'Log in',
-    title: 'Readable, fast access to your workspace.',
+    title: 'Access the workspace shell.',
   },
   registration: {
     alternateActionLabel: 'Sign in',
     alternateActionRoute: `/${APP_ROUTE_PATHS.login}`,
     alternateActionText: 'Already have an account?',
     description:
-      'Create your workspace profile and start with the same session flow the API already uses' +
-      ' in production-ready auth scenarios.',
+      'Create account access first, then continue into the workspace shell and setup flow.',
     eyebrow: 'Create account',
     mode: AUTH_FORM_MODE.registration,
     pendingSubmitLabel: 'Creating workspace access...',
     submitLabel: 'Create account',
-    title: 'Start with a strong authentication foundation.',
+    title: 'Create workspace access.',
   },
 } as const;

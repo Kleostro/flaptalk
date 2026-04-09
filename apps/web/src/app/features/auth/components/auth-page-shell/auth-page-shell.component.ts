@@ -2,13 +2,21 @@ import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core
 
 import { ThemeService } from '@web/app/core/services/theme.service';
 import { type AuthFormMode } from '@web/app/features/auth/types/auth-form-mode.type';
+import { AppShellComponent } from '@web/app/shared/ui/app-shell/app-shell';
 import { CardComponent } from '@web/app/shared/ui/card/card';
 import { LinkComponent } from '@web/app/shared/ui/link/link';
+import { ShellNavItemComponent } from '@web/app/shared/ui/shell-nav-item/shell-nav-item';
 import { ThemeSwitcherComponent } from '@web/app/shared/ui/theme-switcher/theme-switcher';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CardComponent, LinkComponent, ThemeSwitcherComponent],
+  imports: [
+    AppShellComponent,
+    CardComponent,
+    LinkComponent,
+    ShellNavItemComponent,
+    ThemeSwitcherComponent,
+  ],
   selector: 'app-auth-page-shell',
   styleUrl: './auth-page-shell.component.scss',
   templateUrl: './auth-page-shell.component.html',

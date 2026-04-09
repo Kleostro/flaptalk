@@ -1,35 +1,42 @@
 <form class="auth-form" novalidate (submit)="onSubmit($event)">
-  <app-text-input-field
-    [autocomplete]="autocomplete.email"
-    [field]="emailField()"
-    [inputId]="fieldIds.registrationEmail"
-    [label]="labels.email"
-    [placeholder]="placeholders.email"
-    [showErrors]="showErrors()"
-    type="email"
-  />
+  <header class="auth-form__header">
+    <p class="auth-form__eyebrow">{{ formContent.eyebrow }}</p>
+    <p class="auth-form__description">{{ formContent.description }}</p>
+  </header>
 
-  <app-text-input-field
-    [autocomplete]="autocomplete.newPassword"
-    [field]="passwordField()"
-    [hint]="passwordRequirements.join(' ')"
-    [inputId]="fieldIds.registrationPassword"
-    [label]="labels.password"
-    [placeholder]="placeholders.password"
-    [showErrors]="showErrors()"
-    type="password"
-  />
+  <div class="auth-form__fields">
+    <app-text-input-field
+      [autocomplete]="autocomplete.email"
+      [field]="emailField()"
+      [inputId]="fieldIds.registrationEmail"
+      [label]="labels.email"
+      [placeholder]="placeholders.email"
+      [showErrors]="showErrors()"
+      type="email"
+    />
 
-  <app-text-input-field
-    [autocomplete]="autocomplete.confirmPassword"
-    [errors]="confirmPasswordErrors()"
-    [field]="repeatPasswordField()"
-    [inputId]="fieldIds.registrationConfirmPassword"
-    [label]="labels.confirmPassword"
-    [placeholder]="placeholders.confirmPassword"
-    [showErrors]="showErrors()"
-    type="password"
-  />
+    <app-text-input-field
+      [autocomplete]="autocomplete.newPassword"
+      [field]="passwordField()"
+      [hint]="passwordRequirements.join(' ')"
+      [inputId]="fieldIds.registrationPassword"
+      [label]="labels.password"
+      [placeholder]="placeholders.password"
+      [showErrors]="showErrors()"
+      type="password"
+    />
+
+    <app-text-input-field
+      [autocomplete]="autocomplete.confirmPassword"
+      [errors]="confirmPasswordErrors()"
+      [field]="repeatPasswordField()"
+      [inputId]="fieldIds.registrationConfirmPassword"
+      [label]="labels.confirmPassword"
+      [placeholder]="placeholders.confirmPassword"
+      [showErrors]="showErrors()"
+      type="password"
+    />
+  </div>
 
   <ul class="auth-form__requirements">
     @for (requirement of passwordRequirements; track requirement) {

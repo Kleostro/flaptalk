@@ -32,7 +32,7 @@ export class ThemeService {
       return persistedMode;
     }
 
-    return matchMedia('(prefers-color-scheme: dark)').matches ? THEME_MODE.dark : THEME_MODE.light;
+    return THEME_MODE.dark;
   }
 
   public setMode(mode: ThemeMode): void {

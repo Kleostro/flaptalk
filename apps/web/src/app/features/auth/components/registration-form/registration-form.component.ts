@@ -7,6 +7,7 @@ import {
   AUTH_FIELD_LABELS,
   AUTH_FIELD_PLACEHOLDERS,
   AUTH_PASSWORD_REQUIREMENTS,
+  AUTH_REGISTRATION_FORM_CONTENT,
   type AuthFieldAutocomplete,
   type AuthFieldLabels,
   type AuthFieldPlaceholders,
@@ -26,6 +27,7 @@ export class RegistrationFormComponent {
   public readonly confirmPasswordErrors = input<readonly string[]>([]);
   public readonly emailField = input.required<FieldTree<string>>();
   public readonly fieldIds = AUTH_FIELD_IDS;
+  public readonly formContent = AUTH_REGISTRATION_FORM_CONTENT;
   public readonly isPending = input.required<boolean>();
   public readonly labels: AuthFieldLabels = AUTH_FIELD_LABELS;
   public readonly passwordField = input.required<FieldTree<string>>();
