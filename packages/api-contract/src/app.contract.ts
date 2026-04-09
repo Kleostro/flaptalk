@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia';
 
 import { AuthModel, createSessionCookieModel } from './models/auth';
 import { ErrorModel } from './models/error';
+import { RoomsModel } from './models/rooms';
 import { UsersModel } from './models/users';
 import { WorkspacesModel } from './models/workspaces';
 
@@ -23,6 +24,18 @@ function createContractWorkspace() {
     ownerId: 0,
     slug: 'flaptalk-founders',
     updatedAt: new Date(0).toISOString(),
+  };
+}
+
+function createContractRoom() {
+  return {
+    createdAt: new Date(0).toISOString(),
+    description: 'Structured room for updates and focused discussion.',
+    id: 0,
+    name: 'General',
+    slug: 'general',
+    updatedAt: new Date(0).toISOString(),
+    workspaceId: 0,
   };
 }
 
@@ -59,6 +72,7 @@ export const appContract = new Elysia({
   .model(AuthModel)
   .model(UsersModel)
   .model(WorkspacesModel)
+  .model(RoomsModel)
   .group('/auth', (app) =>
     app
       .post(
@@ -168,6 +182,36 @@ export const appContract = new Elysia({
           }),
           response: {
             200: 'workspaces.single.response',
+            401: 'error.response',
+            404: 'error.response',
+          },
+        },
+      )
+      .post('/:workspaceId/rooms', () => createContractRoom(), {
+        body: 'rooms.create.body',
+        cookie: sessionCookieModel,
+        params: t.Object({
+          workspaceId: t.Numeric(),
+        }),
+        response: {
+          200: 'rooms.create.response',
+          401: 'error.response',
+          403: 'error.response',
+          404: 'error.response',
+        },
+      })
+      .get(
+        '/:workspaceId/rooms',
+        () => ({
+          rooms: [createContractRoom()],
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            workspaceId: t.Numeric(),
+          }),
+          response: {
+            200: 'rooms.list.response',
             401: 'error.response',
             404: 'error.response',
           },
