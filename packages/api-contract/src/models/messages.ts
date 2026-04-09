@@ -12,6 +12,7 @@ export const MessageModel = t.Object({
     format: 'date-time',
   }),
   id: t.Numeric(),
+  parentMessageId: t.Nullable(t.Numeric()),
   roomId: t.Numeric(),
   updatedAt: t.String({
     format: 'date-time',
@@ -25,6 +26,7 @@ export const CreateMessageRequestBodyModel = t.Object({
     maxLength: MESSAGE_BODY_MAX_LENGTH,
     minLength: MESSAGE_BODY_MIN_LENGTH,
   }),
+  parentMessageId: t.Optional(t.Nullable(t.Numeric())),
 });
 
 export type CreateMessageRequestBody = Static<typeof CreateMessageRequestBodyModel>;
@@ -35,5 +37,9 @@ export const MessagesModel = {
   'messages.entity': MessageModel,
   'messages.list.response': t.Object({
     messages: t.Array(MessageModel),
+  }),
+  'messages.thread.response': t.Object({
+    replies: t.Array(MessageModel),
+    rootMessage: MessageModel,
   }),
 };

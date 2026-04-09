@@ -7,6 +7,7 @@ const messageSelect = {
   body: true,
   createdAt: true,
   id: true,
+  parentMessageId: true,
   roomId: true,
   updatedAt: true,
 } as const;
@@ -16,6 +17,7 @@ type SerializableMessage = {
   readonly body: string;
   readonly createdAt: Date;
   readonly id: number;
+  readonly parentMessageId: null | number;
   readonly roomId: number;
   readonly updatedAt: Date;
 };

@@ -49,16 +49,21 @@ model Room {
 }
 
 model Message {
-  id        Int      @id @default(autoincrement())
-  roomId    Int      @map("room_id")
-  authorId  Int      @map("author_id")
-  body      String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  id              Int       @id @default(autoincrement())
+  roomId          Int       @map("room_id")
+  authorId        Int       @map("author_id")
+  parentMessageId Int?      @map("parent_message_id")
+  body            String
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  author          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentMessage   Message?  @relation("MessageThread", fields: [parentMessageId], references: [id], onDelete: Cascade)
+  replies         Message[] @relation("MessageThread")
+  room            Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([authorId])
+  @@index([parentMessageId])
   @@index([roomId, createdAt])
+  @@index([roomId, parentMessageId, createdAt])
   @@map("messages")
 }

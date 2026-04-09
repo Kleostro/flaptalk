@@ -46,6 +46,7 @@ function createContractMessage() {
     body: 'Welcome to the room. The first discussion can start here.',
     createdAt: new Date(0).toISOString(),
     id: 0,
+    parentMessageId: null,
     roomId: 0,
     updatedAt: new Date(0).toISOString(),
   };
@@ -262,6 +263,26 @@ export const appContract = new Elysia({
           },
         },
       ),
+  )
+  .group('/messages', (app) =>
+    app.get(
+      '/:messageId/thread',
+      () => ({
+        replies: [createContractMessage()],
+        rootMessage: createContractMessage(),
+      }),
+      {
+        cookie: sessionCookieModel,
+        params: t.Object({
+          messageId: t.Numeric(),
+        }),
+        response: {
+          200: 'messages.thread.response',
+          401: 'error.response',
+          404: 'error.response',
+        },
+      },
+    ),
   )
   .get(
     '/health',

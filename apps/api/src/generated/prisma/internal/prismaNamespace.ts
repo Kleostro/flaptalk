@@ -869,6 +869,7 @@ export const MessageScalarFieldEnum = {
   id: 'id',
   roomId: 'roomId',
   authorId: 'authorId',
+  parentMessageId: 'parentMessageId',
   body: 'body',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

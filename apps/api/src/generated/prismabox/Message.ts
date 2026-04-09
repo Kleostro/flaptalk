@@ -9,6 +9,7 @@ export const MessagePlain = t.Object(
     id: t.Integer(),
     roomId: t.Integer(),
     authorId: t.Integer(),
+    parentMessageId: __nullable__(t.Integer()),
     body: t.String(),
     createdAt: t.Date(),
     updatedAt: t.Date(),
@@ -26,6 +27,35 @@ export const MessageRelations = t.Object(
         createdAt: t.Date(),
         updatedAt: t.Date(),
       },
+      { additionalProperties: false },
+    ),
+    parentMessage: __nullable__(
+      t.Object(
+        {
+          id: t.Integer(),
+          roomId: t.Integer(),
+          authorId: t.Integer(),
+          parentMessageId: __nullable__(t.Integer()),
+          body: t.String(),
+          createdAt: t.Date(),
+          updatedAt: t.Date(),
+        },
+        { additionalProperties: false },
+      ),
+    ),
+    replies: t.Array(
+      t.Object(
+        {
+          id: t.Integer(),
+          roomId: t.Integer(),
+          authorId: t.Integer(),
+          parentMessageId: __nullable__(t.Integer()),
+          body: t.String(),
+          createdAt: t.Date(),
+          updatedAt: t.Date(),
+        },
+        { additionalProperties: false },
+      ),
       { additionalProperties: false },
     ),
     room: t.Object(
@@ -67,6 +97,35 @@ export const MessageRelationsInputCreate = t.Object(
       },
       { additionalProperties: false },
     ),
+    parentMessage: t.Optional(
+      t.Object(
+        {
+          connect: t.Object(
+            {
+              id: t.Integer({ additionalProperties: false }),
+            },
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
+    replies: t.Optional(
+      t.Object(
+        {
+          connect: t.Array(
+            t.Object(
+              {
+                id: t.Integer({ additionalProperties: false }),
+              },
+              { additionalProperties: false },
+            ),
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
     room: t.Object(
       {
         connect: t.Object(
@@ -96,6 +155,45 @@ export const MessageRelationsInputUpdate = t.Partial(
         },
         { additionalProperties: false },
       ),
+      parentMessage: t.Partial(
+        t.Object(
+          {
+            connect: t.Object(
+              {
+                id: t.Integer({ additionalProperties: false }),
+              },
+              { additionalProperties: false },
+            ),
+            disconnect: t.Boolean(),
+          },
+          { additionalProperties: false },
+        ),
+      ),
+      replies: t.Partial(
+        t.Object(
+          {
+            connect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+            disconnect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+          },
+          { additionalProperties: false },
+        ),
+      ),
       room: t.Object(
         {
           connect: t.Object(
@@ -123,6 +221,7 @@ export const MessageWhere = t.Partial(
           id: t.Integer(),
           roomId: t.Integer(),
           authorId: t.Integer(),
+          parentMessageId: t.Integer(),
           body: t.String(),
           createdAt: t.Date(),
           updatedAt: t.Date(),
@@ -164,6 +263,7 @@ export const MessageWhereUnique = t.Recursive(
               id: t.Integer(),
               roomId: t.Integer(),
               authorId: t.Integer(),
+              parentMessageId: t.Integer(),
               body: t.String(),
               createdAt: t.Date(),
               updatedAt: t.Date(),
@@ -183,10 +283,13 @@ export const MessageSelect = t.Partial(
       id: t.Boolean(),
       roomId: t.Boolean(),
       authorId: t.Boolean(),
+      parentMessageId: t.Boolean(),
       body: t.Boolean(),
       createdAt: t.Boolean(),
       updatedAt: t.Boolean(),
       author: t.Boolean(),
+      parentMessage: t.Boolean(),
+      replies: t.Boolean(),
       room: t.Boolean(),
       _count: t.Boolean(),
     },
@@ -196,7 +299,13 @@ export const MessageSelect = t.Partial(
 
 export const MessageInclude = t.Partial(
   t.Object(
-    { author: t.Boolean(), room: t.Boolean(), _count: t.Boolean() },
+    {
+      author: t.Boolean(),
+      parentMessage: t.Boolean(),
+      replies: t.Boolean(),
+      room: t.Boolean(),
+      _count: t.Boolean(),
+    },
     { additionalProperties: false },
   ),
 );
@@ -211,6 +320,9 @@ export const MessageOrderBy = t.Partial(
         additionalProperties: false,
       }),
       authorId: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      parentMessageId: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
       body: t.Union([t.Literal("asc"), t.Literal("desc")], {
