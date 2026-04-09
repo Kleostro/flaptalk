@@ -19,6 +19,20 @@ export const RoomPlain = t.Object(
 
 export const RoomRelations = t.Object(
   {
+    messages: t.Array(
+      t.Object(
+        {
+          id: t.Integer(),
+          roomId: t.Integer(),
+          authorId: t.Integer(),
+          body: t.String(),
+          createdAt: t.Date(),
+          updatedAt: t.Date(),
+        },
+        { additionalProperties: false },
+      ),
+      { additionalProperties: false },
+    ),
     workspace: t.Object(
       {
         id: t.Integer(),
@@ -55,6 +69,22 @@ export const RoomPlainInputUpdate = t.Object(
 
 export const RoomRelationsInputCreate = t.Object(
   {
+    messages: t.Optional(
+      t.Object(
+        {
+          connect: t.Array(
+            t.Object(
+              {
+                id: t.Integer({ additionalProperties: false }),
+              },
+              { additionalProperties: false },
+            ),
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
     workspace: t.Object(
       {
         connect: t.Object(
@@ -73,6 +103,31 @@ export const RoomRelationsInputCreate = t.Object(
 export const RoomRelationsInputUpdate = t.Partial(
   t.Object(
     {
+      messages: t.Partial(
+        t.Object(
+          {
+            connect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+            disconnect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+          },
+          { additionalProperties: false },
+        ),
+      ),
       workspace: t.Object(
         {
           connect: t.Object(
@@ -184,6 +239,7 @@ export const RoomSelect = t.Partial(
       description: t.Boolean(),
       createdAt: t.Boolean(),
       updatedAt: t.Boolean(),
+      messages: t.Boolean(),
       workspace: t.Boolean(),
       _count: t.Boolean(),
     },
@@ -193,7 +249,7 @@ export const RoomSelect = t.Partial(
 
 export const RoomInclude = t.Partial(
   t.Object(
-    { workspace: t.Boolean(), _count: t.Boolean() },
+    { messages: t.Boolean(), workspace: t.Boolean(), _count: t.Boolean() },
     { additionalProperties: false },
   ),
 );

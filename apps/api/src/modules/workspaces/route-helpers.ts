@@ -11,6 +11,10 @@ export const WorkspaceParamsModel = t.Object({
   workspaceId: t.Numeric(),
 });
 
+export const RoomParamsModel = t.Object({
+  roomId: t.Numeric(),
+});
+
 export async function requireAuthenticatedUserId(context: {
   readonly authJwt: AuthJwtVerifier;
   readonly cookie: Record<string, { value?: string | undefined }>;
