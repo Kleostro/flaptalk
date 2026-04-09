@@ -8,8 +8,6 @@
 }
 
 .card {
-  position: relative;
-
   display: flex;
   flex: 1 1 auto;
 
@@ -18,14 +16,9 @@
   block-size: 100%;
   padding: var(--panel-padding);
   border: var(--border-width-thin) solid color-mix(in oklch, var(--outline-subtle) 82%, transparent);
-  border-radius: var(--radius-xl);
+  border-radius: 1.75rem;
 
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklch, var(--surface-elevated) 92%, transparent),
-    color-mix(in oklch, var(--surface-base) 94%, transparent)
-  );
-  backdrop-filter: blur(1.5rem);
+  background: color-mix(in oklch, var(--surface-elevated) 99%, transparent);
   box-shadow: var(--shadow-panel);
 }
 

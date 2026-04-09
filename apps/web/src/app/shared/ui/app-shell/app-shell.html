@@ -1,0 +1,25 @@
+<main class="app-shell">
+  <header class="app-shell__topbar">
+    <div class="app-shell__topbar-brand">
+      <span class="app-shell__brand-mark">FT</span>
+      <strong class="app-shell__brand-name">FlapTalk</strong>
+    </div>
+
+    <div class="app-shell__topbar-title">
+      <ng-content select="[appShellTitle]" />
+    </div>
+
+    <div class="app-shell__topbar-actions">
+      <ng-content select="[appShellActions]" />
+    </div>
+  </header>
+
+  <aside class="app-shell__sidebar">
+    <ng-content select="[appShellSidebar]" />
+  </aside>
+
+  <section class="app-shell__content-area">
+    <ng-content select="[appShellContentHeader]" />
+    <ng-content select="[appShellContent]" />
+  </section>
+</main>

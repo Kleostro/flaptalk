@@ -2,14 +2,14 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: 1.5rem;
 
   min-block-size: 100%;
 
   &__header {
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
+    gap: 0.625rem;
   }
 
   &__eyebrow {
@@ -24,47 +24,44 @@
   }
 
   &__description {
-    max-inline-size: 36rem;
+    max-inline-size: 34rem;
     margin: 0;
 
-    font-size: var(--font-size-label);
-    line-height: 1.6;
+    font-size: 0.94rem;
+    line-height: 1.65;
     color: var(--text-secondary);
   }
 
   &__fields {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xl);
+    gap: 1rem;
   }
 
   &__support {
     margin-block-start: auto;
-    padding: var(--space-lg);
+    padding: 1.1rem 1.15rem;
     border: var(--border-width-thin) solid
-      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
-    border-radius: var(--radius-lg);
+      color-mix(in oklch, var(--outline-subtle) 76%, transparent);
+    border-radius: 1rem;
 
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklch, var(--surface-elevated) 82%, transparent),
-      color-mix(in oklch, var(--surface-base) 88%, transparent)
-    );
+    background: color-mix(in oklch, var(--surface-base) 10%, transparent);
   }
 
   &__support-title {
     margin: 0 0 var(--space-md);
 
-    font-size: var(--font-size-label);
+    font-size: 0.98rem;
     font-weight: 700;
     line-height: 1.4;
     color: var(--text-primary);
+    letter-spacing: -0.015em;
   }
 
   &__highlights {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-sm);
+    gap: 0.625rem;
 
     margin: 0;
     padding: 0;
@@ -73,16 +70,16 @@
 
     li {
       padding-block: 0.625rem;
-      padding-inline: 0.875rem;
+      padding-inline: 0.85rem;
       border: var(--border-width-thin) solid
         color-mix(in oklch, var(--outline-subtle) 72%, transparent);
       border-radius: var(--radius-pill);
 
-      font-size: var(--font-size-caption);
+      font-size: 0.82rem;
       line-height: 1.4;
       color: var(--text-secondary);
 
-      background: color-mix(in oklch, var(--surface-elevated) 78%, transparent);
+      background: color-mix(in oklch, var(--surface-shell) 22%, transparent);
     }
   }
 

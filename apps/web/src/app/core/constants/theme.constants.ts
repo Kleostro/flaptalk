@@ -12,7 +12,7 @@ export const THEME_OPTIONS = [
     value: THEME_MODE.light,
   },
   {
-    label: 'Dark',
+    label: 'Dim',
     value: THEME_MODE.dark,
   },
 ] as const;

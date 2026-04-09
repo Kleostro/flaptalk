@@ -1,0 +1,34 @@
+.shell-stat-card {
+  display: grid;
+  gap: 0.875rem;
+  min-block-size: 11rem;
+
+  &__label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__main {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__value {
+    font-size: clamp(2rem, 2.1vw, 2.45rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  &__description {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+}
