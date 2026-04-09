@@ -13,7 +13,10 @@
   } @else if (messages().length > 0) {
     <div class="workspace-room-feed__message-list">
       @for (message of messages(); track message.id) {
-        <article class="workspace-room-feed__message-item">
+        <article
+          class="workspace-room-feed__message-item"
+          [class.workspace-room-feed__message-item--active]="activeThreadMessageId() === message.id"
+        >
           <div class="workspace-room-feed__message-avatar" aria-hidden="true">
             {{ getMessageAuthorInitials(message.author.email) }}
           </div>
@@ -25,6 +28,16 @@
             </div>
 
             <p>{{ message.body }}</p>
+
+            <div class="workspace-room-feed__message-actions">
+              <button
+                class="workspace-room-feed__thread-button"
+                type="button"
+                (click)="openThread(message.id)"
+              >
+                {{ activeThreadMessageId() === message.id ? 'Thread open' : 'Open thread' }}
+              </button>
+            </div>
           </div>
         </article>
       }

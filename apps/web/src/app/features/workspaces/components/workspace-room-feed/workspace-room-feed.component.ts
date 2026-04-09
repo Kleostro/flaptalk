@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { type Message, type Room } from '@flaptalk/api-contract';
 
@@ -10,9 +10,11 @@ import { type Message, type Room } from '@flaptalk/api-contract';
   templateUrl: './workspace-room-feed.component.html',
 })
 export class WorkspaceRoomFeedComponent {
+  public readonly activeThreadMessageId = input<null | number>(null);
   public readonly isPending = input.required<boolean>();
   public readonly messages = input.required<readonly Message[]>();
   public readonly room = input<null | Room>(null);
+  public readonly selectThread = output<number>();
 
   public getMessageAuthorInitials(email: string): string {
     const [localPart = ''] = email.split('@');
@@ -22,5 +24,9 @@ export class WorkspaceRoomFeedComponent {
       .toUpperCase();
 
     return initials || 'FT';
+  }
+
+  public openThread(messageId: number): void {
+    this.selectThread.emit(messageId);
   }
 }

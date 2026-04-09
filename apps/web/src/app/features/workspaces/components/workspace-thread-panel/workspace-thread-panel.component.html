@@ -1,0 +1,56 @@
+<div class="workspace-thread-panel">
+  @if (!rootMessage()) {
+    <div class="workspace-thread-panel__state">
+      <strong>No thread selected</strong>
+      <p>
+        Select a root message from the room feed to open its replies and continue the discussion.
+      </p>
+    </div>
+  } @else if (isPending()) {
+    <div class="workspace-thread-panel__state">
+      <strong>Restoring thread...</strong>
+      <p>We are loading the root message and its replies.</p>
+    </div>
+  } @else {
+    <article class="workspace-thread-panel__message workspace-thread-panel__message--root">
+      <div class="workspace-thread-panel__avatar" aria-hidden="true">
+        {{ getMessageAuthorInitials(rootMessage()!.author.email) }}
+      </div>
+
+      <div class="workspace-thread-panel__body">
+        <div class="workspace-thread-panel__meta">
+          <strong>{{ rootMessage()!.author.email }}</strong>
+          <span>{{ rootMessage()!.createdAt | date: 'short' }}</span>
+        </div>
+
+        <p>{{ rootMessage()!.body }}</p>
+      </div>
+    </article>
+
+    @if (replies().length > 0) {
+      <div class="workspace-thread-panel__reply-list">
+        @for (reply of replies(); track reply.id) {
+          <article class="workspace-thread-panel__message">
+            <div class="workspace-thread-panel__avatar" aria-hidden="true">
+              {{ getMessageAuthorInitials(reply.author.email) }}
+            </div>
+
+            <div class="workspace-thread-panel__body">
+              <div class="workspace-thread-panel__meta">
+                <strong>{{ reply.author.email }}</strong>
+                <span>{{ reply.createdAt | date: 'short' }}</span>
+              </div>
+
+              <p>{{ reply.body }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="workspace-thread-panel__state">
+        <strong>No replies yet</strong>
+        <p>This thread is ready for the first reply.</p>
+      </div>
+    }
+  }
+</div>

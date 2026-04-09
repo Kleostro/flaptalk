@@ -64,6 +64,7 @@ export class WorkspaceApiService {
       () =>
         api.rooms({ roomId }).messages.post({
           body: message.body.trim(),
+          ...(message.parentMessageId === null ? {} : { parentMessageId: message.parentMessageId }),
         }),
       (response) => {
         if (response.data?.id) {
@@ -115,6 +116,23 @@ export class WorkspaceApiService {
         throw new Error(this.getErrorMessage(response, 'Unable to create the workspace.'));
       },
       'Unable to create the workspace.',
+    );
+  }
+
+  public getMessageThread(messageId: number): Observable<{
+    readonly replies: Message[];
+    readonly rootMessage: Message;
+  }> {
+    return this.createRequest$(
+      () => api.messages({ messageId }).thread.get(),
+      (response) => {
+        if (response.data) {
+          return response.data;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to load the thread.'));
+      },
+      'Unable to load the thread.',
     );
   }
 
