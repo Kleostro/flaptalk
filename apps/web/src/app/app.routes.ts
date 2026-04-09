@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { authRequiredGuard } from '@web/app/features/auth/guards/auth-required.guard';
-import { WorkspacePageComponent } from '@web/app/features/auth/pages/workspace-page.component';
+import { WorkspacePageComponent } from '@web/app/features/workspaces/pages/workspace-page.component';
 
 export const routes: Routes = [
   {
