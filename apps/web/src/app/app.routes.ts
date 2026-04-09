@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { authRequiredGuard } from '@web/app/features/auth/guards/auth-required.guard';
-import { WorkspacePageComponent } from '@web/app/features/workspaces/pages/workspace-page.component';
 
 export const routes: Routes = [
   {
@@ -12,7 +11,10 @@ export const routes: Routes = [
   },
   {
     canActivate: [authRequiredGuard],
-    component: WorkspacePageComponent,
+    loadChildren: () =>
+      import('@web/app/features/workspaces/workspaces.routes').then(
+        (module) => module.WORKSPACE_ROUTES,
+      ),
     path: APP_ROUTE_PATHS.workspace,
   },
   {

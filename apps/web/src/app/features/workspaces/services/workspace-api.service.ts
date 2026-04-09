@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { type Room, type WorkspaceAccess } from '@flaptalk/api-contract';
+import { type Message, type Room, type WorkspaceAccess } from '@flaptalk/api-contract';
 import { defer, from, map, Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { api } from '@web/app/api.config';
+import { type CreateMessage } from '@web/app/features/workspaces/types/create-message.model';
 import { type CreateRoom } from '@web/app/features/workspaces/types/create-room.model';
 import { type CreateWorkspace } from '@web/app/features/workspaces/types/create-workspace.model';
 
@@ -56,6 +57,23 @@ export class WorkspaceApiService {
     }
 
     return fallbackMessage;
+  }
+
+  public createMessage(roomId: number, message: CreateMessage): Observable<Message> {
+    return this.createRequest$(
+      () =>
+        api.rooms({ roomId }).messages.post({
+          body: message.body.trim(),
+        }),
+      (response) => {
+        if (response.data?.id) {
+          return response.data;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to send the message.'));
+      },
+      'Unable to send the message.',
+    );
   }
 
   public createRoom(workspaceId: number, room: CreateRoom): Observable<Room> {
@@ -111,6 +129,20 @@ export class WorkspaceApiService {
         throw new Error(this.getErrorMessage(response, 'Unable to load your workspaces.'));
       },
       'Unable to load your workspaces.',
+    );
+  }
+
+  public getRoomMessages(roomId: number): Observable<Message[]> {
+    return this.createRequest$(
+      () => api.rooms({ roomId }).messages.get(),
+      (response) => {
+        if (response.data?.messages) {
+          return response.data.messages;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to load room messages.'));
+      },
+      'Unable to load room messages.',
     );
   }
 

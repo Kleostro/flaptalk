@@ -1,0 +1,41 @@
+<div class="workspace-room-feed">
+  <p class="workspace-room-feed__helper">
+    {{ room()?.description || 'This room is ready for its first messages and room-level context.' }}
+  </p>
+
+  @if (isPending()) {
+    <div class="workspace-room-feed__state">
+      <strong>Restoring room feed...</strong>
+      <p class="workspace-room-feed__helper">
+        We are loading the latest discussion history for this room.
+      </p>
+    </div>
+  } @else if (messages().length > 0) {
+    <div class="workspace-room-feed__message-list">
+      @for (message of messages(); track message.id) {
+        <article class="workspace-room-feed__message-item">
+          <div class="workspace-room-feed__message-avatar" aria-hidden="true">
+            {{ getMessageAuthorInitials(message.author.email) }}
+          </div>
+
+          <div class="workspace-room-feed__message-body">
+            <div class="workspace-room-feed__message-meta">
+              <strong>{{ message.author.email }}</strong>
+              <span>{{ message.createdAt | date: 'short' }}</span>
+            </div>
+
+            <p>{{ message.body }}</p>
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="workspace-room-feed__state">
+      <strong>No messages yet</strong>
+      <p class="workspace-room-feed__helper">
+        Start this room with the first message to establish context for future threads and
+        summaries.
+      </p>
+    </div>
+  }
+</div>

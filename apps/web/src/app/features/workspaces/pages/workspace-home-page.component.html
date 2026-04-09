@@ -1,0 +1,229 @@
+<div class="workspace-home-page__canvas-header">
+  <div class="workspace-home-page__canvas-copy">
+    <span class="workspace-home-page__canvas-kicker">Workspace canvas</span>
+    <h1 class="workspace-home-page__title">
+      @if (hasWorkspace()) {
+        {{ currentWorkspace()?.name }}
+      } @else {
+        Create the first workspace shell.
+      }
+    </h1>
+  </div>
+
+  <p class="workspace-home-page__description">
+    @if (hasWorkspace()) {
+      This is the control surface for workspace structure, room setup, and future catch-up flows.
+    } @else {
+      Start from a compact product shell, then expand into rooms, messages, threads, and summaries.
+    }
+  </p>
+</div>
+
+<div class="workspace-home-page__metric-strip">
+  <app-shell-stat-card
+    [description]="workspaceStateDescription()"
+    [label]="overviewCards[0].label"
+    [value]="hasWorkspace() ? 'Active' : 'Pending'"
+  />
+
+  <app-shell-stat-card
+    [description]="foundationDescription()"
+    [label]="overviewCards[1].label"
+    [value]="overviewCards[1].value"
+  />
+</div>
+
+<div class="workspace-home-page__dashboard-grid">
+  <section class="workspace-home-page__primary-column">
+    <app-card>
+      <div class="workspace-home-page__panel">
+        <app-shell-panel-header tag="Home" title="Catch up" />
+
+        <div class="workspace-home-page__activity-list">
+          @for (card of activityCards; track card.title) {
+            <div class="workspace-home-page__activity-item">
+              <strong>{{ card.title }}</strong>
+              <p>{{ card.body }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </app-card>
+
+    @if (isWorkspacePending()) {
+      <app-card>
+        <div class="workspace-home-page__panel workspace-home-page__panel--centered">
+          <span class="workspace-home-page__metric-label">Loading</span>
+          <strong class="workspace-home-page__panel-title">Restoring workspace state...</strong>
+          <p class="workspace-home-page__helper">
+            We are checking whether this account already belongs to an existing community space.
+          </p>
+        </div>
+      </app-card>
+    } @else if (hasWorkspace()) {
+      <app-card>
+        <div class="workspace-home-page__panel">
+          <app-shell-panel-header tag="Overview" title="Current workspace" />
+
+          @if (currentWorkspace()?.description) {
+            <p class="workspace-home-page__helper">{{ currentWorkspace()?.description }}</p>
+          }
+
+          <dl class="workspace-home-page__details">
+            <div class="workspace-home-page__detail">
+              <dt>Role</dt>
+              <dd>{{ currentWorkspaceRole() }}</dd>
+            </div>
+
+            <div class="workspace-home-page__detail">
+              <dt>Workspace ID</dt>
+              <dd>{{ currentWorkspace()?.id }}</dd>
+            </div>
+
+            <div class="workspace-home-page__detail">
+              <dt>Slug</dt>
+              <dd>{{ currentWorkspace()?.slug }}</dd>
+            </div>
+
+            <div class="workspace-home-page__detail">
+              <dt>Joined spaces</dt>
+              <dd>{{ workspaceCount() }}</dd>
+            </div>
+
+            <div class="workspace-home-page__detail">
+              <dt>Created</dt>
+              <dd>{{ currentWorkspace()?.createdAt | date: 'medium' }}</dd>
+            </div>
+
+            <div class="workspace-home-page__detail">
+              <dt>Updated</dt>
+              <dd>{{ currentWorkspace()?.updatedAt | date: 'medium' }}</dd>
+            </div>
+          </dl>
+        </div>
+      </app-card>
+    } @else {
+      <app-card>
+        <form class="workspace-home-page__panel" (submit)="createWorkspace($event)">
+          <app-shell-panel-header tag="Setup" title="Create workspace" />
+
+          <p class="workspace-home-page__helper">
+            This first workspace becomes the shell where rooms, threads, and summaries will land
+            next.
+          </p>
+
+          <app-text-input-field
+            autocomplete="organization"
+            [field]="workspaceForm.name"
+            hint="Choose the visible name your members will recognize."
+            inputId="workspace-name"
+            label="Workspace name"
+            placeholder="FlapTalk Founders"
+            [showErrors]="showWorkspaceFormErrors()"
+            type="text"
+          />
+
+          <app-textarea-field
+            [field]="workspaceForm.description"
+            hint="Optional for now, but useful as shared context."
+            inputId="workspace-description"
+            label="Description"
+            placeholder="Private community for structured founder conversations."
+            [rows]="4"
+            [showErrors]="showWorkspaceFormErrors()"
+          />
+
+          <app-button [disabled]="isCreateWorkspacePending()" [fluid]="true" type="submit">
+            {{ isCreateWorkspacePending() ? 'Creating workspace...' : 'Create workspace' }}
+          </app-button>
+        </form>
+      </app-card>
+    }
+  </section>
+
+  <section class="workspace-home-page__secondary-column">
+    <app-card>
+      <div class="workspace-home-page__panel">
+        <app-shell-panel-header tag="Soon" title="Active threads" />
+        <div class="workspace-home-page__stat-list">
+          @for (stat of roomsStatRows(); track stat.label) {
+            <div class="workspace-home-page__stat-row">
+              <span>{{ stat.label }}</span>
+              <strong>{{ stat.value }}</strong>
+            </div>
+          }
+        </div>
+      </div>
+    </app-card>
+
+    <app-card>
+      <div class="workspace-home-page__panel">
+        <app-shell-panel-header
+          [tag]="hasRooms() ? 'Live' : canManageRooms() ? 'Setup' : 'Pending'"
+          title="Rooms"
+        />
+
+        @if (isRoomCollectionPending()) {
+          <p class="workspace-home-page__helper">Restoring the room shell for this workspace...</p>
+        } @else if (hasRooms()) {
+          <div class="workspace-home-page__room-list">
+            @for (room of rooms(); track room.id) {
+              <a [routerLink]="getRoomLink(room.id)" class="workspace-home-page__room-link">
+                <div class="workspace-home-page__room-item">
+                  <strong>{{ room.name }}</strong>
+                  <span>
+                    {{ room.description || 'Room shell is ready for its first discussions.' }}
+                  </span>
+                </div>
+              </a>
+            }
+          </div>
+        } @else {
+          <div class="workspace-home-page__empty-state">
+            <p class="workspace-home-page__helper">
+              No rooms exist yet. The owner can shape the shell intentionally instead of inheriting
+              defaults.
+            </p>
+
+            <div class="workspace-home-page__hint-list">
+              @for (hint of roomSetupHints; track hint) {
+                <span class="workspace-home-page__hint-chip">{{ hint }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        @if (hasWorkspace() && canManageRooms()) {
+          <form class="workspace-home-page__room-form" (submit)="createRoom($event)">
+            <app-shell-panel-header tag="Owner" title="Create room" />
+
+            <app-text-input-field
+              autocomplete="off"
+              [field]="roomForm.name"
+              hint="This becomes the visible room name inside the workspace shell."
+              inputId="room-name"
+              label="Room name"
+              placeholder="General"
+              [showErrors]="showRoomFormErrors()"
+              type="text"
+            />
+
+            <app-textarea-field
+              [field]="roomForm.description"
+              hint="Optional, but useful as context for future members."
+              inputId="room-description"
+              label="Description"
+              placeholder="Core updates and member communication."
+              [rows]="3"
+              [showErrors]="showRoomFormErrors()"
+            />
+
+            <app-button [disabled]="isCreateRoomPending()" [fluid]="true" type="submit">
+              {{ isCreateRoomPending() ? 'Creating room...' : 'Create room' }}
+            </app-button>
+          </form>
+        }
+      </div>
+    </app-card>
+  </section>
+</div>

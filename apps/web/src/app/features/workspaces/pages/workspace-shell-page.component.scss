@@ -1,0 +1,141 @@
+.workspace-shell-page {
+  &__topbar-title {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+    strong {
+      overflow: hidden;
+
+      font-size: 1rem;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+  }
+
+  &__topbar-kicker {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__topbar-actions {
+    display: flex;
+    gap: 0.875rem;
+    align-items: center;
+    justify-content: flex-end;
+
+    min-block-size: 100%;
+  }
+
+  &__action-icons {
+    display: flex;
+    gap: 0.625rem;
+    align-items: center;
+  }
+
+  &__icon-button {
+    cursor: pointer;
+
+    position: relative;
+
+    display: inline-grid;
+    place-items: center;
+
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    padding: 0;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+    border-radius: 1rem;
+
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--text-secondary);
+
+    background: color-mix(in oklch, var(--surface-base) 18%, transparent);
+
+    transition:
+      border-color var(--motion-duration-fast) ease,
+      color var(--motion-duration-fast) ease,
+      background-color var(--motion-duration-fast) ease;
+
+    &:hover,
+    &:focus-visible {
+      border-color: color-mix(in oklch, var(--accent-primary) 30%, var(--outline-subtle));
+      color: var(--text-primary);
+      background: color-mix(in oklch, var(--surface-accent) 48%, transparent);
+      outline: none;
+    }
+  }
+
+  &__icon-button--notification::after {
+    content: '';
+
+    position: absolute;
+    inset-block-start: 0.55rem;
+    inset-inline-end: 0.55rem;
+
+    inline-size: 0.45rem;
+    block-size: 0.45rem;
+    border-radius: 999rem;
+
+    background: color-mix(in oklch, var(--danger) 88%, white 8%);
+    box-shadow: 0 0 0 0.125rem color-mix(in oklch, var(--surface-sidebar) 98%, transparent);
+  }
+
+  &__topbar-chip {
+    display: inline-flex;
+    align-items: center;
+
+    min-block-size: 2.625rem;
+    padding-inline: 1rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+    border-radius: var(--radius-pill);
+
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+
+    background: color-mix(in oklch, var(--surface-base) 18%, transparent);
+  }
+
+  &__avatar {
+    display: inline-grid;
+    place-items: center;
+
+    inline-size: 2.875rem;
+    block-size: 2.875rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 76%, transparent);
+    border-radius: 999rem;
+
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--surface-elevated) 96%, transparent),
+      color-mix(in oklch, var(--surface-card-muted) 96%, transparent)
+    );
+  }
+
+  @media (width < 48rem) {
+    &__topbar-actions,
+    &__topbar-title {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+}
