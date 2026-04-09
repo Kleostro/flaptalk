@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia';
 
 import { AuthModel, createSessionCookieModel } from './models/auth';
 import { ErrorModel } from './models/error';
+import { MessagesModel } from './models/messages';
 import { RoomsModel } from './models/rooms';
 import { UsersModel } from './models/users';
 import { WorkspacesModel } from './models/workspaces';
@@ -39,6 +40,17 @@ function createContractRoom() {
   };
 }
 
+function createContractMessage() {
+  return {
+    author: createContractUser(),
+    body: 'Welcome to the room. The first discussion can start here.',
+    createdAt: new Date(0).toISOString(),
+    id: 0,
+    roomId: 0,
+    updatedAt: new Date(0).toISOString(),
+  };
+}
+
 const sessionCookieModel = createSessionCookieModel();
 
 const HealthResponseModel = t.Object({
@@ -70,6 +82,7 @@ export const appContract = new Elysia({
 })
   .model(ErrorModel)
   .model(AuthModel)
+  .model(MessagesModel)
   .model(UsersModel)
   .model(WorkspacesModel)
   .model(RoomsModel)
@@ -212,6 +225,38 @@ export const appContract = new Elysia({
           }),
           response: {
             200: 'rooms.list.response',
+            401: 'error.response',
+            404: 'error.response',
+          },
+        },
+      ),
+  )
+  .group('/rooms', (app) =>
+    app
+      .post('/:roomId/messages', () => createContractMessage(), {
+        body: 'messages.create.body',
+        cookie: sessionCookieModel,
+        params: t.Object({
+          roomId: t.Numeric(),
+        }),
+        response: {
+          200: 'messages.create.response',
+          401: 'error.response',
+          404: 'error.response',
+        },
+      })
+      .get(
+        '/:roomId/messages',
+        () => ({
+          messages: [createContractMessage()],
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            roomId: t.Numeric(),
+          }),
+          response: {
+            200: 'messages.list.response',
             401: 'error.response',
             404: 'error.response',
           },
