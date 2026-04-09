@@ -46,4 +46,26 @@
       color: var(--text-secondary);
     }
   }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-inline-size: 1.5rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+
+    background: color-mix(in oklch, var(--surface-accent) 65%, transparent);
+  }
+
+  &__heading {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
 }

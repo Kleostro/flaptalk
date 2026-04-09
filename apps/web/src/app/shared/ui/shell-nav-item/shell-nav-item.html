@@ -1,7 +1,14 @@
 <div class="shell-nav-item" [class.shell-nav-item--active]="active()">
   <span class="shell-nav-item__icon">{{ indexLabel() }}</span>
   <div class="shell-nav-item__copy">
-    <strong>{{ title() }}</strong>
+    <div class="shell-nav-item__heading">
+      <strong>{{ title() }}</strong>
+
+      @if (badge()) {
+        <span class="shell-nav-item__badge">{{ badge() }}</span>
+      }
+    </div>
+
     <span>{{ description() }}</span>
   </div>
 </div>

@@ -57,6 +57,9 @@ export class WorkspaceRoomPageComponent {
   public readonly isMessageFormSubmitted = signal(false);
   public readonly isReplyFormSubmitted = signal(false);
   public readonly isThreadPending = computed(() => this.workspaceFacadeService.isThreadPending());
+  public readonly lastReadMessageId = computed(
+    () => this.workspaceFacadeService.getSelectedRoomReadState()?.lastReadMessageId ?? null,
+  );
   public readonly messageCount = computed(() => this.workspaceFacadeService.messageCount());
   public readonly messageModel = this.workspaceFormFactoryService.createMessageModel();
   public readonly messageForm = this.workspaceFormFactoryService.createMessageForm(
@@ -69,6 +72,10 @@ export class WorkspaceRoomPageComponent {
     {
       label: 'Messages',
       value: String(this.messageCount()).padStart(2, '0'),
+    },
+    {
+      label: 'Unread',
+      value: String(this.workspaceFacadeService.getSelectedRoomUnreadCount()).padStart(2, '0'),
     },
     {
       label: 'Owner access',
@@ -208,6 +215,21 @@ export class WorkspaceRoomPageComponent {
       });
   }
 
+  private updateVisibleReadProgress(messageId: number): void {
+    const roomId = this.getCurrentRoomId();
+
+    if (!roomId) {
+      return;
+    }
+
+    this.workspaceFacadeService
+      .markRoomRead(roomId, messageId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: () => undefined,
+      });
+  }
+
   public createMessage(event: Event): void {
     event.preventDefault();
     this.isMessageFormSubmitted.set(true);
@@ -242,6 +264,10 @@ export class WorkspaceRoomPageComponent {
     }
 
     this.sendReply(replyContext.roomId, replyContext.rootMessageId);
+  }
+
+  public handleVisibleMessageChange(messageId: number): void {
+    this.updateVisibleReadProgress(messageId);
   }
 
   public openThread(messageId: number): void {

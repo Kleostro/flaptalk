@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { type Message, type Room, type WorkspaceAccess } from '@flaptalk/api-contract';
+import {
+  type Message,
+  type Room,
+  type RoomReadState,
+  type WorkspaceAccess,
+  type WorkspaceRoomActivity,
+} from '@flaptalk/api-contract';
 import { defer, from, map, Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -164,6 +170,24 @@ export class WorkspaceApiService {
     );
   }
 
+  public getWorkspaceActivity(workspaceId: number): Observable<{
+    readonly rooms: WorkspaceRoomActivity[];
+    readonly unreadMessageCount: number;
+    readonly unreadRoomCount: number;
+  }> {
+    return this.createRequest$(
+      () => api.workspaces({ workspaceId }).activity.get(),
+      (response) => {
+        if (response.data?.rooms) {
+          return response.data;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to load workspace activity.'));
+      },
+      'Unable to load workspace activity.',
+    );
+  }
+
   public getWorkspaceRooms(workspaceId: number): Observable<Room[]> {
     return this.createRequest$(
       () => api.workspaces({ workspaceId }).rooms.get(),
@@ -175,6 +199,23 @@ export class WorkspaceApiService {
         throw new Error(this.getErrorMessage(response, 'Unable to load workspace rooms.'));
       },
       'Unable to load workspace rooms.',
+    );
+  }
+
+  public updateRoomReadState(roomId: number, lastReadMessageId: number): Observable<RoomReadState> {
+    return this.createRequest$(
+      () =>
+        api.rooms({ roomId }).read.post({
+          lastReadMessageId,
+        }),
+      (response) => {
+        if (response.data?.roomId) {
+          return response.data;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to update room read progress.'));
+      },
+      'Unable to update room read progress.',
     );
   }
 }

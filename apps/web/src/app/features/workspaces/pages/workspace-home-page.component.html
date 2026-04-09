@@ -39,14 +39,43 @@
       <div class="workspace-home-page__panel">
         <app-shell-panel-header tag="Home" title="Catch up" />
 
-        <div class="workspace-home-page__activity-list">
-          @for (card of activityCards; track card.title) {
-            <div class="workspace-home-page__activity-item">
-              <strong>{{ card.title }}</strong>
-              <p>{{ card.body }}</p>
-            </div>
-          }
-        </div>
+        @if (isWorkspaceActivityPending()) {
+          <p class="workspace-home-page__helper">
+            Restoring unread counts and recent room activity...
+          </p>
+        } @else if (recentRoomActivity().length > 0) {
+          <div class="workspace-home-page__activity-list">
+            @for (roomActivity of recentRoomActivity(); track roomActivity.room.id) {
+              <div class="workspace-home-page__activity-item">
+                <div class="workspace-home-page__activity-heading">
+                  <strong>{{ roomActivity.room.name }}</strong>
+
+                  @if (roomActivity.unreadMessageCount > 0) {
+                    <span class="workspace-home-page__activity-badge">
+                      {{ roomActivity.unreadMessageCount }}
+                    </span>
+                  }
+                </div>
+
+                <p>
+                  {{
+                    roomActivity.lastMessage?.body ||
+                      'This room is configured and ready for its first unread activity.'
+                  }}
+                </p>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="workspace-home-page__activity-list">
+            @for (card of activityCards; track card.title) {
+              <div class="workspace-home-page__activity-item">
+                <strong>{{ card.title }}</strong>
+                <p>{{ card.body }}</p>
+              </div>
+            }
+          </div>
+        }
       </div>
     </app-card>
 

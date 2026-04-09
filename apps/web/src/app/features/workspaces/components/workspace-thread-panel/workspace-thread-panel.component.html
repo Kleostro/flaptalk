@@ -12,7 +12,11 @@
       <p>We are loading the root message and its replies.</p>
     </div>
   } @else {
-    <article class="workspace-thread-panel__message workspace-thread-panel__message--root">
+    <article
+      #threadMessageItem
+      class="workspace-thread-panel__message workspace-thread-panel__message--root"
+      [attr.data-message-id]="rootMessage()!.id"
+    >
       <div class="workspace-thread-panel__avatar" aria-hidden="true">
         {{ getMessageAuthorInitials(rootMessage()!.author.email) }}
       </div>
@@ -30,7 +34,11 @@
     @if (replies().length > 0) {
       <div class="workspace-thread-panel__reply-list">
         @for (reply of replies(); track reply.id) {
-          <article class="workspace-thread-panel__message">
+          <article
+            #threadMessageItem
+            class="workspace-thread-panel__message"
+            [attr.data-message-id]="reply.id"
+          >
             <div class="workspace-thread-panel__avatar" aria-hidden="true">
               {{ getMessageAuthorInitials(reply.author.email) }}
             </div>

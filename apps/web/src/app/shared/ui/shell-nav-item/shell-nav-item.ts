@@ -8,6 +8,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class ShellNavItemComponent {
   public readonly active = input(false);
+  public readonly badge = input<null | string>(null);
   public readonly description = input.required<string>();
   public readonly indexLabel = input.required<string>();
   public readonly title = input.required<string>();

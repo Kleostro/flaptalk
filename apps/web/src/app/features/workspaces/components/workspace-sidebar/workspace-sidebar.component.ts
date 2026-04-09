@@ -19,7 +19,8 @@ export class WorkspaceSidebarComponent {
   public readonly homeActive = input.required<boolean>();
   public readonly roomCount = input.required<number>();
   public readonly rooms = input.required<readonly Room[]>();
-
+  public readonly totalUnreadCount = input(0);
+  public readonly unreadMessageCountByRoomId = input<ReadonlyMap<number, number>>(new Map());
   public readonly userEmail = input<string | undefined>();
 
   public getNavIndexLabel(index: number): string {
@@ -28,5 +29,11 @@ export class WorkspaceSidebarComponent {
 
   public getRoomLink(roomId: number): string[] {
     return ['/', APP_ROUTE_PATHS.workspace, 'rooms', String(roomId)];
+  }
+
+  public getRoomUnreadBadge(roomId: number): null | string {
+    const unreadCount = this.unreadMessageCountByRoomId().get(roomId) ?? 0;
+
+    return unreadCount > 0 ? this.getNavIndexLabel(unreadCount) : null;
   }
 }

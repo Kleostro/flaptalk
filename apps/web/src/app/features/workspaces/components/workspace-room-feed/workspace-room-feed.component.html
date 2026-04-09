@@ -14,8 +14,10 @@
     <div class="workspace-room-feed__message-list">
       @for (message of messages(); track message.id) {
         <article
+          #messageItem
           class="workspace-room-feed__message-item"
           [class.workspace-room-feed__message-item--active]="activeThreadMessageId() === message.id"
+          [attr.data-message-id]="message.id"
         >
           <div class="workspace-room-feed__message-avatar" aria-hidden="true">
             {{ getMessageAuthorInitials(message.author.email) }}

@@ -26,6 +26,8 @@ import { ShellStatCardComponent } from '@web/app/shared/ui/shell-stat-card/shell
 import { TextInputFieldComponent } from '@web/app/shared/form/components/text-input-field/text-input-field.component';
 import { TextareaFieldComponent } from '@web/app/shared/form/components/textarea-field/textarea-field.component';
 
+const RECENT_ROOM_ACTIVITY_LIMIT = 3;
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -81,11 +83,24 @@ export class WorkspaceHomePageComponent {
     this.workspaceFacadeService.isRoomCollectionPending(),
   );
   public readonly isRoomFormSubmitted = signal(false);
+  public readonly isWorkspaceActivityPending = computed(() =>
+    this.workspaceFacadeService.isWorkspaceActivityPending(),
+  );
   public readonly isWorkspaceFormSubmitted = signal(false);
   public readonly isWorkspacePending = computed(() =>
     this.workspaceFacadeService.isWorkspaceCollectionPending(),
   );
   public readonly messageCount = computed(() => this.workspaceFacadeService.messageCount());
+  public readonly recentRoomActivity = computed(() =>
+    [...this.workspaceFacadeService.workspaceActivity().rooms]
+      .sort((leftRoomActivity, rightRoomActivity) => {
+        const rightTimestamp = rightRoomActivity.lastMessage?.createdAt ?? '';
+        const leftTimestamp = leftRoomActivity.lastMessage?.createdAt ?? '';
+
+        return rightTimestamp.localeCompare(leftTimestamp);
+      })
+      .slice(0, RECENT_ROOM_ACTIVITY_LIMIT),
+  );
   public readonly roomCount = computed(() => this.workspaceFacadeService.roomCount());
   public readonly rooms = computed(() => this.workspaceFacadeService.rooms());
   public readonly roomSetupHints = WORKSPACE_PAGE_ROOM_SETUP_HINTS;
@@ -95,12 +110,12 @@ export class WorkspaceHomePageComponent {
       value: String(this.roomCount()).padStart(2, '0'),
     },
     {
-      label: 'Unread thread summaries',
-      value: this.hasRooms() ? String(this.messageCount()).padStart(2, '0') : '00',
+      label: 'Unread rooms',
+      value: String(this.workspaceFacadeService.unreadRoomCount()).padStart(2, '0'),
     },
     {
-      label: 'Pending catch-up views',
-      value: this.hasRooms() ? '01' : '00',
+      label: 'Unread messages',
+      value: String(this.workspaceFacadeService.unreadMessageCount()).padStart(2, '0'),
     },
   ]);
   public readonly showRoomFormErrors = computed(
