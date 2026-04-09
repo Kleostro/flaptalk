@@ -61,3 +61,8 @@ export type WorkspaceMember = Prisma.WorkspaceMemberModel
  * 
  */
 export type Room = Prisma.RoomModel
+/**
+ * Model Message
+ * 
+ */
+export type Message = Prisma.MessageModel

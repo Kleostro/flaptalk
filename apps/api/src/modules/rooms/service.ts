@@ -25,19 +25,6 @@ function createRoomSlugBase(name: string): string {
   return slugBase || 'room';
 }
 
-type RoomPersistenceRecord = Parameters<typeof serializeRoom>[0];
-type RoomSlugRecord = {
-  readonly slug: string;
-};
-type PrismaRoomDelegate = {
-  create(args: unknown): Promise<unknown>;
-  findMany(args: unknown): Promise<unknown>;
-};
-
-function getPrismaRoomDelegate(): PrismaRoomDelegate {
-  return (prisma as typeof prisma & { room: PrismaRoomDelegate }).room;
-}
-
 export class RoomsService {
   private async getWorkspaceMembership(params: {
     readonly userId: number;
@@ -61,7 +48,7 @@ export class RoomsService {
     readonly workspaceId: number;
   }): Promise<string> {
     const slugBase = createRoomSlugBase(params.name);
-    const existingRooms = (await getPrismaRoomDelegate().findMany({
+    const existingRooms = await prisma.room.findMany({
       select: {
         slug: true,
       },
@@ -71,7 +58,7 @@ export class RoomsService {
         },
         workspaceId: params.workspaceId,
       },
-    })) as RoomSlugRecord[];
+    });
 
     const takenSlugs = new Set(existingRooms.map(({ slug }) => slug));
 
@@ -112,7 +99,7 @@ export class RoomsService {
       workspaceId: params.workspaceId,
     });
 
-    const createdRoom = (await getPrismaRoomDelegate().create({
+    const createdRoom = await prisma.room.create({
       data: {
         description: normalizeRoomDescription(params.room.description),
         name: normalizedName,
@@ -120,7 +107,7 @@ export class RoomsService {
         workspaceId: params.workspaceId,
       },
       select: roomSelect,
-    })) as RoomPersistenceRecord;
+    });
 
     return serializeRoom(createdRoom);
   }
@@ -135,7 +122,7 @@ export class RoomsService {
       throw new DomainError(404, 'workspace_not_found', 'Workspace not found.');
     }
 
-    const rooms = (await getPrismaRoomDelegate().findMany({
+    const rooms = await prisma.room.findMany({
       orderBy: [
         {
           createdAt: 'asc',
@@ -148,7 +135,7 @@ export class RoomsService {
       where: {
         workspaceId: params.workspaceId,
       },
-    })) as RoomPersistenceRecord[];
+    });
 
     return {
       rooms: rooms.map((room) => serializeRoom(room)),
