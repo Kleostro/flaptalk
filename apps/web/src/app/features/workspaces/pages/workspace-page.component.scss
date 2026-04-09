@@ -253,6 +253,33 @@
     gap: 0.9rem;
   }
 
+  &__empty-state {
+    display: grid;
+    gap: 1rem;
+  }
+
+  &__hint-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  &__hint-chip {
+    display: inline-flex;
+    align-items: center;
+
+    min-block-size: 2.4rem;
+    padding-inline: 0.95rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 76%, transparent);
+    border-radius: var(--radius-pill);
+
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+
+    background: color-mix(in oklch, var(--surface-base) 12%, transparent);
+  }
+
   &__activity-item,
   &__room-item {
     display: grid;
@@ -314,6 +341,14 @@
 
   form.workspace-page__panel {
     gap: 1rem;
+  }
+
+  &__room-form {
+    display: grid;
+    gap: 1rem;
+    padding-block-start: 0.25rem;
+    border-block-start: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 74%, transparent);
   }
 
   @media (width < 84rem) {
