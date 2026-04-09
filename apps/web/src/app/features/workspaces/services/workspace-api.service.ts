@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { type WorkspaceAccess } from '@flaptalk/api-contract';
+import { type Room, type WorkspaceAccess } from '@flaptalk/api-contract';
 import { defer, from, map, Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { api } from '@web/app/api.config';
+import { type CreateRoom } from '@web/app/features/workspaces/types/create-room.model';
 import { type CreateWorkspace } from '@web/app/features/workspaces/types/create-workspace.model';
 
 const UNAUTHORIZED_STATUS = 401;
@@ -57,6 +58,27 @@ export class WorkspaceApiService {
     return fallbackMessage;
   }
 
+  public createRoom(workspaceId: number, room: CreateRoom): Observable<Room> {
+    return this.createRequest$(
+      () => {
+        const normalizedDescription = room.description.trim();
+
+        return api.workspaces({ workspaceId }).rooms.post({
+          ...(normalizedDescription ? { description: normalizedDescription } : {}),
+          name: room.name.trim(),
+        });
+      },
+      (response) => {
+        if (response.data?.id) {
+          return response.data;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to create the room.'));
+      },
+      'Unable to create the room.',
+    );
+  }
+
   public createWorkspace(workspace: CreateWorkspace): Observable<WorkspaceAccess> {
     return this.createRequest$(
       () => {
@@ -89,6 +111,20 @@ export class WorkspaceApiService {
         throw new Error(this.getErrorMessage(response, 'Unable to load your workspaces.'));
       },
       'Unable to load your workspaces.',
+    );
+  }
+
+  public getWorkspaceRooms(workspaceId: number): Observable<Room[]> {
+    return this.createRequest$(
+      () => api.workspaces({ workspaceId }).rooms.get(),
+      (response) => {
+        if (response.data?.rooms) {
+          return response.data.rooms;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to load workspace rooms.'));
+      },
+      'Unable to load workspace rooms.',
     );
   }
 }

@@ -13,6 +13,11 @@ import { Router } from '@angular/router';
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { ToastService } from '@web/app/core/services/toast.service';
 import { AuthFacadeService } from '@web/app/features/auth/services/auth-facade.service';
+import {
+  WORKSPACE_PAGE_ACTIVITY_CARDS,
+  WORKSPACE_PAGE_OVERVIEW_CARDS,
+  WORKSPACE_PAGE_ROOM_SETUP_HINTS,
+} from '@web/app/features/workspaces/pages/workspace-page.constants';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
 import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/services/workspace-form.factory.service';
 import { AppShellComponent } from '@web/app/shared/ui/app-shell/app-shell';
@@ -49,48 +54,26 @@ export class WorkspacePageComponent {
   private readonly workspaceFacadeService = inject(WorkspaceFacadeService);
   private readonly workspaceFormFactoryService = inject(WorkspaceFormFactoryService);
 
-  public readonly activityCards = [
-    {
-      body: 'Unread activity, important summaries, and thread context will appear here as a calm catch-up surface.',
-      title: 'Catch up',
-    },
-    {
-      body: 'The next iteration will surface active discussions instead of forcing members into a raw room list.',
-      title: 'Active threads',
-    },
-    {
-      body: 'Rooms will appear as structured navigation blocks once the entity and shell wiring are ready.',
-      title: 'Rooms',
-    },
-  ] as const;
-  public readonly currentWorkspace = computed(() => this.workspaceFacadeService.currentWorkspace());
+  public readonly activityCards = WORKSPACE_PAGE_ACTIVITY_CARDS;
+  public readonly canManageRooms = computed(() => this.workspaceFacadeService.canManageRooms());
 
+  public readonly currentWorkspace = computed(() => this.workspaceFacadeService.currentWorkspace());
   public readonly currentWorkspaceRole = computed(() =>
     this.workspaceFacadeService.currentWorkspaceRole(),
   );
   public readonly hasWorkspace = computed(() => this.workspaceFacadeService.hasWorkspace());
-  public readonly overviewCards = [
-    {
-      description:
-        'The shell is connected to live workspace persistence and membership-aware access.',
-      label: 'Workspace state',
-      pendingDescription:
-        'Create the first workspace to unlock rooms, member access, and future thread flow.',
-      value: 'Active',
-    },
-    {
-      description:
-        'The UI is now moving toward a shell-first product layout instead of a cinematic entry page.',
-      label: 'Current phase',
-      pendingDescription:
-        'This surface will turn into the operator home for rooms, summaries, and community context.',
-      value: 'Foundation',
-    },
-  ] as const;
+  public readonly overviewCards = WORKSPACE_PAGE_OVERVIEW_CARDS;
   public readonly foundationDescription = computed(() =>
     this.hasWorkspace()
       ? this.overviewCards[1].description
       : this.overviewCards[1].pendingDescription,
+  );
+  public readonly hasRooms = computed(() => this.workspaceFacadeService.hasRooms());
+  public readonly roomModel = this.workspaceFormFactoryService.createRoomModel();
+  public readonly roomForm = this.workspaceFormFactoryService.createRoomForm(this.roomModel);
+  public readonly isCreateRoomInvalid = computed(() => this.roomForm().invalid());
+  public readonly isCreateRoomPending = computed(() =>
+    this.workspaceFacadeService.isCreateRoomPending(),
   );
   public readonly workspaceModel = this.workspaceFormFactoryService.createWorkspaceModel();
   public readonly workspaceForm = this.workspaceFormFactoryService.createWorkspaceForm(
@@ -101,9 +84,33 @@ export class WorkspacePageComponent {
     this.workspaceFacadeService.isCreateWorkspacePending(),
   );
   public readonly isLogoutPending = computed(() => this.authFacadeService.isLogoutPending());
+  public readonly isRoomCollectionPending = computed(() =>
+    this.workspaceFacadeService.isRoomCollectionPending(),
+  );
+  public readonly isRoomFormSubmitted = signal(false);
   public readonly isWorkspaceFormSubmitted = signal(false);
   public readonly isWorkspacePending = computed(() =>
     this.workspaceFacadeService.isWorkspaceCollectionPending(),
+  );
+  public readonly roomCount = computed(() => this.workspaceFacadeService.roomCount());
+  public readonly rooms = computed(() => this.workspaceFacadeService.rooms());
+  public readonly roomSetupHints = WORKSPACE_PAGE_ROOM_SETUP_HINTS;
+  public readonly roomsStatRows = computed(() => [
+    {
+      label: 'Configured rooms',
+      value: String(this.roomCount()).padStart(2, '0'),
+    },
+    {
+      label: 'Unread thread summaries',
+      value: this.hasRooms() ? String(this.roomCount()).padStart(2, '0') : '00',
+    },
+    {
+      label: 'Pending catch-up views',
+      value: this.hasRooms() ? '01' : '00',
+    },
+  ]);
+  public readonly showRoomFormErrors = computed(
+    () => this.isRoomFormSubmitted() || this.roomForm().touched(),
   );
   public readonly showWorkspaceFormErrors = computed(
     () => this.isWorkspaceFormSubmitted() || this.workspaceForm().touched(),
@@ -131,6 +138,56 @@ export class WorkspacePageComponent {
       : this.overviewCards[0].pendingDescription,
   );
 
+  private resetRoomDraft(): void {
+    this.roomModel.set({
+      description: '',
+      name: '',
+    });
+    this.isRoomFormSubmitted.set(false);
+  }
+
+  public createRoom(event: Event): void {
+    event.preventDefault();
+    this.isRoomFormSubmitted.set(true);
+
+    if (this.isCreateRoomInvalid()) {
+      this.toastService.error({
+        message: 'Review the room details before continuing.',
+        title: 'Room details are incomplete',
+      });
+      return;
+    }
+
+    const workspaceId = this.currentWorkspace()?.id;
+
+    if (!workspaceId) {
+      this.toastService.error({
+        message: 'Create a workspace first before adding rooms.',
+        title: 'Workspace required',
+      });
+      return;
+    }
+
+    this.workspaceFacadeService
+      .createRoom(workspaceId, this.roomModel())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: (error: unknown) => {
+          this.toastService.error({
+            message:
+              error instanceof Error
+                ? error.message
+                : 'We could not create the room. Please try again.',
+            title: 'Room creation failed',
+          });
+        },
+        next: (result) => {
+          this.resetRoomDraft();
+          this.toastService.success(result);
+        },
+      });
+  }
+
   public createWorkspace(event: Event): void {
     event.preventDefault();
     this.isWorkspaceFormSubmitted.set(true);
@@ -157,9 +214,18 @@ export class WorkspacePageComponent {
           });
         },
         next: (result) => {
+          this.workspaceModel.set({
+            description: '',
+            name: '',
+          });
+          this.isWorkspaceFormSubmitted.set(false);
           this.toastService.success(result);
         },
       });
+  }
+
+  public getNavIndexLabel(index: number): string {
+    return String(index).padStart(2, '0');
   }
 
   public logout(): void {

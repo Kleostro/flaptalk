@@ -42,15 +42,29 @@
         title="Overview"
       />
 
-      <app-shell-nav-item
-        description="General, questions, and resources will appear in the left rail next."
-        indexLabel="02"
-        title="Rooms"
-      />
+      @if (hasWorkspace() && hasRooms()) {
+        @for (room of rooms(); track room.id; let roomIndex = $index) {
+          <app-shell-nav-item
+            [description]="room.description || 'Room shell is ready for its first discussions.'"
+            [indexLabel]="getNavIndexLabel(roomIndex + 2)"
+            [title]="room.name"
+          />
+        }
+      } @else {
+        <app-shell-nav-item
+          [description]="
+            hasWorkspace()
+              ? 'Create the first room to start shaping the left rail.'
+              : 'Create a workspace first, then rooms will appear here.'
+          "
+          indexLabel="02"
+          title="Rooms"
+        />
+      }
 
       <app-shell-nav-item
         description="Catch-up cards and context surfaces will sit inside this home canvas."
-        indexLabel="03"
+        [indexLabel]="hasRooms() ? getNavIndexLabel(roomCount() + 2) : '03'"
         title="Summaries"
       />
     </div>
@@ -211,39 +225,81 @@
           <div class="workspace-page__panel">
             <app-shell-panel-header tag="Soon" title="Active threads" />
             <div class="workspace-page__stat-list">
-              <div class="workspace-page__stat-row">
-                <span>Unread thread summaries</span>
-                <strong>03</strong>
-              </div>
-              <div class="workspace-page__stat-row">
-                <span>Active room surfaces</span>
-                <strong>03</strong>
-              </div>
-              <div class="workspace-page__stat-row">
-                <span>Pending catch-up views</span>
-                <strong>02</strong>
-              </div>
+              @for (stat of roomsStatRows(); track stat.label) {
+                <div class="workspace-page__stat-row">
+                  <span>{{ stat.label }}</span>
+                  <strong>{{ stat.value }}</strong>
+                </div>
+              }
             </div>
           </div>
         </app-card>
 
         <app-card>
           <div class="workspace-page__panel">
-            <app-shell-panel-header tag="Preview" title="Rooms" />
-            <div class="workspace-page__room-list">
-              <div class="workspace-page__room-item">
-                <strong>General</strong>
-                <span>Core updates and member communication.</span>
+            <app-shell-panel-header
+              [tag]="hasRooms() ? 'Live' : canManageRooms() ? 'Setup' : 'Pending'"
+              title="Rooms"
+            />
+
+            @if (isRoomCollectionPending()) {
+              <p class="workspace-page__helper">Restoring the room shell for this workspace...</p>
+            } @else if (hasRooms()) {
+              <div class="workspace-page__room-list">
+                @for (room of rooms(); track room.id) {
+                  <div class="workspace-page__room-item">
+                    <strong>{{ room.name }}</strong>
+                    <span>
+                      {{ room.description || 'Room shell is ready for its first discussions.' }}
+                    </span>
+                  </div>
+                }
               </div>
-              <div class="workspace-page__room-item">
-                <strong>Questions</strong>
-                <span>Structured discussions and ask flows.</span>
+            } @else {
+              <div class="workspace-page__empty-state">
+                <p class="workspace-page__helper">
+                  No rooms exist yet. The owner can shape the shell intentionally instead of
+                  inheriting defaults.
+                </p>
+
+                <div class="workspace-page__hint-list">
+                  @for (hint of roomSetupHints; track hint) {
+                    <span class="workspace-page__hint-chip">{{ hint }}</span>
+                  }
+                </div>
               </div>
-              <div class="workspace-page__room-item">
-                <strong>Resources</strong>
-                <span>Saved references, notes, and future summaries.</span>
-              </div>
-            </div>
+            }
+
+            @if (hasWorkspace() && canManageRooms()) {
+              <form class="workspace-page__room-form" (submit)="createRoom($event)">
+                <app-shell-panel-header tag="Owner" title="Create room" />
+
+                <app-text-input-field
+                  autocomplete="off"
+                  [field]="roomForm.name"
+                  hint="This becomes the visible room name inside the workspace shell."
+                  inputId="room-name"
+                  label="Room name"
+                  placeholder="General"
+                  [showErrors]="showRoomFormErrors()"
+                  type="text"
+                />
+
+                <app-textarea-field
+                  [field]="roomForm.description"
+                  hint="Optional, but useful as context for future members."
+                  inputId="room-description"
+                  label="Description"
+                  placeholder="Core updates and member communication."
+                  [rows]="3"
+                  [showErrors]="showRoomFormErrors()"
+                />
+
+                <app-button [disabled]="isCreateRoomPending()" [fluid]="true" type="submit">
+                  {{ isCreateRoomPending() ? 'Creating room...' : 'Create room' }}
+                </app-button>
+              </form>
+            }
           </div>
         </app-card>
       </section>
