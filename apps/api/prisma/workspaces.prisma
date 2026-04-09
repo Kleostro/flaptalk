@@ -4,14 +4,14 @@ enum WorkspaceMemberRole {
 }
 
 model Workspace {
-  id          Int      @id @default(autoincrement())
+  id          Int               @id @default(autoincrement())
   name        String
-  slug        String   @unique
+  slug        String            @unique
   description String?
-  ownerId     Int      @map("owner_id")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     Int               @map("owner_id")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+  owner       User              @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members     WorkspaceMember[]
   rooms       Room[]
 
@@ -33,15 +33,16 @@ model WorkspaceMember {
 }
 
 model Room {
-  id          Int       @id @default(autoincrement())
-  workspaceId Int       @map("workspace_id")
+  id          Int             @id @default(autoincrement())
+  workspaceId Int             @map("workspace_id")
   name        String
   slug        String
   description String?
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
   messages    Message[]
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  readStates  RoomReadState[]
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, slug])
   @@index([workspaceId])
@@ -49,21 +50,38 @@ model Room {
 }
 
 model Message {
-  id              Int       @id @default(autoincrement())
-  roomId          Int       @map("room_id")
-  authorId        Int       @map("author_id")
-  parentMessageId Int?      @map("parent_message_id")
+  id              Int             @id @default(autoincrement())
+  roomId          Int             @map("room_id")
+  authorId        Int             @map("author_id")
+  parentMessageId Int?            @map("parent_message_id")
   body            String
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  author          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  parentMessage   Message?  @relation("MessageThread", fields: [parentMessageId], references: [id], onDelete: Cascade)
-  replies         Message[] @relation("MessageThread")
-  room            Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  author          User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  lastReadStates  RoomReadState[] @relation("RoomReadMessage")
+  parentMessage   Message?        @relation("MessageThread", fields: [parentMessageId], references: [id], onDelete: Cascade)
+  replies         Message[]       @relation("MessageThread")
+  room            Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([authorId])
   @@index([parentMessageId])
   @@index([roomId, createdAt])
   @@index([roomId, parentMessageId, createdAt])
   @@map("messages")
+}
+
+model RoomReadState {
+  id                Int      @id @default(autoincrement())
+  roomId            Int      @map("room_id")
+  userId            Int      @map("user_id")
+  lastReadMessageId Int?     @map("last_read_message_id")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  lastReadMessage   Message? @relation("RoomReadMessage", fields: [lastReadMessageId], references: [id], onDelete: SetNull)
+  room              Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@index([lastReadMessageId])
+  @@map("room_read_states")
 }

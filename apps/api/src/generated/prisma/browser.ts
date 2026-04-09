@@ -42,3 +42,8 @@ export type Room = Prisma.RoomModel
  * 
  */
 export type Message = Prisma.MessageModel
+/**
+ * Model RoomReadState
+ * 
+ */
+export type RoomReadState = Prisma.RoomReadStateModel

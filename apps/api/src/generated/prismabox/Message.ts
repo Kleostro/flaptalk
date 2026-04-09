@@ -29,6 +29,19 @@ export const MessageRelations = t.Object(
       },
       { additionalProperties: false },
     ),
+    lastReadStates: t.Array(
+      t.Object(
+        {
+          id: t.Integer(),
+          roomId: t.Integer(),
+          userId: t.Integer(),
+          lastReadMessageId: __nullable__(t.Integer()),
+          updatedAt: t.Date(),
+        },
+        { additionalProperties: false },
+      ),
+      { additionalProperties: false },
+    ),
     parentMessage: __nullable__(
       t.Object(
         {
@@ -97,6 +110,22 @@ export const MessageRelationsInputCreate = t.Object(
       },
       { additionalProperties: false },
     ),
+    lastReadStates: t.Optional(
+      t.Object(
+        {
+          connect: t.Array(
+            t.Object(
+              {
+                id: t.Integer({ additionalProperties: false }),
+              },
+              { additionalProperties: false },
+            ),
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
     parentMessage: t.Optional(
       t.Object(
         {
@@ -154,6 +183,31 @@ export const MessageRelationsInputUpdate = t.Partial(
           ),
         },
         { additionalProperties: false },
+      ),
+      lastReadStates: t.Partial(
+        t.Object(
+          {
+            connect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+            disconnect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+          },
+          { additionalProperties: false },
+        ),
       ),
       parentMessage: t.Partial(
         t.Object(
@@ -288,6 +342,7 @@ export const MessageSelect = t.Partial(
       createdAt: t.Boolean(),
       updatedAt: t.Boolean(),
       author: t.Boolean(),
+      lastReadStates: t.Boolean(),
       parentMessage: t.Boolean(),
       replies: t.Boolean(),
       room: t.Boolean(),
@@ -301,6 +356,7 @@ export const MessageInclude = t.Partial(
   t.Object(
     {
       author: t.Boolean(),
+      lastReadStates: t.Boolean(),
       parentMessage: t.Boolean(),
       replies: t.Boolean(),
       room: t.Boolean(),
