@@ -1,34 +1,18 @@
-import { Elysia, t } from 'elysia';
+import { Elysia } from 'elysia';
 
-import { authConfig } from '@api/config/auth';
-import { DomainError } from '@api/errors/domain-error';
-import { authPlugin, type AuthJwtVerifier, resolveAuthSession } from '@api/modules/auth/plugin';
+import { authPlugin, type AuthJwtVerifier } from '@api/modules/auth/plugin';
+import {
+  requireAuthenticatedUserId,
+  workspaceSessionCookieModel,
+  WorkspaceParamsModel,
+} from '@api/modules/workspaces/route-helpers';
 import { workspacesService, type WorkspacesServiceType } from '@api/modules/workspaces/service';
 import {
   type CreateWorkspaceRequestBody,
   CreateWorkspaceRequestBodyModel,
   ErrorModel,
   WorkspacesModel,
-  createSessionCookieModel,
 } from '@flaptalk/api-contract';
-
-const sessionCookieModel = createSessionCookieModel(authConfig.cookieName);
-const WorkspaceParamsModel = t.Object({
-  workspaceId: t.Numeric(),
-});
-
-async function requireAuthenticatedUserId(context: {
-  readonly authJwt: AuthJwtVerifier;
-  readonly cookie: Record<string, { value?: string | undefined }>;
-}): Promise<number> {
-  const authSession = await resolveAuthSession(context);
-
-  if (!authSession) {
-    throw new DomainError(401, 'auth_unauthorized', 'Authentication is required.');
-  }
-
-  return authSession.user.id;
-}
 
 export const workspacesModule = new Elysia({
   name: 'flaptalk.workspaces.routes',
@@ -60,7 +44,7 @@ export const workspacesModule = new Elysia({
     },
     {
       body: CreateWorkspaceRequestBodyModel,
-      cookie: sessionCookieModel,
+      cookie: workspaceSessionCookieModel,
       response: {
         200: 'workspaces.create.response',
         401: 'error.response',
@@ -83,7 +67,7 @@ export const workspacesModule = new Elysia({
       return workspacesService.listWorkspacesForMember(userId);
     },
     {
-      cookie: sessionCookieModel,
+      cookie: workspaceSessionCookieModel,
       response: {
         200: 'workspaces.list.response',
         401: 'error.response',
@@ -113,7 +97,7 @@ export const workspacesModule = new Elysia({
       });
     },
     {
-      cookie: sessionCookieModel,
+      cookie: workspaceSessionCookieModel,
       params: WorkspaceParamsModel,
       response: {
         200: 'workspaces.single.response',
