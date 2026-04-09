@@ -6,6 +6,7 @@ import { ErrorModel } from '@flaptalk/api-contract';
 import { DomainError } from './errors/domain-error';
 import { authModule } from './modules/auth';
 import { messagesModule } from './modules/messages';
+import { readStatesModule } from './modules/read-states';
 import { roomsModule } from './modules/rooms';
 import { usersModule } from './modules/users';
 import { workspacesModule } from './modules/workspaces';
@@ -100,6 +101,7 @@ export const createApp = () =>
     })
     .use(authModule)
     .use(messagesModule)
+    .use(readStatesModule)
     .use(usersModule)
     .use(workspacesModule)
     .use(roomsModule)

@@ -47,6 +47,19 @@ export const UserRelations = t.Object(
       ),
       { additionalProperties: false },
     ),
+    roomReadStates: t.Array(
+      t.Object(
+        {
+          id: t.Integer(),
+          roomId: t.Integer(),
+          userId: t.Integer(),
+          lastReadMessageId: __nullable__(t.Integer()),
+          updatedAt: t.Date(),
+        },
+        { additionalProperties: false },
+      ),
+      { additionalProperties: false },
+    ),
     workspaceMemberships: t.Array(
       t.Object(
         {
@@ -95,6 +108,22 @@ export const UserRelationsInputCreate = t.Object(
       ),
     ),
     ownedWorkspaces: t.Optional(
+      t.Object(
+        {
+          connect: t.Array(
+            t.Object(
+              {
+                id: t.Integer({ additionalProperties: false }),
+              },
+              { additionalProperties: false },
+            ),
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
+    roomReadStates: t.Optional(
       t.Object(
         {
           connect: t.Array(
@@ -159,6 +188,31 @@ export const UserRelationsInputUpdate = t.Partial(
         ),
       ),
       ownedWorkspaces: t.Partial(
+        t.Object(
+          {
+            connect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+            disconnect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+          },
+          { additionalProperties: false },
+        ),
+      ),
+      roomReadStates: t.Partial(
         t.Object(
           {
             connect: t.Array(
@@ -290,6 +344,7 @@ export const UserSelect = t.Partial(
       updatedAt: t.Boolean(),
       authoredMessages: t.Boolean(),
       ownedWorkspaces: t.Boolean(),
+      roomReadStates: t.Boolean(),
       workspaceMemberships: t.Boolean(),
       _count: t.Boolean(),
     },
@@ -302,6 +357,7 @@ export const UserInclude = t.Partial(
     {
       authoredMessages: t.Boolean(),
       ownedWorkspaces: t.Boolean(),
+      roomReadStates: t.Boolean(),
       workspaceMemberships: t.Boolean(),
       _count: t.Boolean(),
     },

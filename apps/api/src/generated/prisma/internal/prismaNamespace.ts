@@ -388,7 +388,8 @@ export const ModelName = {
   Workspace: 'Workspace',
   WorkspaceMember: 'WorkspaceMember',
   Room: 'Room',
-  Message: 'Message'
+  Message: 'Message',
+  RoomReadState: 'RoomReadState'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -404,7 +405,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "workspace" | "workspaceMember" | "room" | "message"
+    modelProps: "user" | "workspace" | "workspaceMember" | "room" | "message" | "roomReadState"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -778,6 +779,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RoomReadState: {
+      payload: Prisma.$RoomReadStatePayload<ExtArgs>
+      fields: Prisma.RoomReadStateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RoomReadStateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RoomReadStateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload>
+        }
+        findFirst: {
+          args: Prisma.RoomReadStateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RoomReadStateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload>
+        }
+        findMany: {
+          args: Prisma.RoomReadStateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload>[]
+        }
+        create: {
+          args: Prisma.RoomReadStateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload>
+        }
+        createMany: {
+          args: Prisma.RoomReadStateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RoomReadStateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload>[]
+        }
+        delete: {
+          args: Prisma.RoomReadStateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload>
+        }
+        update: {
+          args: Prisma.RoomReadStateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload>
+        }
+        deleteMany: {
+          args: Prisma.RoomReadStateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RoomReadStateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RoomReadStateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload>[]
+        }
+        upsert: {
+          args: Prisma.RoomReadStateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RoomReadStatePayload>
+        }
+        aggregate: {
+          args: Prisma.RoomReadStateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRoomReadState>
+        }
+        groupBy: {
+          args: Prisma.RoomReadStateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RoomReadStateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RoomReadStateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RoomReadStateCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -876,6 +951,17 @@ export const MessageScalarFieldEnum = {
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const RoomReadStateScalarFieldEnum = {
+  id: 'id',
+  roomId: 'roomId',
+  userId: 'userId',
+  lastReadMessageId: 'lastReadMessageId',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RoomReadStateScalarFieldEnum = (typeof RoomReadStateScalarFieldEnum)[keyof typeof RoomReadStateScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1077,6 +1163,7 @@ export type GlobalOmitConfig = {
   workspaceMember?: Prisma.WorkspaceMemberOmit
   room?: Prisma.RoomOmit
   message?: Prisma.MessageOmit
+  roomReadState?: Prisma.RoomReadStateOmit
 }
 
 /* Types for Logging */

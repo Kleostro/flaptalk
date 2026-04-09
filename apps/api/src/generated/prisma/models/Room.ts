@@ -237,6 +237,7 @@ export type RoomWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Room"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Room"> | Date | string
   messages?: Prisma.MessageListRelationFilter
+  readStates?: Prisma.RoomReadStateListRelationFilter
   workspace?: Prisma.XOR<Prisma.WorkspaceScalarRelationFilter, Prisma.WorkspaceWhereInput>
 }
 
@@ -249,6 +250,7 @@ export type RoomOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   messages?: Prisma.MessageOrderByRelationAggregateInput
+  readStates?: Prisma.RoomReadStateOrderByRelationAggregateInput
   workspace?: Prisma.WorkspaceOrderByWithRelationInput
 }
 
@@ -265,6 +267,7 @@ export type RoomWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Room"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Room"> | Date | string
   messages?: Prisma.MessageListRelationFilter
+  readStates?: Prisma.RoomReadStateListRelationFilter
   workspace?: Prisma.XOR<Prisma.WorkspaceScalarRelationFilter, Prisma.WorkspaceWhereInput>
 }, "id" | "workspaceId_slug">
 
@@ -303,6 +306,7 @@ export type RoomCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.MessageCreateNestedManyWithoutRoomInput
+  readStates?: Prisma.RoomReadStateCreateNestedManyWithoutRoomInput
   workspace: Prisma.WorkspaceCreateNestedOneWithoutRoomsInput
 }
 
@@ -315,6 +319,7 @@ export type RoomUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutRoomInput
+  readStates?: Prisma.RoomReadStateUncheckedCreateNestedManyWithoutRoomInput
 }
 
 export type RoomUpdateInput = {
@@ -324,6 +329,7 @@ export type RoomUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUpdateManyWithoutRoomNestedInput
+  readStates?: Prisma.RoomReadStateUpdateManyWithoutRoomNestedInput
   workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutRoomsNestedInput
 }
 
@@ -336,6 +342,7 @@ export type RoomUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutRoomNestedInput
+  readStates?: Prisma.RoomReadStateUncheckedUpdateManyWithoutRoomNestedInput
 }
 
 export type RoomCreateManyInput = {
@@ -482,6 +489,20 @@ export type RoomUpdateOneRequiredWithoutMessagesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.RoomUpdateToOneWithWhereWithoutMessagesInput, Prisma.RoomUpdateWithoutMessagesInput>, Prisma.RoomUncheckedUpdateWithoutMessagesInput>
 }
 
+export type RoomCreateNestedOneWithoutReadStatesInput = {
+  create?: Prisma.XOR<Prisma.RoomCreateWithoutReadStatesInput, Prisma.RoomUncheckedCreateWithoutReadStatesInput>
+  connectOrCreate?: Prisma.RoomCreateOrConnectWithoutReadStatesInput
+  connect?: Prisma.RoomWhereUniqueInput
+}
+
+export type RoomUpdateOneRequiredWithoutReadStatesNestedInput = {
+  create?: Prisma.XOR<Prisma.RoomCreateWithoutReadStatesInput, Prisma.RoomUncheckedCreateWithoutReadStatesInput>
+  connectOrCreate?: Prisma.RoomCreateOrConnectWithoutReadStatesInput
+  upsert?: Prisma.RoomUpsertWithoutReadStatesInput
+  connect?: Prisma.RoomWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.RoomUpdateToOneWithWhereWithoutReadStatesInput, Prisma.RoomUpdateWithoutReadStatesInput>, Prisma.RoomUncheckedUpdateWithoutReadStatesInput>
+}
+
 export type RoomCreateWithoutWorkspaceInput = {
   name: string
   slug: string
@@ -489,6 +510,7 @@ export type RoomCreateWithoutWorkspaceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.MessageCreateNestedManyWithoutRoomInput
+  readStates?: Prisma.RoomReadStateCreateNestedManyWithoutRoomInput
 }
 
 export type RoomUncheckedCreateWithoutWorkspaceInput = {
@@ -499,6 +521,7 @@ export type RoomUncheckedCreateWithoutWorkspaceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutRoomInput
+  readStates?: Prisma.RoomReadStateUncheckedCreateNestedManyWithoutRoomInput
 }
 
 export type RoomCreateOrConnectWithoutWorkspaceInput = {
@@ -546,6 +569,7 @@ export type RoomCreateWithoutMessagesInput = {
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  readStates?: Prisma.RoomReadStateCreateNestedManyWithoutRoomInput
   workspace: Prisma.WorkspaceCreateNestedOneWithoutRoomsInput
 }
 
@@ -557,6 +581,7 @@ export type RoomUncheckedCreateWithoutMessagesInput = {
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  readStates?: Prisma.RoomReadStateUncheckedCreateNestedManyWithoutRoomInput
 }
 
 export type RoomCreateOrConnectWithoutMessagesInput = {
@@ -581,6 +606,7 @@ export type RoomUpdateWithoutMessagesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  readStates?: Prisma.RoomReadStateUpdateManyWithoutRoomNestedInput
   workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutRoomsNestedInput
 }
 
@@ -592,6 +618,65 @@ export type RoomUncheckedUpdateWithoutMessagesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  readStates?: Prisma.RoomReadStateUncheckedUpdateManyWithoutRoomNestedInput
+}
+
+export type RoomCreateWithoutReadStatesInput = {
+  name: string
+  slug: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  messages?: Prisma.MessageCreateNestedManyWithoutRoomInput
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutRoomsInput
+}
+
+export type RoomUncheckedCreateWithoutReadStatesInput = {
+  id?: number
+  workspaceId: number
+  name: string
+  slug: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutRoomInput
+}
+
+export type RoomCreateOrConnectWithoutReadStatesInput = {
+  where: Prisma.RoomWhereUniqueInput
+  create: Prisma.XOR<Prisma.RoomCreateWithoutReadStatesInput, Prisma.RoomUncheckedCreateWithoutReadStatesInput>
+}
+
+export type RoomUpsertWithoutReadStatesInput = {
+  update: Prisma.XOR<Prisma.RoomUpdateWithoutReadStatesInput, Prisma.RoomUncheckedUpdateWithoutReadStatesInput>
+  create: Prisma.XOR<Prisma.RoomCreateWithoutReadStatesInput, Prisma.RoomUncheckedCreateWithoutReadStatesInput>
+  where?: Prisma.RoomWhereInput
+}
+
+export type RoomUpdateToOneWithWhereWithoutReadStatesInput = {
+  where?: Prisma.RoomWhereInput
+  data: Prisma.XOR<Prisma.RoomUpdateWithoutReadStatesInput, Prisma.RoomUncheckedUpdateWithoutReadStatesInput>
+}
+
+export type RoomUpdateWithoutReadStatesInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MessageUpdateManyWithoutRoomNestedInput
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutRoomsNestedInput
+}
+
+export type RoomUncheckedUpdateWithoutReadStatesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  workspaceId?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutRoomNestedInput
 }
 
 export type RoomCreateManyWorkspaceInput = {
@@ -610,6 +695,7 @@ export type RoomUpdateWithoutWorkspaceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUpdateManyWithoutRoomNestedInput
+  readStates?: Prisma.RoomReadStateUpdateManyWithoutRoomNestedInput
 }
 
 export type RoomUncheckedUpdateWithoutWorkspaceInput = {
@@ -620,6 +706,7 @@ export type RoomUncheckedUpdateWithoutWorkspaceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutRoomNestedInput
+  readStates?: Prisma.RoomReadStateUncheckedUpdateManyWithoutRoomNestedInput
 }
 
 export type RoomUncheckedUpdateManyWithoutWorkspaceInput = {
@@ -638,10 +725,12 @@ export type RoomUncheckedUpdateManyWithoutWorkspaceInput = {
 
 export type RoomCountOutputType = {
   messages: number
+  readStates: number
 }
 
 export type RoomCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   messages?: boolean | RoomCountOutputTypeCountMessagesArgs
+  readStates?: boolean | RoomCountOutputTypeCountReadStatesArgs
 }
 
 /**
@@ -661,6 +750,13 @@ export type RoomCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.MessageWhereInput
 }
 
+/**
+ * RoomCountOutputType without action
+ */
+export type RoomCountOutputTypeCountReadStatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RoomReadStateWhereInput
+}
+
 
 export type RoomSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -671,6 +767,7 @@ export type RoomSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   messages?: boolean | Prisma.Room$messagesArgs<ExtArgs>
+  readStates?: boolean | Prisma.Room$readStatesArgs<ExtArgs>
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.RoomCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["room"]>
@@ -710,6 +807,7 @@ export type RoomSelectScalar = {
 export type RoomOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "name" | "slug" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
 export type RoomInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   messages?: boolean | Prisma.Room$messagesArgs<ExtArgs>
+  readStates?: boolean | Prisma.Room$readStatesArgs<ExtArgs>
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.RoomCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -724,6 +822,7 @@ export type $RoomPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "Room"
   objects: {
     messages: Prisma.$MessagePayload<ExtArgs>[]
+    readStates: Prisma.$RoomReadStatePayload<ExtArgs>[]
     workspace: Prisma.$WorkspacePayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1129,6 +1228,7 @@ readonly fields: RoomFieldRefs;
 export interface Prisma__RoomClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   messages<T extends Prisma.Room$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Room$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  readStates<T extends Prisma.Room$readStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Room$readStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RoomReadStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   workspace<T extends Prisma.WorkspaceDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkspaceDefaultArgs<ExtArgs>>): Prisma.Prisma__WorkspaceClient<runtime.Types.Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1588,6 +1688,30 @@ export type Room$messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.MessageScalarFieldEnum | Prisma.MessageScalarFieldEnum[]
+}
+
+/**
+ * Room.readStates
+ */
+export type Room$readStatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RoomReadState
+   */
+  select?: Prisma.RoomReadStateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RoomReadState
+   */
+  omit?: Prisma.RoomReadStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RoomReadStateInclude<ExtArgs> | null
+  where?: Prisma.RoomReadStateWhereInput
+  orderBy?: Prisma.RoomReadStateOrderByWithRelationInput | Prisma.RoomReadStateOrderByWithRelationInput[]
+  cursor?: Prisma.RoomReadStateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RoomReadStateScalarFieldEnum | Prisma.RoomReadStateScalarFieldEnum[]
 }
 
 /**
