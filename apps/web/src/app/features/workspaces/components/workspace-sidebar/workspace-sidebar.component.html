@@ -1,0 +1,48 @@
+<div class="workspace-sidebar">
+  <span class="workspace-sidebar__label">Workspace</span>
+
+  <div class="workspace-sidebar__nav-list">
+    <a [routerLink]="workspacePath" class="workspace-sidebar__nav-link">
+      <app-shell-nav-item
+        [active]="homeActive()"
+        description="Landing surface for workspace state, activity, and member context."
+        indexLabel="01"
+        title="Overview"
+      />
+    </a>
+
+    @if (hasWorkspace() && rooms().length > 0) {
+      @for (room of rooms(); track room.id; let roomIndex = $index) {
+        <a [routerLink]="getRoomLink(room.id)" class="workspace-sidebar__nav-link">
+          <app-shell-nav-item
+            [active]="activeRoomId() === room.id"
+            [description]="room.description || 'Room shell is ready for its first discussions.'"
+            [indexLabel]="getNavIndexLabel(roomIndex + 2)"
+            [title]="room.name"
+          />
+        </a>
+      }
+    } @else {
+      <app-shell-nav-item
+        [description]="
+          hasWorkspace()
+            ? 'Create the first room to start shaping the left rail.'
+            : 'Create a workspace first, then rooms will appear here.'
+        "
+        indexLabel="02"
+        title="Rooms"
+      />
+    }
+
+    <app-shell-nav-item
+      description="Catch-up cards and context surfaces will sit inside this home canvas."
+      [indexLabel]="rooms().length > 0 ? getNavIndexLabel(roomCount() + 2) : '03'"
+      title="Summaries"
+    />
+  </div>
+
+  <div class="workspace-sidebar__account">
+    <span class="workspace-sidebar__account-label">Signed in as</span>
+    <strong class="workspace-sidebar__account-value">{{ userEmail() }}</strong>
+  </div>
+</div>

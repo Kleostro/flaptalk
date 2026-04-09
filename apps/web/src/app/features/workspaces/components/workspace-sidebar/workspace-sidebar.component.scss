@@ -1,0 +1,49 @@
+.workspace-sidebar {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1.5rem;
+  block-size: 100%;
+
+  &__label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__nav-list {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  &__nav-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  &__account {
+    display: grid;
+    gap: 0.35rem;
+
+    padding: 1rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 82%, transparent);
+    border-radius: 1.1rem;
+
+    background: color-mix(in oklch, var(--surface-base) 16%, transparent);
+  }
+
+  &__account-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__account-value {
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+}
