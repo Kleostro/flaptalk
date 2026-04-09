@@ -5,6 +5,7 @@
     <a [routerLink]="workspacePath" class="workspace-sidebar__nav-link">
       <app-shell-nav-item
         [active]="homeActive()"
+        [badge]="totalUnreadCount() > 0 ? getNavIndexLabel(totalUnreadCount()) : null"
         description="Landing surface for workspace state, activity, and member context."
         indexLabel="01"
         title="Overview"
@@ -16,6 +17,7 @@
         <a [routerLink]="getRoomLink(room.id)" class="workspace-sidebar__nav-link">
           <app-shell-nav-item
             [active]="activeRoomId() === room.id"
+            [badge]="getRoomUnreadBadge(room.id)"
             [description]="room.description || 'Room shell is ready for its first discussions.'"
             [indexLabel]="getNavIndexLabel(roomIndex + 2)"
             [title]="room.name"

@@ -28,10 +28,12 @@
 
         <app-workspace-room-feed
           [activeThreadMessageId]="selectedThreadRootMessage()?.id ?? null"
+          [currentReadMessageId]="lastReadMessageId()"
           [isPending]="isMessageCollectionPending()"
           [messages]="messages()"
           [room]="selectedRoom()"
           (selectThread)="openThread($event)"
+          (visibleMessageChange)="handleVisibleMessageChange($event)"
         />
       </div>
     </app-card>
@@ -69,9 +71,11 @@
         />
 
         <app-workspace-thread-panel
+          [currentReadMessageId]="lastReadMessageId()"
           [isPending]="isThreadPending()"
           [replies]="selectedThreadReplies()"
           [rootMessage]="selectedThreadRootMessage()"
+          (visibleMessageChange)="handleVisibleMessageChange($event)"
         />
 
         @if (hasSelectedThread()) {

@@ -35,6 +35,12 @@ export class WorkspaceShellPageComponent {
   public readonly topbarTitle = computed(
     () => this.selectedRoom()?.name ?? this.currentWorkspace()?.name ?? 'Workspace Home',
   );
+  public readonly totalUnreadMessageCount = computed(() =>
+    this.workspaceFacadeService.unreadMessageCount(),
+  );
+  public readonly unreadMessageCountByRoomId = computed(() =>
+    this.workspaceFacadeService.unreadMessageCountByRoomId(),
+  );
   public readonly user = computed(() => this.authFacadeService.user());
 
   public readonly userInitials = computed(() => {
