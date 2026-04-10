@@ -17,6 +17,7 @@ import { type AuthSubmissionResult } from '@web/app/features/auth/models/auth-su
 import { AuthFacadeService } from '@web/app/features/auth/services/auth-facade.service';
 import { WorkspaceApiService } from '@web/app/features/workspaces/services/workspace-api.service';
 import { type CreateInvite } from '@web/app/features/workspaces/types/create-invite.model';
+import { type WorkspaceCatchUpItem } from '@web/app/features/workspaces/types/workspace-catch-up-item.model';
 import { type CreateMessage } from '@web/app/features/workspaces/types/create-message.model';
 import { type CreateRoom } from '@web/app/features/workspaces/types/create-room.model';
 import { type CreateWorkspace } from '@web/app/features/workspaces/types/create-workspace.model';
@@ -183,6 +184,55 @@ export class WorkspaceFacadeService {
   );
   public readonly canManageInvites = computed(() => this.currentWorkspaceRole() === 'owner');
   public readonly canManageRooms = computed(() => this.currentWorkspaceRole() === 'owner');
+  public readonly workspaceActivity = computed(() => this.workspaceActivityResource.value());
+  public readonly continueReadingRooms = computed(() =>
+    [...this.workspaceActivity().rooms].sort((leftRoomActivity, rightRoomActivity) => {
+      const unreadDelta =
+        Number(leftRoomActivity.unreadMessageCount > 0) -
+        Number(rightRoomActivity.unreadMessageCount > 0);
+
+      if (unreadDelta !== 0) {
+        return unreadDelta;
+      }
+
+      const leftTimestamp = Date.parse(
+        leftRoomActivity.lastMessage?.createdAt ?? new Date(0).toISOString(),
+      );
+      const rightTimestamp = Date.parse(
+        rightRoomActivity.lastMessage?.createdAt ?? new Date(0).toISOString(),
+      );
+
+      return leftTimestamp - rightTimestamp;
+    }),
+  );
+  public readonly continueReadingItems = computed<readonly WorkspaceCatchUpItem[]>(() =>
+    this.continueReadingRooms().map((roomActivity) => {
+      const hasUnreadMessages = roomActivity.unreadMessageCount > 0;
+      const isThreadReply =
+        roomActivity.lastMessage?.parentMessageId !== null &&
+        roomActivity.lastMessage?.parentMessageId !== undefined;
+
+      return {
+        contextLabel: isThreadReply ? 'Thread reply' : 'Room message',
+        lastActivityAt: roomActivity.lastMessage?.createdAt ?? null,
+        lastAuthorEmail: roomActivity.lastMessage?.author.email ?? null,
+        preview:
+          roomActivity.lastMessage?.body ??
+          'This room is configured and ready for the next wave of activity.',
+        resumeLabel: hasUnreadMessages ? 'Resume unread' : 'Open room',
+        resumeMode: hasUnreadMessages ? 'unread' : 'latest',
+        roomId: roomActivity.room.id,
+        roomName: roomActivity.room.name,
+        threadRootMessageId: isThreadReply
+          ? (roomActivity.lastMessage?.parentMessageId ?? null)
+          : null,
+        unreadLabel: hasUnreadMessages
+          ? `${roomActivity.unreadMessageCount} unread`
+          : 'Recently active',
+        unreadMessageCount: roomActivity.unreadMessageCount,
+      };
+    }),
+  );
   public readonly messages = computed(() => this.messageCollectionResource.value());
   public readonly messageCount = computed(() => this.messages().length);
   public readonly hasMessages = computed(() => this.messageCount() > 0);
@@ -229,7 +279,6 @@ export class WorkspaceFacadeService {
   });
   public readonly memberCount = computed(() => this.members().length);
   public readonly selectedThreadReplies = computed(() => this.selectedThread()?.replies ?? []);
-  public readonly workspaceActivity = computed(() => this.workspaceActivityResource.value());
   public readonly unreadMessageCount = computed(() => this.workspaceActivity().unreadMessageCount);
   public readonly unreadMessageCountByRoomId = computed(() => {
     const roomActivityEntries = this.workspaceActivity().rooms.map(
@@ -473,14 +522,22 @@ export class WorkspaceFacadeService {
 
     return this.workspaceApiService.updateRoomReadState(roomId, lastReadMessageId).pipe(
       tap((readState) => {
+        const nextLastReadMessageId = readState.lastReadMessageId ?? 0;
+        const remainingUnreadMessages =
+          this.selectedRoom()?.id === roomId
+            ? this.messages().filter((message) => message.id > nextLastReadMessageId).length
+            : null;
+
         this.updateWorkspaceActivityRoom(roomId, (roomActivity) => ({
           ...roomActivity,
           readState,
-          unreadMessageCount: roomActivity.lastMessage?.id
-            ? roomActivity.lastMessage.id > (readState.lastReadMessageId ?? 0)
-              ? roomActivity.unreadMessageCount
-              : 0
-            : 0,
+          unreadMessageCount:
+            remainingUnreadMessages ??
+            (roomActivity.lastMessage?.id
+              ? roomActivity.lastMessage.id > (readState.lastReadMessageId ?? 0)
+                ? roomActivity.unreadMessageCount
+                : 0
+              : 0),
         }));
       }),
       map(() => void 0),

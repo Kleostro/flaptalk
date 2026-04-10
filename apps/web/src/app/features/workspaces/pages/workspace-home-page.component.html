@@ -20,10 +20,61 @@
 
 <div class="workspace-home-page__dashboard-grid">
   <section class="workspace-home-page__primary-column">
+    @if (primaryCatchUpItem(); as featuredCatchUpItem) {
+      <app-shell-section-card tag="Continue" title="Continue reading">
+        <div class="workspace-home-page__panel workspace-home-page__panel--compact">
+          <div class="workspace-home-page__continue-reading">
+            <div class="workspace-home-page__continue-copy">
+              <div class="workspace-home-page__continue-meta">
+                @if (featuredCatchUpItem.unreadMessageCount > 0) {
+                  <app-pill appearance="accent" size="small">
+                    {{ featuredCatchUpItem.unreadLabel }}
+                  </app-pill>
+                } @else {
+                  <app-pill size="small">{{ featuredCatchUpItem.unreadLabel }}</app-pill>
+                }
+
+                <app-pill appearance="outline" size="small">
+                  {{ featuredCatchUpItem.contextLabel }}
+                </app-pill>
+              </div>
+
+              <div class="workspace-home-page__continue-heading">
+                <strong>{{ featuredCatchUpItem.roomName }}</strong>
+                <span>
+                  {{
+                    featuredCatchUpItem.lastAuthorEmail
+                      ? featuredCatchUpItem.lastAuthorEmail
+                      : 'Recent workspace activity'
+                  }}
+                </span>
+              </div>
+
+              <p class="workspace-home-page__helper">
+                {{ getContinueReadingDescription(featuredCatchUpItem) }}
+              </p>
+
+              <p class="workspace-home-page__continue-preview">
+                {{ featuredCatchUpItem.preview }}
+              </p>
+            </div>
+
+            <a
+              class="workspace-home-page__continue-link"
+              [queryParams]="getContinueReadingQueryParams(featuredCatchUpItem)"
+              [routerLink]="getContinueReadingRoute(featuredCatchUpItem)"
+            >
+              {{ featuredCatchUpItem.resumeLabel }}
+            </a>
+          </div>
+        </div>
+      </app-shell-section-card>
+    }
+
     <app-workspace-catch-up-panel
       [activityCards]="activityCards"
+      [catchUpItems]="recentRoomActivity()"
       [isPending]="isWorkspaceActivityPending()"
-      [recentRoomActivity]="recentRoomActivity()"
     />
 
     @if (isWorkspacePending()) {

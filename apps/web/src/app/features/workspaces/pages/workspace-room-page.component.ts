@@ -12,6 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { ToastService } from '@web/app/core/services/toast.service';
 import { WorkspaceRoomFeedComponent } from '@web/app/features/workspaces/components/workspace-room-feed/workspace-room-feed.component';
+import { type WorkspaceRoomFeedResumeMode } from '@web/app/features/workspaces/components/workspace-room-feed/workspace-room-feed.component';
 import { WorkspaceThreadPanelComponent } from '@web/app/features/workspaces/components/workspace-thread-panel/workspace-thread-panel.component';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
 import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/services/workspace-form.factory.service';
@@ -126,6 +127,7 @@ export class WorkspaceRoomPageComponent {
       value: this.hasSelectedThread() ? 'Open' : 'Ready',
     },
   ]);
+  public readonly roomResumeMode = signal<WorkspaceRoomFeedResumeMode>('default');
   public readonly selectedThreadReplies = computed(() =>
     this.workspaceFacadeService.selectedThreadReplies(),
   );
@@ -146,6 +148,26 @@ export class WorkspaceRoomPageComponent {
       if (Number.isFinite(roomId)) {
         this.workspaceFacadeService.selectRoom(roomId);
       }
+    });
+
+    this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      const resumeParam = params.get('resume');
+      const threadParam = Number(params.get('thread'));
+
+      if (resumeParam === 'unread') {
+        this.roomResumeMode.set('first-unread');
+      } else if (resumeParam === 'latest') {
+        this.roomResumeMode.set('latest');
+      } else {
+        this.roomResumeMode.set('default');
+      }
+
+      if (Number.isFinite(threadParam)) {
+        this.workspaceFacadeService.selectThread(threadParam);
+        return;
+      }
+
+      this.workspaceFacadeService.clearSelectedThread();
     });
   }
 

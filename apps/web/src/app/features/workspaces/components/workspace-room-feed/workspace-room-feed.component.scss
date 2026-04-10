@@ -26,6 +26,36 @@
     gap: 0.9rem;
   }
 
+  &__unread-marker {
+    position: sticky;
+    z-index: 1;
+    inset-block-start: 0.75rem;
+
+    display: flex;
+    justify-content: center;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      min-block-size: 1.7rem;
+      padding-inline: 0.75rem;
+      border: var(--border-width-thin) solid
+        color-mix(in oklch, var(--accent-primary) 18%, var(--outline-subtle));
+      border-radius: var(--radius-pill);
+
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+
+      background: color-mix(in oklch, var(--surface-elevated) 96%, transparent);
+      backdrop-filter: blur(14px);
+    }
+  }
+
   &__message-item {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
@@ -43,6 +73,11 @@
   &__message-item--active {
     border-color: color-mix(in oklch, var(--accent-primary) 24%, var(--outline-subtle));
     background: color-mix(in oklch, var(--surface-accent) 32%, transparent);
+  }
+
+  &__message-item--unread {
+    border-color: color-mix(in oklch, var(--accent-primary) 12%, var(--outline-subtle));
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--accent-primary) 8%, transparent);
   }
 
   &__message-avatar {
