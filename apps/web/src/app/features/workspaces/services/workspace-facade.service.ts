@@ -1,20 +1,26 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import {
+  type Invite,
+  type InvitePreview,
   type Message,
   type Room,
   type RoomReadState,
   type WorkspaceAccess,
+  type WorkspaceMember,
   type WorkspaceRoomActivity,
 } from '@flaptalk/api-contract';
 import { finalize, map, Observable, of, tap } from 'rxjs';
 
 import { TOAST_LEVEL } from '@web/app/core/models/toast-level.type';
 import { type AuthSubmissionResult } from '@web/app/features/auth/models/auth-submission-result.model';
+import { AuthFacadeService } from '@web/app/features/auth/services/auth-facade.service';
 import { WorkspaceApiService } from '@web/app/features/workspaces/services/workspace-api.service';
+import { type CreateInvite } from '@web/app/features/workspaces/types/create-invite.model';
 import { type CreateMessage } from '@web/app/features/workspaces/types/create-message.model';
 import { type CreateRoom } from '@web/app/features/workspaces/types/create-room.model';
 import { type CreateWorkspace } from '@web/app/features/workspaces/types/create-workspace.model';
+import { type WorkspaceMemberRow } from '@web/app/features/workspaces/types/workspace-member-row.model';
 
 interface WorkspaceActivityState {
   readonly rooms: readonly WorkspaceRoomActivity[];
@@ -30,13 +36,14 @@ const EMPTY_WORKSPACE_ACTIVITY: WorkspaceActivityState = {
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceFacadeService {
+  private readonly acceptInvitePendingState = signal(false);
+  private readonly authFacadeService = inject(AuthFacadeService);
+  private readonly createInvitePendingState = signal(false);
   private readonly createMessagePendingState = signal(false);
   private readonly createRoomPendingState = signal(false);
   private readonly createWorkspacePendingState = signal(false);
-  private readonly messageRequestVersion = signal(0);
+  private readonly inviteRequestVersion = signal(0);
   private readonly workspaceApiService = inject(WorkspaceApiService);
-  private readonly selectedRoomIdState = signal<null | number>(null);
-  private readonly roomRequestVersion = signal(0);
   private readonly workspaceRequestVersion = signal(0);
   private readonly workspaceCollectionResource = rxResource<WorkspaceAccess[], number>({
     defaultValue: [],
@@ -48,6 +55,60 @@ export class WorkspaceFacadeService {
   public readonly currentWorkspace = computed(
     () => this.currentWorkspaceAccess()?.workspace ?? null,
   );
+  public readonly currentWorkspaceRole = computed(
+    () => this.currentWorkspaceAccess()?.role ?? null,
+  );
+  private readonly inviteCollectionResource = rxResource<
+    Invite[],
+    {
+      readonly version: number;
+      readonly workspaceId: null | number;
+      readonly workspaceRole: null | WorkspaceAccess['role'];
+    }
+  >({
+    defaultValue: [],
+    params: () => ({
+      version: this.inviteRequestVersion(),
+      workspaceId: this.currentWorkspace()?.id ?? null,
+      workspaceRole: this.currentWorkspaceRole(),
+    }),
+    stream: ({ params }) =>
+      params.workspaceId === null || params.workspaceRole !== 'owner'
+        ? of([])
+        : this.workspaceApiService.getWorkspaceInvites(params.workspaceId),
+  });
+  private readonly invitePreviewRequestVersion = signal(0);
+  private readonly inviteTokenState = signal<null | string>(null);
+  private readonly invitePreviewResource = rxResource<
+    InvitePreview | null,
+    { readonly token: null | string; readonly version: number }
+  >({
+    defaultValue: null,
+    params: () => ({
+      token: this.inviteTokenState(),
+      version: this.invitePreviewRequestVersion(),
+    }),
+    stream: ({ params }) =>
+      params.token === null ? of(null) : this.workspaceApiService.getInvitePreview(params.token),
+  });
+  private readonly memberRequestVersion = signal(0);
+  private readonly memberCollectionResource = rxResource<
+    WorkspaceMember[],
+    { readonly version: number; readonly workspaceId: null | number }
+  >({
+    defaultValue: [],
+    params: () => ({
+      version: this.memberRequestVersion(),
+      workspaceId: this.currentWorkspace()?.id ?? null,
+    }),
+    stream: ({ params }) =>
+      params.workspaceId === null
+        ? of([])
+        : this.workspaceApiService.getWorkspaceMembers(params.workspaceId),
+  });
+  private readonly messageRequestVersion = signal(0);
+  private readonly selectedRoomIdState = signal<null | number>(null);
+  private readonly roomRequestVersion = signal(0);
   private readonly roomCollectionResource = rxResource<
     Room[],
     { readonly version: number; readonly workspaceId: null | number }
@@ -116,9 +177,11 @@ export class WorkspaceFacadeService {
         : this.workspaceApiService.getWorkspaceActivity(params.workspaceId),
   });
 
-  public readonly currentWorkspaceRole = computed(
-    () => this.currentWorkspaceAccess()?.role ?? null,
+  public readonly invites = computed(() => this.inviteCollectionResource.value());
+  public readonly activeInviteCount = computed(
+    () => this.invites().filter((invite) => invite.usedAt === null).length,
   );
+  public readonly canManageInvites = computed(() => this.currentWorkspaceRole() === 'owner');
   public readonly canManageRooms = computed(() => this.currentWorkspaceRole() === 'owner');
   public readonly messages = computed(() => this.messageCollectionResource.value());
   public readonly messageCount = computed(() => this.messages().length);
@@ -131,9 +194,20 @@ export class WorkspaceFacadeService {
   );
   public readonly hasSelectedThread = computed(() => this.selectedThreadRootMessage() !== null);
   public readonly hasWorkspace = computed(() => this.currentWorkspace() !== null);
+  public readonly inviteCount = computed(() => this.invites().length);
+  public readonly invitePreview = computed(() => this.invitePreviewResource.value());
+  public readonly isAcceptInvitePending = computed(() => this.acceptInvitePendingState());
+  public readonly isCreateInvitePending = computed(() => this.createInvitePendingState());
   public readonly isCreateMessagePending = computed(() => this.createMessagePendingState());
   public readonly isCreateRoomPending = computed(() => this.createRoomPendingState());
   public readonly isCreateWorkspacePending = computed(() => this.createWorkspacePendingState());
+  public readonly isInviteCollectionPending = computed(() =>
+    this.inviteCollectionResource.isLoading(),
+  );
+  public readonly isInvitePreviewPending = computed(() => this.invitePreviewResource.isLoading());
+  public readonly isMemberCollectionPending = computed(() =>
+    this.memberCollectionResource.isLoading(),
+  );
   public readonly isMessageCollectionPending = computed(() =>
     this.messageCollectionResource.isLoading(),
   );
@@ -145,6 +219,15 @@ export class WorkspaceFacadeService {
   public readonly isWorkspaceCollectionPending = computed(() =>
     this.workspaceCollectionResource.isLoading(),
   );
+  public readonly members = computed<WorkspaceMemberRow[]>(() => {
+    const authenticatedUserId = this.authFacadeService.user()?.id ?? null;
+
+    return this.memberCollectionResource.value().map((member) => ({
+      ...member,
+      isCurrentUser: member.user.id === authenticatedUserId,
+    }));
+  });
+  public readonly memberCount = computed(() => this.members().length);
   public readonly selectedThreadReplies = computed(() => this.selectedThread()?.replies ?? []);
   public readonly workspaceActivity = computed(() => this.workspaceActivityResource.value());
   public readonly unreadMessageCount = computed(() => this.workspaceActivity().unreadMessageCount);
@@ -181,6 +264,44 @@ export class WorkspaceFacadeService {
     this.workspaceActivityResource.set(this.computeWorkspaceActivityTotals(updatedRooms));
   }
 
+  public acceptInvite(token: string): Observable<AuthSubmissionResult> {
+    this.acceptInvitePendingState.set(true);
+
+    return this.workspaceApiService.acceptInvite(token).pipe(
+      tap((workspaceAccess) => {
+        const existingWorkspaces = this.workspaces();
+        const nextWorkspaces = [
+          workspaceAccess,
+          ...existingWorkspaces.filter(
+            (existingWorkspace) => existingWorkspace.workspace.id !== workspaceAccess.workspace.id,
+          ),
+        ];
+
+        this.workspaceCollectionResource.set(nextWorkspaces);
+        this.roomCollectionResource.set([]);
+        this.messageCollectionResource.set([]);
+        this.selectedRoomIdState.set(null);
+        this.threadResource.set(null);
+        this.selectedThreadMessageIdState.set(null);
+        this.workspaceActivityResource.set(EMPTY_WORKSPACE_ACTIVITY);
+        this.inviteCollectionResource.set([]);
+        this.memberCollectionResource.set([]);
+        this.roomRequestVersion.update((version) => version + 1);
+        this.inviteRequestVersion.update((version) => version + 1);
+        this.memberRequestVersion.update((version) => version + 1);
+        this.readStateRequestVersion.update((version) => version + 1);
+      }),
+      map((workspaceAccess) => ({
+        level: TOAST_LEVEL.success,
+        message: `You now have access to ${workspaceAccess.workspace.name}.`,
+        title: 'Invite accepted',
+      })),
+      finalize(() => {
+        this.acceptInvitePendingState.set(false);
+      }),
+    );
+  }
+
   public clearSelectedRoom(): void {
     this.clearSelectedThread();
     this.selectedRoomIdState.set(null);
@@ -188,6 +309,31 @@ export class WorkspaceFacadeService {
 
   public clearSelectedThread(): void {
     this.selectedThreadMessageIdState.set(null);
+  }
+
+  public createInvite(
+    workspaceId: number,
+    invite: CreateInvite,
+  ): Observable<{ readonly invite: Invite; readonly result: AuthSubmissionResult }> {
+    this.createInvitePendingState.set(true);
+
+    return this.workspaceApiService.createInvite(workspaceId, invite).pipe(
+      tap((createdInvite) => {
+        this.inviteCollectionResource.set([createdInvite, ...this.invites()]);
+        this.refreshInvites();
+      }),
+      map((createdInvite) => ({
+        invite: createdInvite,
+        result: {
+          level: TOAST_LEVEL.success,
+          message: 'A shareable workspace invite is ready to send.',
+          title: 'Invite created',
+        },
+      })),
+      finalize(() => {
+        this.createInvitePendingState.set(false);
+      }),
+    );
   }
 
   public createMessage(roomId: number, message: CreateMessage): Observable<AuthSubmissionResult> {
@@ -272,6 +418,8 @@ export class WorkspaceFacadeService {
     return this.workspaceApiService.createWorkspace(workspace).pipe(
       tap((createdWorkspaceAccess) => {
         this.workspaceCollectionResource.set([createdWorkspaceAccess, ...this.workspaces()]);
+        this.inviteCollectionResource.set([]);
+        this.memberCollectionResource.set([]);
         this.messageCollectionResource.set([]);
         this.roomCollectionResource.set([]);
         this.selectedRoomIdState.set(null);
@@ -339,6 +487,18 @@ export class WorkspaceFacadeService {
     );
   }
 
+  public refreshInvitePreview(): void {
+    this.invitePreviewRequestVersion.update((version) => version + 1);
+  }
+
+  public refreshInvites(): void {
+    this.inviteRequestVersion.update((version) => version + 1);
+  }
+
+  public refreshMembers(): void {
+    this.memberRequestVersion.update((version) => version + 1);
+  }
+
   public refreshMessages(): void {
     this.messageRequestVersion.update((version) => version + 1);
   }
@@ -366,5 +526,9 @@ export class WorkspaceFacadeService {
 
   public selectThread(messageId: number): void {
     this.selectedThreadMessageIdState.set(messageId);
+  }
+
+  public setInvitePreviewToken(token: null | string): void {
+    this.inviteTokenState.set(token);
   }
 }

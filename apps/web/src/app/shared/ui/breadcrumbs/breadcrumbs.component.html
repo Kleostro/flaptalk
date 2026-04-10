@@ -1,0 +1,26 @@
+<nav aria-label="Breadcrumb" class="ui-breadcrumbs">
+  @if (mobileBackItem(); as backItem) {
+    <a [routerLink]="backItem.href" class="ui-breadcrumbs__back-link">
+      <span aria-hidden="true" class="ui-breadcrumbs__back-icon">←</span>
+      <span>{{ backItem.label }}</span>
+    </a>
+  }
+
+  <ol class="ui-breadcrumbs__list">
+    @for (item of items(); track item.label; let isLast = $last) {
+      <li class="ui-breadcrumbs__item">
+        @if (item.href && !isLast) {
+          <a [routerLink]="item.href" class="ui-breadcrumbs__link">
+            {{ item.label }}
+          </a>
+        } @else {
+          <span class="ui-breadcrumbs__current">{{ item.label }}</span>
+        }
+
+        @if (!isLast) {
+          <span aria-hidden="true" class="ui-breadcrumbs__separator">/</span>
+        }
+      </li>
+    }
+  </ol>
+</nav>

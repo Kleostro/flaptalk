@@ -1,0 +1,25 @@
+.ui-empty-state {
+  display: grid;
+  gap: 0.7rem;
+
+  &__kicker {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  &__description {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+}

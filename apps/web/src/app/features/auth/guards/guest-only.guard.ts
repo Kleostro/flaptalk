@@ -6,7 +6,7 @@ import { filter, take } from 'rxjs';
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { AuthFacadeService } from '@web/app/features/auth/services/auth-facade.service';
 
-export const guestOnlyGuard: CanActivateFn = () => {
+export const guestOnlyGuard: CanActivateFn = (route) => {
   const authFacadeService = inject(AuthFacadeService);
   const router = inject(Router);
 
@@ -17,7 +17,9 @@ export const guestOnlyGuard: CanActivateFn = () => {
       }
 
       return authFacadeService.isAuthenticated()
-        ? router.createUrlTree([`/${APP_ROUTE_PATHS.workspace}`])
+        ? router.createUrlTree([
+            route.queryParamMap.get('redirectTo') ?? `/${APP_ROUTE_PATHS.workspace}`,
+          ])
         : true;
     }),
   ).pipe(

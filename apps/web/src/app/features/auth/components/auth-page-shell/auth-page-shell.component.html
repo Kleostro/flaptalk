@@ -23,9 +23,9 @@
       />
     </div>
 
-    <span class="auth-page-shell__topbar-chip">
+    <app-pill appearance="outline" [caps]="true">
       {{ mode() === 'login' ? 'Sign in' : 'Register' }}
-    </span>
+    </app-pill>
   </div>
 
   <div appShellSidebar class="auth-page-shell__sidebar">
@@ -87,7 +87,7 @@
 
         <p class="auth-page-shell__alternate">
           <span>{{ alternateActionText() }}</span>
-          <app-link [route]="alternateActionRoute()">
+          <app-link [queryParams]="alternateActionQueryParams()" [route]="alternateActionRoute()">
             {{ alternateActionLabel() }}
           </app-link>
         </p>

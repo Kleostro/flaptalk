@@ -1,0 +1,13 @@
+<div class="ui-empty-state">
+  @if (kicker()) {
+    <span class="ui-empty-state__kicker">{{ kicker() }}</span>
+  }
+
+  @if (title()) {
+    <strong class="ui-empty-state__title">{{ title() }}</strong>
+  }
+
+  <p class="ui-empty-state__description">{{ description() }}</p>
+
+  <ng-content />
+</div>

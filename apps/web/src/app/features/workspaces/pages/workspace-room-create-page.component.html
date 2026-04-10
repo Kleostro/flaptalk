@@ -1,0 +1,78 @@
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  description="Open a new structured discussion surface without mixing room setup into the community home."
+  kicker="Owner setup"
+  title="Create room"
+/>
+
+@if (!canManageRooms()) {
+  <app-card>
+    <div class="workspace-room-create-page__panel workspace-room-create-page__panel--centered">
+      <app-empty-state
+        description="Members can use existing rooms, but workspace owners decide how the shell grows."
+        kicker="Owner access"
+        title="Room creation is limited to owners"
+      />
+    </div>
+  </app-card>
+} @else {
+  <div class="workspace-room-create-page__layout">
+    <app-card>
+      <form class="workspace-room-create-page__panel" (submit)="createRoom($event)">
+        <app-shell-panel-header tag="Owner" title="Create room" />
+
+        <app-text-input-field
+          autocomplete="off"
+          [field]="roomForm.name"
+          hint="This becomes the visible room name inside the workspace shell."
+          inputId="room-name"
+          label="Room name"
+          placeholder="General"
+          [showErrors]="showRoomFormErrors()"
+          type="text"
+        />
+
+        <app-textarea-field
+          [field]="roomForm.description"
+          hint="Optional, but useful as context for future members."
+          inputId="room-description"
+          label="Description"
+          placeholder="Core updates and member communication."
+          [rows]="4"
+          [showErrors]="showRoomFormErrors()"
+        />
+
+        <app-button [disabled]="isCreateRoomPending()" [fluid]="true" type="submit">
+          {{ isCreateRoomPending() ? 'Creating room...' : 'Create room' }}
+        </app-button>
+      </form>
+    </app-card>
+
+    <app-shell-section-card tag="Context" title="Existing rooms">
+      <div class="workspace-room-create-page__panel">
+        @if (existingRooms().length === 0) {
+          <app-empty-state
+            description="No rooms exist yet. Your first room will define the initial structure of the workspace."
+          />
+        } @else {
+          <div class="workspace-room-create-page__room-list">
+            @for (room of existingRooms(); track room.id) {
+              <app-entity-list-item>
+                <div entityIdentity>
+                  <strong>{{ room.name }}</strong>
+                </div>
+                <span>
+                  {{ room.description || 'Room shell is ready for its first discussions.' }}
+                </span>
+              </app-entity-list-item>
+            }
+          </div>
+        }
+
+        <a [routerLink]="setupLink" class="workspace-room-create-page__link-button">
+          Back to owner setup
+        </a>
+      </div>
+    </app-shell-section-card>
+  </div>
+}

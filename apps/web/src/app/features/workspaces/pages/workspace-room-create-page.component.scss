@@ -1,0 +1,92 @@
+.workspace-room-create-page {
+  &__panel,
+  &__layout,
+  &__room-list {
+    display: grid;
+  }
+
+  &__panel,
+  &__room-list {
+    gap: 1rem;
+  }
+
+  &__panel-kicker {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__helper {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+
+  &__layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr);
+    gap: 1.25rem;
+  }
+
+  &__panel--centered {
+    align-content: center;
+    min-block-size: 18rem;
+  }
+
+  &__panel-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  &__room-item {
+    display: grid;
+    gap: 0.35rem;
+
+    padding: 1rem 1.05rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+    border-radius: 1rem;
+
+    background: color-mix(in oklch, var(--surface-base) 12%, transparent);
+
+    strong {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+
+    span {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+  }
+
+  &__link-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-block-size: 2.75rem;
+    padding-inline: 1rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 80%, transparent);
+    border-radius: var(--radius-pill);
+
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+
+    background: color-mix(in oklch, var(--surface-base) 14%, transparent);
+  }
+
+  @media (width < 72rem) {
+    &__layout {
+      grid-template-columns: 1fr;
+    }
+  }
+}

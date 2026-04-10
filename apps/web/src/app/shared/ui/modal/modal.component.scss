@@ -1,0 +1,186 @@
+:host {
+  display: contents;
+}
+
+.ui-modal {
+  --modal-motion-duration: 220ms;
+
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  padding: 1.5rem;
+
+  animation: modal-fade-in var(--modal-motion-duration) ease;
+
+  &--closing {
+    .ui-modal__backdrop {
+      animation: modal-backdrop-out var(--modal-motion-duration) ease forwards;
+    }
+
+    .ui-modal__surface {
+      animation: modal-surface-out var(--modal-motion-duration) cubic-bezier(0.4, 0, 1, 1) forwards;
+    }
+  }
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+
+    background: color-mix(in oklch, var(--surface-backdrop) 62%, transparent);
+    backdrop-filter: blur(12px);
+
+    animation: modal-backdrop-in var(--modal-motion-duration) ease;
+  }
+
+  &__surface {
+    will-change: opacity, transform;
+
+    position: relative;
+    z-index: 1;
+    transform-origin: top center;
+
+    overflow: auto;
+    overscroll-behavior: contain;
+
+    inline-size: min(42rem, calc(100vw - 2rem));
+    max-block-size: calc(100vh - 2rem);
+    padding: 1.5rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 86%, transparent);
+    border-radius: 1.75rem;
+
+    background: color-mix(in oklch, var(--surface-panel) 98%, transparent);
+    box-shadow: var(--shadow-panel);
+
+    animation: modal-surface-in var(--modal-motion-duration) cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  &__header,
+  &__copy {
+    display: grid;
+  }
+
+  &__header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: start;
+    margin-block-end: 1.25rem;
+  }
+
+  &__copy {
+    gap: 0.4rem;
+  }
+
+  &__tag {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: clamp(1.75rem, 2vw, 2.1rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+  }
+
+  &__description {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+
+  &__close {
+    cursor: pointer;
+
+    min-block-size: 2.75rem;
+    padding-inline: 1rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 82%, transparent);
+    border-radius: var(--radius-pill);
+
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-primary);
+
+    background: color-mix(in oklch, var(--surface-base) 14%, transparent);
+
+    transition:
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in oklch, var(--accent-primary) 24%, var(--outline-subtle));
+      color: var(--accent-primary);
+    }
+  }
+
+  &__body {
+    display: grid;
+    gap: 1rem;
+  }
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-backdrop-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-surface-in {
+  from {
+    transform: translateY(0.9rem) scale(0.965);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes modal-surface-out {
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(0.55rem) scale(0.985);
+    opacity: 0;
+  }
+}

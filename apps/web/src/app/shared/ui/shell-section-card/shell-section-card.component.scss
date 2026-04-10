@@ -1,0 +1,11 @@
+.ui-shell-section-card {
+  display: grid;
+  gap: 1.25rem;
+  min-block-size: 100%;
+
+  &__content {
+    display: grid;
+    gap: 1rem;
+    min-block-size: 0;
+  }
+}

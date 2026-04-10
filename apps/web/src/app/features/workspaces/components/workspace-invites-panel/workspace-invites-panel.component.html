@@ -1,0 +1,66 @@
+<app-shell-section-card tag="Access" title="Invites">
+  <div class="workspace-invites-panel">
+    @if (!hasWorkspace()) {
+      <app-empty-state
+        description="Create a workspace first, then invite the first members into the shell."
+      />
+    } @else if (!canManageInvites()) {
+      <app-empty-state
+        description="Workspace owners manage invite links. You can still join through links shared with you."
+      />
+    } @else {
+      <app-key-value-list [items]="summaryItems()" />
+
+      <div class="workspace-invites-panel__filters" aria-label="Invite status filter">
+        @for (filter of statusFilters; track filter) {
+          <button
+            class="workspace-invites-panel__filter-button"
+            type="button"
+            [class.workspace-invites-panel__filter-button--active]="statusFilter() === filter"
+            (click)="setStatusFilter(filter)"
+          >
+            {{ filter }}
+          </button>
+        }
+      </div>
+
+      @if (isPending()) {
+        <app-empty-state description="Restoring issued invite links..." />
+      } @else if (invites().length === 0) {
+        <app-empty-state
+          description="No invites yet. Create the first link when you are ready to onboard someone."
+        />
+      } @else if (visibleInvites().length === 0) {
+        <app-empty-state description="No invites match the current filter." />
+      } @else {
+        <div class="workspace-invites-panel__list">
+          @for (invite of visibleInvites(); track invite.id) {
+            <app-entity-list-item>
+              <div entityIdentity class="workspace-invites-panel__identity">
+                <strong>{{ invite.email || 'Generic invite link' }}</strong>
+                <span>
+                  {{ getInviteState(invite) }} · expires
+                  {{ invite.expiresAt | date: 'mediumDate' }}
+                </span>
+              </div>
+
+              <div entityAside class="workspace-invites-panel__actions">
+                @if (isUsed(invite)) {
+                  <app-pill [caps]="true" size="small">Used</app-pill>
+                } @else {
+                  <button
+                    class="workspace-invites-panel__copy-button"
+                    type="button"
+                    (click)="onCopyInvite(invite.token)"
+                  >
+                    {{ isCopied(invite.token) ? 'Copied' : 'Copy link' }}
+                  </button>
+                }
+              </div>
+            </app-entity-list-item>
+          }
+        </div>
+      }
+    }
+  </div>
+</app-shell-section-card>

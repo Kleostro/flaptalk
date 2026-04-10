@@ -1,0 +1,39 @@
+@if (isRendered()) {
+  <div aria-modal="true" class="ui-modal" [class.ui-modal--closing]="isClosing()" role="dialog">
+    <button
+      aria-label="Close modal"
+      class="ui-modal__backdrop"
+      type="button"
+      (click)="requestClose()"
+    ></button>
+
+    <section class="ui-modal__surface">
+      <header class="ui-modal__header">
+        <div class="ui-modal__copy">
+          @if (tag()) {
+            <span class="ui-modal__tag">{{ tag() }}</span>
+          }
+
+          <h2 class="ui-modal__title">{{ title() }}</h2>
+
+          @if (description()) {
+            <p class="ui-modal__description">{{ description() }}</p>
+          }
+        </div>
+
+        <button
+          aria-label="Close modal"
+          class="ui-modal__close"
+          type="button"
+          (click)="requestClose()"
+        >
+          Close
+        </button>
+      </header>
+
+      <div class="ui-modal__body">
+        <ng-content />
+      </div>
+    </section>
+  </div>
+}

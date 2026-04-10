@@ -1,0 +1,97 @@
+<app-shell>
+  <div appShellTitle class="workspace-invite-page__topbar-title">
+    <span class="workspace-invite-page__topbar-kicker">Workspace invite</span>
+    <strong>Join workspace</strong>
+  </div>
+
+  <div appShellActions class="workspace-invite-page__topbar-actions">
+    @if (authStatus() === 'anonymous') {
+      <app-link appearance="subtle" [queryParams]="redirectQueryParams()" [route]="loginRoute">
+        Sign in
+      </app-link>
+
+      <app-link [queryParams]="redirectQueryParams()" [route]="registerRoute">
+        Create account
+      </app-link>
+    }
+  </div>
+
+  <div appShellContent class="workspace-invite-page__content">
+    <app-card>
+      <div class="workspace-invite-page__panel">
+        <app-breadcrumbs [items]="breadcrumbs()" />
+
+        @if (isInvitePreviewPending()) {
+          <span class="workspace-invite-page__eyebrow">Loading</span>
+          <h1 class="workspace-invite-page__title">Restoring invite details...</h1>
+          <p class="workspace-invite-page__description">
+            We are checking the workspace and invite state now.
+          </p>
+        } @else if (invitePreview(); as preview) {
+          <span class="workspace-invite-page__eyebrow">Workspace invite</span>
+          <h1 class="workspace-invite-page__title">{{ preview.workspace.name }}</h1>
+          <p class="workspace-invite-page__description">
+            {{
+              preview.workspace.description ||
+                'A structured workspace for rooms, threads, and focused member context.'
+            }}
+          </p>
+
+          <dl class="workspace-invite-page__details">
+            <div class="workspace-invite-page__detail">
+              <dt>Status</dt>
+              <dd>
+                @if (preview.isUsed) {
+                  Used
+                } @else if (preview.isExpired) {
+                  Expired
+                } @else {
+                  Ready
+                }
+              </dd>
+            </div>
+
+            <div class="workspace-invite-page__detail">
+              <dt>Target</dt>
+              <dd>{{ preview.invite.email || 'Generic invite link' }}</dd>
+            </div>
+
+            <div class="workspace-invite-page__detail">
+              <dt>Expires</dt>
+              <dd>{{ preview.expiresAt | date: 'medium' }}</dd>
+            </div>
+          </dl>
+
+          @if (preview.isUsed) {
+            <p class="workspace-invite-page__callout">
+              This invite has already been used. Ask the workspace owner for a fresh link.
+            </p>
+          } @else if (preview.isExpired) {
+            <p class="workspace-invite-page__callout">
+              This invite has expired. Ask the workspace owner to issue a new one.
+            </p>
+          } @else if (authStatus() === 'authenticated') {
+            <app-button [disabled]="isAcceptPending()" [fluid]="true" (click)="acceptInvite()">
+              {{ isAcceptPending() ? 'Joining workspace...' : 'Accept invite' }}
+            </app-button>
+          } @else {
+            <div class="workspace-invite-page__action-stack">
+              <app-link [queryParams]="redirectQueryParams()" [route]="loginRoute">
+                Sign in to accept
+              </app-link>
+              <app-link [queryParams]="redirectQueryParams()" [route]="registerRoute">
+                Create account and continue
+              </app-link>
+            </div>
+          }
+        } @else {
+          <span class="workspace-invite-page__eyebrow">Unavailable</span>
+          <h1 class="workspace-invite-page__title">Invite not found</h1>
+          <p class="workspace-invite-page__description">
+            This link may be invalid or no longer available.
+          </p>
+        }
+      </div>
+    </app-card>
+  </div>
+</app-shell>

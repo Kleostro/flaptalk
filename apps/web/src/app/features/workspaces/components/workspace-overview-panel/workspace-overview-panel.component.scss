@@ -1,0 +1,11 @@
+.workspace-overview-panel {
+  display: grid;
+  gap: 1.25rem;
+
+  &__helper {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+}

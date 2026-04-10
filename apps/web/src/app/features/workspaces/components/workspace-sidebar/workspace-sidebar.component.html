@@ -1,5 +1,5 @@
 <div class="workspace-sidebar">
-  <span class="workspace-sidebar__label">Workspace</span>
+  <span class="workspace-sidebar__label">Community</span>
 
   <div class="workspace-sidebar__nav-list">
     <a [routerLink]="workspacePath" class="workspace-sidebar__nav-link">
@@ -42,6 +42,21 @@
       title="Summaries"
     />
   </div>
+
+  @if (isOwner()) {
+    <span class="workspace-sidebar__label workspace-sidebar__label--section">Owner tools</span>
+
+    <div class="workspace-sidebar__nav-list">
+      <a [routerLink]="workspaceSetupPath" class="workspace-sidebar__nav-link">
+        <app-shell-nav-item
+          [active]="setupActive()"
+          description="Manage invites, room setup, and workspace structure from a dedicated owner flow."
+          indexLabel="OT"
+          title="Owner setup"
+        />
+      </a>
+    </div>
+  }
 
   <div class="workspace-sidebar__account">
     <span class="workspace-sidebar__account-label">Signed in as</span>

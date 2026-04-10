@@ -1,46 +1,9 @@
 .workspace-room-page {
-  &__canvas-header {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-end;
-    justify-content: space-between;
-
-    margin-block-end: 1.25rem;
-  }
-
-  &__canvas-copy {
-    display: grid;
-    gap: 0.35rem;
-  }
-
-  &__canvas-kicker {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  &__title {
-    margin: 0;
-
-    font-size: clamp(2.1rem, 2.8vw, 3rem);
-    font-weight: 700;
-    line-height: 0.98;
-    text-wrap: balance;
-    letter-spacing: -0.06em;
-  }
-
-  &__description,
   &__helper {
     margin: 0;
     font-size: 0.95rem;
     line-height: 1.65;
     color: var(--text-secondary);
-  }
-
-  &__description {
-    max-inline-size: 33rem;
   }
 
   &__dashboard-grid {
@@ -114,13 +77,6 @@
   @media (width < 84rem) {
     &__dashboard-grid {
       grid-template-columns: 1fr;
-    }
-  }
-
-  @media (width < 72rem) {
-    &__canvas-header {
-      flex-direction: column;
-      align-items: flex-start;
     }
   }
 }

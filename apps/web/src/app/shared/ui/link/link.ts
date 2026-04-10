@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Params, RouterLink } from '@angular/router';
 
 import { LINK_APPEARANCE, type LinkAppearance } from '@web/app/shared/ui/link/link.constants';
 
@@ -13,5 +13,6 @@ import { LINK_APPEARANCE, type LinkAppearance } from '@web/app/shared/ui/link/li
 export class LinkComponent {
   public readonly appearance = input<LinkAppearance>(LINK_APPEARANCE.inline);
   public readonly ariaLabel = input<null | string>(null);
+  public readonly queryParams = input<null | Params>(null);
   public readonly route = input.required<string>();
 }

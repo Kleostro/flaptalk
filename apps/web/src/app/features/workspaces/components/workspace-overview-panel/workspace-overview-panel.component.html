@@ -1,0 +1,9 @@
+<app-shell-section-card tag="Overview" title="Current workspace">
+  <div class="workspace-overview-panel">
+    @if (workspace()?.description) {
+      <p class="workspace-overview-panel__helper">{{ workspace()?.description }}</p>
+    }
+
+    <app-key-value-list [items]="detailItems()" />
+  </div>
+</app-shell-section-card>

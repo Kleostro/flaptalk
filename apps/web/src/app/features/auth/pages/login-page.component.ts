@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { ToastService } from '@web/app/core/services/toast.service';
@@ -25,12 +25,18 @@ import { AuthFormFactoryService } from '@web/app/features/auth/services/auth-for
   templateUrl: './login-page.component.html',
 })
 export class LoginPageComponent {
+  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly authFacadeService = inject(AuthFacadeService);
   private readonly authFormFactoryService = inject(AuthFormFactoryService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly toastService = inject(ToastService);
 
+  public readonly alternateActionQueryParams = computed<null | Params>(() => {
+    const redirectTo = this.activatedRoute.snapshot.queryParamMap.get('redirectTo');
+
+    return redirectTo ? { redirectTo } : null;
+  });
   public readonly content: AuthPageContent = AUTH_PAGE_CONTENT.login;
   public readonly loginModel = this.authFormFactoryService.createLoginModel();
   public readonly loginForm = this.authFormFactoryService.createLoginForm(this.loginModel);
@@ -66,7 +72,10 @@ export class LoginPageComponent {
         },
         next: (result) => {
           this.toastService.success(result);
-          void this.router.navigateByUrl(`/${APP_ROUTE_PATHS.workspace}`);
+          void this.router.navigateByUrl(
+            this.activatedRoute.snapshot.queryParamMap.get('redirectTo') ??
+              `/${APP_ROUTE_PATHS.workspace}`,
+          );
         },
       });
   }

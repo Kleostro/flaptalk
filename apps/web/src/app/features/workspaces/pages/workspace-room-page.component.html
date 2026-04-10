@@ -1,31 +1,14 @@
-<div class="workspace-room-page__canvas-header">
-  <div class="workspace-room-page__canvas-copy">
-    <span class="workspace-room-page__canvas-kicker">Room canvas</span>
-    <h1 class="workspace-room-page__title">
-      @if (selectedRoom()) {
-        {{ selectedRoom()?.name }}
-      } @else {
-        Room unavailable
-      }
-    </h1>
-  </div>
-
-  <p class="workspace-room-page__description">
-    @if (selectedRoom()) {
-      Real-time messaging lives here now. Threads and catch-up layers will grow from this room feed
-      next.
-    } @else {
-      The selected room could not be restored from the current workspace context.
-    }
-  </p>
-</div>
+<app-page-header
+  [breadcrumbs]="breadcrumbs()"
+  [description]="roomHeaderDescription()"
+  kicker="Room canvas"
+  [title]="roomHeaderTitle()"
+/>
 
 <div class="workspace-room-page__dashboard-grid">
   <section class="workspace-room-page__primary-column">
-    <app-card>
+    <app-shell-section-card tag="Room feed" [title]="selectedRoom()?.name ?? 'Room feed'">
       <div class="workspace-room-page__panel">
-        <app-shell-panel-header tag="Room feed" [title]="selectedRoom()?.name ?? 'Room feed'" />
-
         <app-workspace-room-feed
           [activeThreadMessageId]="selectedThreadRootMessage()?.id ?? null"
           [currentReadMessageId]="lastReadMessageId()"
@@ -36,7 +19,7 @@
           (visibleMessageChange)="handleVisibleMessageChange($event)"
         />
       </div>
-    </app-card>
+    </app-shell-section-card>
 
     @if (selectedRoom()) {
       <app-card>
@@ -63,13 +46,8 @@
   </section>
 
   <section class="workspace-room-page__secondary-column">
-    <app-card>
+    <app-shell-section-card [tag]="hasSelectedThread() ? 'Live' : 'Thread'" title="Thread panel">
       <div class="workspace-room-page__panel">
-        <app-shell-panel-header
-          [tag]="hasSelectedThread() ? 'Live' : 'Thread'"
-          title="Thread panel"
-        />
-
         <app-workspace-thread-panel
           [currentReadMessageId]="lastReadMessageId()"
           [isPending]="isThreadPending()"
@@ -99,12 +77,10 @@
           </form>
         }
       </div>
-    </app-card>
+    </app-shell-section-card>
 
-    <app-card>
+    <app-shell-section-card tag="Context" title="Room details">
       <div class="workspace-room-page__panel">
-        <app-shell-panel-header tag="Context" title="Room details" />
-
         @if (selectedRoom()?.description) {
           <p class="workspace-room-page__helper">{{ selectedRoom()?.description }}</p>
         } @else {
@@ -114,38 +90,14 @@
           </p>
         }
 
-        <dl class="workspace-room-page__details">
-          <div class="workspace-room-page__detail">
-            <dt>Room ID</dt>
-            <dd>{{ selectedRoom()?.id ?? '—' }}</dd>
-          </div>
-
-          <div class="workspace-room-page__detail">
-            <dt>Slug</dt>
-            <dd>{{ selectedRoom()?.slug ?? '—' }}</dd>
-          </div>
-
-          <div class="workspace-room-page__detail">
-            <dt>Workspace</dt>
-            <dd>{{ currentWorkspace()?.name ?? '—' }}</dd>
-          </div>
-        </dl>
+        <app-key-value-list [items]="roomDetailItems()" />
       </div>
-    </app-card>
+    </app-shell-section-card>
 
-    <app-card>
+    <app-shell-section-card tag="Status" title="Discussion health">
       <div class="workspace-room-page__panel">
-        <app-shell-panel-header tag="Status" title="Discussion health" />
-
-        <div class="workspace-room-page__stat-list">
-          @for (stat of roomHealthRows(); track stat.label) {
-            <div class="workspace-room-page__stat-row">
-              <span>{{ stat.label }}</span>
-              <strong>{{ stat.value }}</strong>
-            </div>
-          }
-        </div>
+        <app-key-value-list [items]="roomHealthRows()" />
       </div>
-    </app-card>
+    </app-shell-section-card>
   </section>
 </div>
