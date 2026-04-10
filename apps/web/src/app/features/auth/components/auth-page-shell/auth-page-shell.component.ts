@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Params } from '@angular/router';
 
 import { ThemeService } from '@web/app/core/services/theme.service';
 import { type AuthFormMode } from '@web/app/features/auth/types/auth-form-mode.type';
 import { AppShellComponent } from '@web/app/shared/ui/app-shell/app-shell';
 import { CardComponent } from '@web/app/shared/ui/card/card';
 import { LinkComponent } from '@web/app/shared/ui/link/link';
+import { PillComponent } from '@web/app/shared/ui/pill/pill.component';
 import { ShellNavItemComponent } from '@web/app/shared/ui/shell-nav-item/shell-nav-item';
 import { ThemeSwitcherComponent } from '@web/app/shared/ui/theme-switcher/theme-switcher';
 
@@ -14,6 +16,7 @@ import { ThemeSwitcherComponent } from '@web/app/shared/ui/theme-switcher/theme-
     AppShellComponent,
     CardComponent,
     LinkComponent,
+    PillComponent,
     ShellNavItemComponent,
     ThemeSwitcherComponent,
   ],
@@ -25,6 +28,7 @@ export class AuthPageShellComponent {
   private readonly themeService = inject(ThemeService);
 
   public readonly alternateActionLabel = input.required<string>();
+  public readonly alternateActionQueryParams = input<null | Params>(null);
   public readonly alternateActionRoute = input.required<string>();
   public readonly alternateActionText = input.required<string>();
   public readonly description = input.required<string>();

@@ -1,0 +1,21 @@
+<article class="ui-entity-list-item" [class.ui-entity-list-item--stack-on-mobile]="stackOnMobile()">
+  <div class="ui-entity-list-item__main">
+    <div class="ui-entity-list-item__head">
+      <div class="ui-entity-list-item__identity">
+        <ng-content select="[entityIdentity]" />
+      </div>
+
+      <div class="ui-entity-list-item__badge">
+        <ng-content select="[entityBadge]" />
+      </div>
+    </div>
+
+    <div class="ui-entity-list-item__body">
+      <ng-content />
+    </div>
+  </div>
+
+  <div class="ui-entity-list-item__aside">
+    <ng-content select="[entityAside]" />
+  </div>
+</article>

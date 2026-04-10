@@ -18,9 +18,9 @@
       </button>
     </div>
 
-    <span class="workspace-shell-page__topbar-chip">
+    <app-pill appearance="outline" [caps]="true">
       {{ hasWorkspace() ? currentWorkspaceRole() : 'Setup' }}
-    </span>
+    </app-pill>
 
     <div class="workspace-shell-page__avatar" aria-label="Current member">
       {{ userInitials() }}
@@ -36,8 +36,10 @@
     [activeRoomId]="selectedRoom()?.id ?? null"
     [hasWorkspace]="hasWorkspace()"
     [homeActive]="isHomeRoute()"
+    [isOwner]="isOwner()"
     [roomCount]="roomCount()"
     [rooms]="rooms()"
+    [setupActive]="isSetupRoute()"
     [totalUnreadCount]="totalUnreadMessageCount()"
     [unreadMessageCountByRoomId]="unreadMessageCountByRoomId()"
     [userEmail]="user()?.email"

@@ -14,11 +14,14 @@ import { ShellNavItemComponent } from '@web/app/shared/ui/shell-nav-item/shell-n
 })
 export class WorkspaceSidebarComponent {
   protected readonly workspacePath = `/${APP_ROUTE_PATHS.workspace}`;
+  protected readonly workspaceSetupPath = `/${APP_ROUTE_PATHS.workspace}/${APP_ROUTE_PATHS.workspaceSetup}`;
   public readonly activeRoomId = input<null | number>(null);
   public readonly hasWorkspace = input.required<boolean>();
   public readonly homeActive = input.required<boolean>();
+  public readonly isOwner = input.required<boolean>();
   public readonly roomCount = input.required<number>();
   public readonly rooms = input.required<readonly Room[]>();
+  public readonly setupActive = input.required<boolean>();
   public readonly totalUnreadCount = input(0);
   public readonly unreadMessageCountByRoomId = input<ReadonlyMap<number, number>>(new Map());
   public readonly userEmail = input<string | undefined>();

@@ -5,6 +5,13 @@ import { authRequiredGuard } from '@web/app/features/auth/guards/auth-required.g
 
 export const routes: Routes = [
   {
+    loadComponent: () =>
+      import('@web/app/features/workspaces/pages/workspace-invite-page.component').then(
+        (module) => module.WorkspaceInvitePageComponent,
+      ),
+    path: `${APP_ROUTE_PATHS.invites}/:token`,
+  },
+  {
     path: APP_ROUTE_PATHS.root,
     pathMatch: 'full',
     redirectTo: APP_ROUTE_PATHS.workspace,

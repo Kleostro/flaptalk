@@ -1,0 +1,8 @@
+<dl class="ui-key-value-list">
+  @for (item of items(); track item.label) {
+    <div class="ui-key-value-list__row">
+      <dt>{{ item.label }}</dt>
+      <dd>{{ item.value }}</dd>
+    </div>
+  }
+</dl>

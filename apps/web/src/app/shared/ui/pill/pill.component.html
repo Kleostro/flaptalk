@@ -1,0 +1,9 @@
+<span
+  class="ui-pill"
+  [class.ui-pill--accent]="appearance() === 'accent'"
+  [class.ui-pill--caps]="caps()"
+  [class.ui-pill--outline]="appearance() === 'outline'"
+  [class.ui-pill--small]="size() === 'small'"
+>
+  <ng-content />
+</span>

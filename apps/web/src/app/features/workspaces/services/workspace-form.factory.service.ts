@@ -1,10 +1,14 @@
 import { Injectable, signal, type WritableSignal } from '@angular/core';
 import { type FieldTree, form, maxLength, minLength, required } from '@angular/forms/signals';
 
+import { type CreateInvite } from '@web/app/features/workspaces/types/create-invite.model';
 import { type CreateMessage } from '@web/app/features/workspaces/types/create-message.model';
 import { type CreateRoom } from '@web/app/features/workspaces/types/create-room.model';
 import { type CreateWorkspace } from '@web/app/features/workspaces/types/create-workspace.model';
 
+const INVITE_EMAIL_MAX_LENGTH = 320;
+const INVITE_EXPIRES_IN_HOURS_MAX = 720;
+const INVITE_EXPIRES_IN_HOURS_MIN = 1;
 const MESSAGE_BODY_MAX_LENGTH = 4000;
 const MESSAGE_BODY_MIN_LENGTH = 1;
 const ROOM_DESCRIPTION_MAX_LENGTH = 500;
@@ -16,6 +20,28 @@ const WORKSPACE_NAME_MIN_LENGTH = 1;
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceFormFactoryService {
+  public createInviteForm(model: WritableSignal<CreateInvite>): FieldTree<CreateInvite> {
+    return form(model, (path) => {
+      maxLength(path.email, INVITE_EMAIL_MAX_LENGTH, {
+        message: `Use no more than ${INVITE_EMAIL_MAX_LENGTH} characters.`,
+      });
+
+      required(path.expiresInHours, {
+        message: 'Invite expiration is required.',
+      });
+      minLength(path.expiresInHours, 1, {
+        message: 'Invite expiration is required.',
+      });
+    });
+  }
+
+  public createInviteModel(): WritableSignal<CreateInvite> {
+    return signal({
+      email: '',
+      expiresInHours: '72',
+    });
+  }
+
   public createMessageForm(model: WritableSignal<CreateMessage>): FieldTree<CreateMessage> {
     return form(model, (path) => {
       required(path.body, { message: 'Message body is required.' });
@@ -79,5 +105,25 @@ export class WorkspaceFormFactoryService {
       description: '',
       name: '',
     });
+  }
+
+  public parseInviteExpiresInHours(rawValue: string): null | number {
+    const normalizedValue = rawValue.trim();
+
+    if (!/^\d+$/.test(normalizedValue)) {
+      return null;
+    }
+
+    const expiresInHours = Number(normalizedValue);
+
+    if (
+      !Number.isInteger(expiresInHours) ||
+      expiresInHours < INVITE_EXPIRES_IN_HOURS_MIN ||
+      expiresInHours > INVITE_EXPIRES_IN_HOURS_MAX
+    ) {
+      return null;
+    }
+
+    return expiresInHours;
   }
 }

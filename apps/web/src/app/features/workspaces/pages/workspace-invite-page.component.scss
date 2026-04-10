@@ -1,0 +1,101 @@
+.workspace-invite-page {
+  &__topbar-title {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  &__topbar-kicker,
+  &__eyebrow {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__topbar-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  &__content {
+    max-inline-size: 48rem;
+    margin-inline: auto;
+  }
+
+  &__panel {
+    display: grid;
+    gap: 1.1rem;
+    align-content: start;
+  }
+
+  &__title {
+    margin: 0;
+
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    font-weight: 700;
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+  }
+
+  &__description,
+  &__callout {
+    margin: 0;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+
+  &__details {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  &__detail {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0.95rem 1rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+    border-radius: 1rem;
+
+    background: color-mix(in oklch, var(--surface-base) 14%, transparent);
+
+    dt {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    dd {
+      margin: 0;
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-align: end;
+    }
+  }
+
+  &__action-stack {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  @media (width < 52rem) {
+    &__action-stack {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &__detail {
+      flex-direction: column;
+      align-items: flex-start;
+
+      dd {
+        text-align: start;
+      }
+    }
+  }
+}

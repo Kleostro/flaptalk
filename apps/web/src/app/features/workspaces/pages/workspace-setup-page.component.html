@@ -1,0 +1,112 @@
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  description="Shape access and structure intentionally. Community home stays focused on reading and participation, while setup holds owner-side actions."
+  kicker="Owner setup"
+  title="Control workspace setup"
+/>
+
+@if (!hasWorkspace()) {
+  <app-card>
+    <div class="workspace-setup-page__panel workspace-setup-page__panel--centered">
+      <app-empty-state
+        description="Owner setup appears after the first workspace exists."
+        kicker="Setup unavailable"
+        title="Create a workspace first"
+      />
+    </div>
+  </app-card>
+} @else if (!canManageRooms()) {
+  <app-card>
+    <div class="workspace-setup-page__panel workspace-setup-page__panel--centered">
+      <app-empty-state
+        description="You can keep using rooms and catch-up from the workspace home, but owner tools stay in the setup area."
+        kicker="Owner access"
+        title="Setup is limited to workspace owners"
+      />
+      <a [routerLink]="['/', APP_ROUTE_PATHS.workspace]" class="workspace-setup-page__link-button">
+        Return to workspace home
+      </a>
+    </div>
+  </app-card>
+} @else {
+  <div class="workspace-setup-page__quick-grid">
+    <app-shell-section-card tag="Owner" title="Quick actions">
+      <div class="workspace-setup-page__panel">
+        <div class="workspace-setup-page__action-list">
+          <button
+            class="workspace-setup-page__action-card"
+            type="button"
+            (click)="isInviteFormOpen.set(true)"
+          >
+            <span class="workspace-setup-page__action-title">Create invite link</span>
+            <span class="workspace-setup-page__action-copy">
+              Add a new invite without leaving setup.
+            </span>
+          </button>
+
+          <a [routerLink]="createRoomLink" class="workspace-setup-page__action-card">
+            <span class="workspace-setup-page__action-title">Create room</span>
+            <span class="workspace-setup-page__action-copy">
+              Open a dedicated page for room setup and naming.
+            </span>
+          </a>
+        </div>
+      </div>
+    </app-shell-section-card>
+
+    <app-shell-section-card tag="Status" title="Setup health">
+      <div class="workspace-setup-page__panel">
+        <app-key-value-list [items]="setupHealthItems()" />
+      </div>
+    </app-shell-section-card>
+  </div>
+
+  <app-workspace-invites-panel
+    [activeInviteCount]="activeInviteCount()"
+    [canManageInvites]="canManageInvites()"
+    [hasWorkspace]="hasWorkspace()"
+    [invites]="invites()"
+    [isPending]="isInviteCollectionPending()"
+    (copyInvite)="copyInviteLink($event)"
+  />
+
+  <app-modal
+    description="Issue a new shareable workspace invite and copy it right away."
+    [isOpen]="isInviteFormOpen()"
+    tag="Access"
+    title="Create invite link"
+    (closed)="closeInviteModal()"
+  >
+    <form class="workspace-setup-page__invite-form" (submit)="createInvite($event)">
+      <app-text-input-field
+        autocomplete="email"
+        [field]="inviteForm.email"
+        hint="Optional. Leave blank for a generic invite link."
+        inputId="invite-email"
+        label="Invite email"
+        placeholder="alex@flaptalk.app"
+        [showErrors]="showInviteFormErrors()"
+        type="email"
+      />
+
+      <app-text-input-field
+        autocomplete="off"
+        [field]="inviteForm.expiresInHours"
+        hint="Use hours, for example 24, 72, or 168."
+        inputId="invite-expiration"
+        label="Expires in hours"
+        placeholder="72"
+        [showErrors]="showInviteFormErrors()"
+        type="number"
+      />
+
+      <app-button
+        [disabled]="isCreateInvitePending() || isInviteInvalid()"
+        [fluid]="true"
+        type="submit"
+      >
+        {{ isCreateInvitePending() ? 'Creating invite...' : 'Create invite link' }}
+      </app-button>
+    </form>
+  </app-modal>
+}

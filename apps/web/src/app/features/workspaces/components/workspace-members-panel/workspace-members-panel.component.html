@@ -1,0 +1,35 @@
+<app-shell-section-card tag="Members" title="Workspace people">
+  <div class="workspace-members-panel">
+    @if (!hasWorkspace()) {
+      <app-empty-state description="Members appear here once the first workspace exists." />
+    } @else if (isPending()) {
+      <app-empty-state description="Restoring the current member list..." />
+    } @else if (members().length === 0) {
+      <app-empty-state
+        description="No visible members yet. Accepted invites will start filling this roster."
+      />
+    } @else {
+      <div class="workspace-members-panel__list">
+        @for (member of members(); track member.user.id) {
+          <app-entity-list-item>
+            <div entityIdentity class="workspace-members-panel__identity">
+              <strong>{{ member.user.email }}</strong>
+              <span>{{ member.role }}</span>
+              @if (member.isCurrentUser) {
+                <app-pill appearance="accent" [caps]="true" size="small">you</app-pill>
+              }
+            </div>
+
+            <time
+              entityAside
+              class="workspace-members-panel__meta"
+              [attr.datetime]="member.joinedAt"
+            >
+              Joined {{ member.joinedAt | date: 'mediumDate' }}
+            </time>
+          </app-entity-list-item>
+        }
+      </div>
+    }
+  </div>
+</app-shell-section-card>

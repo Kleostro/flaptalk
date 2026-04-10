@@ -1,0 +1,40 @@
+<app-shell-section-card tag="Home" title="Catch up">
+  <div class="workspace-catch-up-panel">
+    @if (isPending()) {
+      <app-empty-state description="Restoring unread counts and recent room activity..." />
+    } @else if (recentRoomActivity().length > 0) {
+      <div class="workspace-catch-up-panel__activity-list">
+        @for (roomActivity of recentRoomActivity(); track roomActivity.room.id) {
+          <app-entity-list-item>
+            <div entityIdentity class="workspace-catch-up-panel__activity-heading">
+              <strong>{{ roomActivity.room.name }}</strong>
+              @if (roomActivity.unreadMessageCount > 0) {
+                <app-pill entityBadge appearance="accent" size="small">
+                  {{ roomActivity.unreadMessageCount }}
+                </app-pill>
+              }
+            </div>
+
+            <p>
+              {{
+                roomActivity.lastMessage?.body ||
+                  'This room is configured and ready for its first unread activity.'
+              }}
+            </p>
+          </app-entity-list-item>
+        }
+      </div>
+    } @else {
+      <div class="workspace-catch-up-panel__activity-list">
+        @for (card of activityCards(); track card.title) {
+          <app-entity-list-item>
+            <div entityIdentity>
+              <strong>{{ card.title }}</strong>
+            </div>
+            <p>{{ card.body }}</p>
+          </app-entity-list-item>
+        }
+      </div>
+    }
+  </div>
+</app-shell-section-card>

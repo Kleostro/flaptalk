@@ -1,0 +1,72 @@
+.workspace-members-panel {
+  display: grid;
+  gap: 1rem;
+
+  &__helper {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  &__list {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  &__item {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0.95rem 1rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+    border-radius: 1rem;
+
+    background: color-mix(in oklch, var(--surface-base) 14%, transparent);
+  }
+
+  &__identity {
+    display: grid;
+    gap: 0.18rem;
+
+    strong {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+
+    span {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      text-transform: capitalize;
+    }
+  }
+
+  &__current-user {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__meta {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    text-align: end;
+  }
+
+  @media (width < 52rem) {
+    &__item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &__meta {
+      text-align: start;
+    }
+  }
+}

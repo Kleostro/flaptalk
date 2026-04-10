@@ -1,15 +1,19 @@
 import { Injectable } from '@angular/core';
 import {
+  type Invite,
+  type InvitePreview,
   type Message,
   type Room,
   type RoomReadState,
   type WorkspaceAccess,
+  type WorkspaceMember,
   type WorkspaceRoomActivity,
 } from '@flaptalk/api-contract';
 import { defer, from, map, Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { api } from '@web/app/api.config';
+import { type CreateInvite } from '@web/app/features/workspaces/types/create-invite.model';
 import { type CreateMessage } from '@web/app/features/workspaces/types/create-message.model';
 import { type CreateRoom } from '@web/app/features/workspaces/types/create-room.model';
 import { type CreateWorkspace } from '@web/app/features/workspaces/types/create-workspace.model';
@@ -63,6 +67,44 @@ export class WorkspaceApiService {
     }
 
     return fallbackMessage;
+  }
+
+  public acceptInvite(token: string): Observable<WorkspaceAccess> {
+    return this.createRequest$(
+      () => api.invites({ token }).accept.post(),
+      (response) => {
+        if (response.data?.workspace) {
+          return response.data;
+        }
+
+        throw new Error(
+          this.getErrorMessage(response, 'Unable to accept the invite.', 'Sign in to accept it.'),
+        );
+      },
+      'Unable to accept the invite.',
+    );
+  }
+
+  public createInvite(workspaceId: number, invite: CreateInvite): Observable<Invite> {
+    return this.createRequest$(
+      () => {
+        const normalizedEmail = invite.email.trim();
+        const expiresInHours = Number(invite.expiresInHours.trim());
+
+        return api.workspaces({ workspaceId }).invites.post({
+          ...(normalizedEmail ? { email: normalizedEmail } : {}),
+          expiresInHours,
+        });
+      },
+      (response) => {
+        if (response.data?.id) {
+          return response.data;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to create the invite.'));
+      },
+      'Unable to create the invite.',
+    );
   }
 
   public createMessage(roomId: number, message: CreateMessage): Observable<Message> {
@@ -125,6 +167,20 @@ export class WorkspaceApiService {
     );
   }
 
+  public getInvitePreview(token: string): Observable<InvitePreview> {
+    return this.createRequest$(
+      () => api.invites({ token }).get(),
+      (response) => {
+        if (response.data?.invite) {
+          return response.data;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to load the invite.'));
+      },
+      'Unable to load the invite.',
+    );
+  }
+
   public getMessageThread(messageId: number): Observable<{
     readonly replies: Message[];
     readonly rootMessage: Message;
@@ -148,6 +204,10 @@ export class WorkspaceApiService {
       (response) => {
         if (response.data?.workspaces) {
           return response.data.workspaces;
+        }
+
+        if (response.status === UNAUTHORIZED_STATUS) {
+          return [];
         }
 
         throw new Error(this.getErrorMessage(response, 'Unable to load your workspaces.'));
@@ -185,6 +245,34 @@ export class WorkspaceApiService {
         throw new Error(this.getErrorMessage(response, 'Unable to load workspace activity.'));
       },
       'Unable to load workspace activity.',
+    );
+  }
+
+  public getWorkspaceInvites(workspaceId: number): Observable<Invite[]> {
+    return this.createRequest$(
+      () => api.workspaces({ workspaceId }).invites.get(),
+      (response) => {
+        if (response.data?.invites) {
+          return response.data.invites;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to load workspace invites.'));
+      },
+      'Unable to load workspace invites.',
+    );
+  }
+
+  public getWorkspaceMembers(workspaceId: number): Observable<WorkspaceMember[]> {
+    return this.createRequest$(
+      () => api.workspaces({ workspaceId }).members.get(),
+      (response) => {
+        if (response.data?.members) {
+          return response.data.members;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to load workspace members.'));
+      },
+      'Unable to load workspace members.',
     );
   }
 

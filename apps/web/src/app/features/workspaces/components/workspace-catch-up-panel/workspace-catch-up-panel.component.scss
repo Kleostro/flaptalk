@@ -1,0 +1,64 @@
+.workspace-catch-up-panel {
+  display: grid;
+  gap: 1.25rem;
+
+  &__helper {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+
+  &__activity-list {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  &__activity-item {
+    display: grid;
+    gap: 0.3rem;
+
+    padding: 1rem 1.05rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+    border-radius: 1rem;
+
+    background: color-mix(in oklch, var(--surface-base) 12%, transparent);
+
+    strong {
+      font-size: 0.98rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+  }
+
+  &__activity-heading {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__activity-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-inline-size: 1.65rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+
+    background: color-mix(in oklch, var(--surface-accent) 68%, transparent);
+  }
+}
