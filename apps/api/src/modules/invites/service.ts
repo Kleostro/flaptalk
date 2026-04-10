@@ -151,6 +151,20 @@ export class InvitesService {
       );
     }
 
+    const existingMembership = await prisma.workspaceMember.findUnique({
+      select: workspaceAccessSelect,
+      where: {
+        workspaceId_userId: {
+          userId: params.userId,
+          workspaceId: invite.workspaceId,
+        },
+      },
+    });
+
+    if (existingMembership) {
+      return serializeWorkspaceAccess(existingMembership);
+    }
+
     if (invite.usedAt) {
       throw new DomainError(409, 'invite_already_used', 'Invite has already been used.');
     }
@@ -159,28 +173,14 @@ export class InvitesService {
       throw new DomainError(409, 'invite_expired', 'Invite has expired.');
     }
 
-    const [, workspaceAccess] = await prisma.$transaction(async (transaction) => {
-      const existingMembership = await transaction.workspaceMember.findUnique({
-        select: {
-          role: true,
-        },
-        where: {
-          workspaceId_userId: {
-            userId: params.userId,
-            workspaceId: invite.workspaceId,
-          },
+    const workspaceAccess = await prisma.$transaction(async (transaction) => {
+      await transaction.workspaceMember.create({
+        data: {
+          role: 'MEMBER',
+          userId: params.userId,
+          workspaceId: invite.workspaceId,
         },
       });
-
-      if (!existingMembership) {
-        await transaction.workspaceMember.create({
-          data: {
-            role: 'MEMBER',
-            userId: params.userId,
-            workspaceId: invite.workspaceId,
-          },
-        });
-      }
 
       await transaction.invite.update({
         data: {
@@ -205,7 +205,7 @@ export class InvitesService {
         throw new DomainError(404, 'workspace_not_found', 'Workspace not found.');
       }
 
-      return [existingMembership, createdWorkspaceAccess] as const;
+      return createdWorkspaceAccess;
     });
 
     return serializeWorkspaceAccess(workspaceAccess);
