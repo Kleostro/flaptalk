@@ -2,6 +2,7 @@ export * from './app.contract';
 export * from './constants/auth';
 export * from './models/auth';
 export * from './models/error';
+export * from './models/invites';
 export * from './models/messages';
 export * from './models/read-states';
 export * from './models/rooms';

@@ -3,6 +3,10 @@ import Elysia from 'elysia';
 import { prisma } from '@api/db/prisma';
 import { DomainError } from '@api/errors/domain-error';
 import {
+  serializeWorkspaceMember,
+  workspaceMemberSelect,
+} from '@api/modules/invites/public-invite';
+import {
   serializeWorkspaceAccess,
   workspaceAccessSelect,
   workspaceSelect,
@@ -131,6 +135,49 @@ export class WorkspacesService {
       workspaces: workspaceAccessList.map((workspaceAccess) =>
         serializeWorkspaceAccess(workspaceAccess),
       ),
+    };
+  }
+
+  public async listWorkspaceMembers(params: {
+    readonly userId: number;
+    readonly workspaceId: number;
+  }) {
+    const workspaceAccess = await prisma.workspaceMember.findUnique({
+      select: {
+        workspaceId: true,
+      },
+      where: {
+        workspaceId_userId: {
+          userId: params.userId,
+          workspaceId: params.workspaceId,
+        },
+      },
+    });
+
+    if (!workspaceAccess) {
+      throw new DomainError(404, 'workspace_not_found', 'Workspace not found.');
+    }
+
+    const members = await prisma.workspaceMember.findMany({
+      orderBy: [
+        {
+          role: 'asc',
+        },
+        {
+          joinedAt: 'asc',
+        },
+        {
+          id: 'asc',
+        },
+      ],
+      select: workspaceMemberSelect,
+      where: {
+        workspaceId: params.workspaceId,
+      },
+    });
+
+    return {
+      members: members.map((member) => serializeWorkspaceMember(member)),
     };
   }
 }

@@ -47,3 +47,8 @@ export type Message = Prisma.MessageModel
  * 
  */
 export type RoomReadState = Prisma.RoomReadStateModel
+/**
+ * Model Invite
+ * 
+ */
+export type Invite = Prisma.InviteModel
