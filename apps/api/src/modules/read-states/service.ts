@@ -4,6 +4,7 @@ import { prisma } from '@api/db/prisma';
 import { DomainError } from '@api/errors/domain-error';
 import { messageSelect } from '@api/modules/messages/public-message';
 import {
+  serializeWorkspaceCatchUpItem,
   serializeReadState,
   serializeWorkspaceRoomActivity,
 } from '@api/modules/read-states/public-read-state';
@@ -68,7 +69,7 @@ export class ReadStatesService {
     });
   }
 
-  public async getWorkspaceActivity(params: {
+  private async buildWorkspaceRoomActivities(params: {
     readonly userId: number;
     readonly workspaceId: number;
   }) {
@@ -117,7 +118,7 @@ export class ReadStatesService {
       lastMessages.map((room) => [room.id, room.messages[0] ?? null]),
     );
 
-    const rooms = await Promise.all(
+    return Promise.all(
       workspaceMembership.rooms.map(async (room) => {
         const readState = readStateByRoomId.get(room.id) ?? null;
         const unreadMessageWhere = readState?.lastReadMessageId
@@ -142,6 +143,35 @@ export class ReadStatesService {
         });
       }),
     );
+  }
+
+  private sortWorkspaceRoomActivities(
+    leftRoomActivity: ReturnType<typeof serializeWorkspaceRoomActivity>,
+    rightRoomActivity: ReturnType<typeof serializeWorkspaceRoomActivity>,
+  ): number {
+    const unreadDelta =
+      Number(rightRoomActivity.unreadMessageCount > 0) -
+      Number(leftRoomActivity.unreadMessageCount > 0);
+
+    if (unreadDelta !== 0) {
+      return unreadDelta;
+    }
+
+    const rightTimestamp = Date.parse(
+      rightRoomActivity.lastMessage?.createdAt ?? new Date(0).toISOString(),
+    );
+    const leftTimestamp = Date.parse(
+      leftRoomActivity.lastMessage?.createdAt ?? new Date(0).toISOString(),
+    );
+
+    return rightTimestamp - leftTimestamp;
+  }
+
+  public async getWorkspaceActivity(params: {
+    readonly userId: number;
+    readonly workspaceId: number;
+  }) {
+    const rooms = await this.buildWorkspaceRoomActivities(params);
 
     return {
       rooms,
@@ -150,6 +180,42 @@ export class ReadStatesService {
         0,
       ),
       unreadRoomCount: rooms.filter((roomActivity) => roomActivity.unreadMessageCount > 0).length,
+    };
+  }
+
+  public async getWorkspaceCatchUp(params: {
+    readonly userId: number;
+    readonly workspaceId: number;
+  }) {
+    const roomActivities = await this.buildWorkspaceRoomActivities(params);
+    const items = [...roomActivities]
+      .sort((leftRoomActivity, rightRoomActivity) =>
+        this.sortWorkspaceRoomActivities(leftRoomActivity, rightRoomActivity),
+      )
+      .map((roomActivity) =>
+        serializeWorkspaceCatchUpItem({
+          contextType:
+            roomActivity.lastMessage?.parentMessageId === null ||
+            roomActivity.lastMessage?.parentMessageId === undefined
+              ? 'room_message'
+              : 'thread_reply',
+          lastActivityAt: roomActivity.lastMessage
+            ? new Date(roomActivity.lastMessage.createdAt)
+            : null,
+          lastAuthor: roomActivity.lastMessage?.author ?? null,
+          preview:
+            roomActivity.lastMessage?.body ??
+            'This room is configured and ready for the next wave of activity.',
+          resumeMode: roomActivity.unreadMessageCount > 0 ? 'unread' : 'latest',
+          room: roomActivity.room,
+          threadRootMessageId: roomActivity.lastMessage?.parentMessageId ?? null,
+          unreadMessageCount: roomActivity.unreadMessageCount,
+        }),
+      );
+
+    return {
+      items,
+      primaryItem: items[0] ?? null,
     };
   }
 
