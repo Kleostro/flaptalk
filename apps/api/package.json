@@ -1,0 +1,32 @@
+{
+  "name": "@flaptalk/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "build": "bunx tsc -p tsconfig.build.json",
+    "typecheck": "bunx tsc -p tsconfig.json --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:push": "prisma db push",
+    "prisma:seed": "prisma db seed",
+    "prisma:format": "prisma format"
+  },
+  "dependencies": {
+    "@flaptalk/api-contract": "workspace:*",
+    "@elysiajs/cors": "^1.4.0",
+    "@elysiajs/jwt": "^1.4.1",
+    "@elysiajs/swagger": "^1.3.1",
+    "@prisma/adapter-pg": "^7.5.0",
+    "@prisma/client": "^7.5.0",
+    "elysia": "^1.4.28",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "bun-types": "^1.3.11",
+    "dotenv": "^17.2.3",
+    "prisma": "^7.5.0",
+    "prismabox": "^1.1.26"
+  }
+}

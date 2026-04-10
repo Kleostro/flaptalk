@@ -1,0 +1,8 @@
+node_modules
+.angular
+dist
+coverage
+apps/api/src/generated
+apps/web/dist
+apps/web/.angular
+bun.lock

@@ -1,0 +1,97 @@
+<app-shell>
+  <div appShellTitle class="auth-page-shell__topbar-title">
+    <span class="auth-page-shell__topbar-kicker">Workspace access</span>
+    <strong>{{ mode() === 'login' ? 'Session recovery' : 'Create account access' }}</strong>
+  </div>
+
+  <div appShellActions class="auth-page-shell__topbar-actions">
+    <div class="auth-page-shell__action-icons" aria-label="Shell actions">
+      <button class="auth-page-shell__icon-button" type="button">
+        <span aria-hidden="true">⌕</span>
+      </button>
+
+      <button class="auth-page-shell__icon-button" type="button">
+        <span aria-hidden="true">☰</span>
+      </button>
+    </div>
+
+    <div class="auth-page-shell__theme-control">
+      <app-theme-switcher
+        [currentTheme]="themeMode()"
+        [options]="themeOptions"
+        (themeSelected)="setTheme($event)"
+      />
+    </div>
+
+    <span class="auth-page-shell__topbar-chip">
+      {{ mode() === 'login' ? 'Sign in' : 'Register' }}
+    </span>
+  </div>
+
+  <div appShellSidebar class="auth-page-shell__sidebar">
+    <span class="auth-page-shell__sidebar-label">Navigation</span>
+
+    <div class="auth-page-shell__nav-list">
+      <app-shell-nav-item
+        [active]="true"
+        [description]="
+          mode() === 'login'
+            ? 'Restore the current session and continue into the workspace.'
+            : 'Create account access before the workspace setup flow.'
+        "
+        indexLabel="01"
+        [title]="mode() === 'login' ? 'Access panel' : 'Account setup'"
+      />
+
+      <app-shell-nav-item
+        description="Structured spaces for updates, questions, and shared resources."
+        indexLabel="02"
+        title="Community rooms"
+      />
+
+      <app-shell-nav-item
+        description="Replies and summaries stay attached to the same shell later on."
+        indexLabel="03"
+        title="Thread context"
+      />
+    </div>
+
+    <div class="auth-page-shell__sidebar-summary">
+      <span class="auth-page-shell__eyebrow">{{ eyebrow() }}</span>
+      <h1 class="auth-page-shell__title">{{ title() }}</h1>
+      <p class="auth-page-shell__description">{{ description() }}</p>
+    </div>
+  </div>
+
+  <div appShellContentHeader class="auth-page-shell__content-header">
+    <div class="auth-page-shell__content-copy">
+      <span class="auth-page-shell__content-kicker">Access panel</span>
+      <strong class="auth-page-shell__content-title">
+        {{ mode() === 'login' ? 'Enter the workspace shell' : 'Prepare a new workspace account' }}
+      </strong>
+    </div>
+
+    <p class="auth-page-shell__content-note">
+      {{
+        mode() === 'login'
+          ? 'A calm entry point into your current workspace.'
+          : 'The first step before workspace creation and membership setup.'
+      }}
+    </p>
+  </div>
+
+  <div appShellContent>
+    <app-card>
+      <div class="auth-page-shell__panel-content">
+        <ng-content />
+
+        <p class="auth-page-shell__alternate">
+          <span>{{ alternateActionText() }}</span>
+          <app-link [route]="alternateActionRoute()">
+            {{ alternateActionLabel() }}
+          </app-link>
+        </p>
+      </div>
+    </app-card>
+  </div>
+</app-shell>

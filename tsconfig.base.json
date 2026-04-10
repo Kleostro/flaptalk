@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "types": ["bun-types"],
+    "paths": {
+      "@api": ["./apps/api/src"],
+      "@api/*": ["./apps/api/src/*"],
+      "@flaptalk/api-contract": ["./packages/api-contract/src/index.ts"],
+      "@flaptalk/api-contract/*": ["./packages/api-contract/src/*"],
+      "@web": ["./apps/web/src"],
+      "@web/*": ["./apps/web/src/*"]
+    }
+  }
+}

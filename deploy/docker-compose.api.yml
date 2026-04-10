@@ -1,0 +1,9 @@
+services:
+  api:
+    image: ${API_IMAGE:?API_IMAGE is required}
+    container_name: flaptalk-api
+    restart: unless-stopped
+    env_file:
+      - /etc/flaptalk/api.env
+    ports:
+      - '3000:3000'

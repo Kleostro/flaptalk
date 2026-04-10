@@ -1,0 +1,19 @@
+<app-auth-page-shell
+  [alternateActionLabel]="content.alternateActionLabel"
+  [alternateActionRoute]="content.alternateActionRoute"
+  [alternateActionText]="content.alternateActionText"
+  [description]="content.description"
+  [eyebrow]="content.eyebrow"
+  [mode]="content.mode"
+  [title]="content.title"
+>
+  <app-login-form
+    [emailField]="loginForm.email"
+    [isPending]="isPending()"
+    [passwordField]="loginForm.password"
+    [pendingSubmitLabel]="content.pendingSubmitLabel"
+    [showErrors]="showErrors()"
+    [submitLabel]="content.submitLabel"
+    (submittedForm)="submit($event)"
+  />
+</app-auth-page-shell>

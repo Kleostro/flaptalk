@@ -1,0 +1,185 @@
+name: Deploy API
+
+on:
+  workflow_run:
+    workflows:
+      - Publish API Image
+    branches:
+      - main
+      - develop
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub environment to deploy to.
+        required: true
+        default: production
+        type: choice
+        options:
+          - production
+          - develop
+      image_tag:
+        description: Optional image tag to deploy for rollback or manual redeploy. Defaults to the current commit SHA.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event.workflow_run.head_branch == 'main' && 'production' || 'develop') }}
+
+    steps:
+      - name: Resolve target environment
+        id: target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_ENVIRONMENT: ${{ inputs.environment }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TARGET_ENV="$INPUT_ENVIRONMENT"
+          elif [[ "$WORKFLOW_RUN_HEAD_BRANCH" == "main" ]]; then
+            TARGET_ENV="production"
+          else
+            TARGET_ENV="develop"
+          fi
+
+          echo "name=${TARGET_ENV}" >> "$GITHUB_OUTPUT"
+
+      - name: Normalize deploy metadata
+        id: deploy
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_IMAGE_TAG: ${{ inputs.image_tag }}
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          IMAGE_NAME="ghcr.io/${GITHUB_REPOSITORY,,}/api"
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && -n "$INPUT_IMAGE_TAG" ]]; then
+            IMAGE_TAG="$INPUT_IMAGE_TAG"
+          elif [[ "$EVENT_NAME" == "workflow_run" ]]; then
+            IMAGE_TAG="$WORKFLOW_RUN_HEAD_SHA"
+          else
+            IMAGE_TAG="${GITHUB_SHA}"
+          fi
+
+          echo "image_name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "api_image=${IMAGE_NAME}:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Download deploy assets
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          name: deploy-assets-${{ github.event.workflow_run.head_sha }}
+          path: deploy-bundle
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Prepare manual deploy assets
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v4
+
+      - name: Stage deploy assets for upload
+        run: |
+          if [[ -f deploy/docker-compose.api.yml ]]; then
+            rm -rf deploy-bundle
+            mkdir -p deploy-bundle/deploy deploy-bundle/scripts
+            cp deploy/docker-compose.api.yml deploy-bundle/deploy/docker-compose.api.yml
+            cp scripts/deploy-api-docker.sh deploy-bundle/scripts/deploy-api-docker.sh
+          elif [[ -f deploy-bundle/deploy/docker-compose.api.yml && -f deploy-bundle/scripts/deploy-api-docker.sh ]]; then
+            echo "Deploy assets already downloaded with directory structure."
+          else
+            mkdir -p deploy-bundle/deploy deploy-bundle/scripts
+            cp deploy-bundle/docker-compose.api.yml deploy-bundle/deploy/docker-compose.api.yml
+            cp deploy-bundle/deploy-api-docker.sh deploy-bundle/scripts/deploy-api-docker.sh
+          fi
+
+      - name: Create deploy directory on server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            mkdir -p /opt/flaptalk/deploy
+
+      - name: Upload deploy assets
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: 'deploy-bundle/deploy/docker-compose.api.yml,deploy-bundle/scripts/deploy-api-docker.sh'
+          target: '/opt/flaptalk'
+          strip_components: 1
+
+      - name: Deploy image on server
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          API_IMAGE: ${{ steps.deploy.outputs.api_image }}
+          GHCR_USERNAME: ${{ github.actor }}
+          GHCR_TOKEN: ${{ github.token }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: API_IMAGE,GHCR_USERNAME,GHCR_TOKEN
+          script: |
+            chmod +x /opt/flaptalk/scripts/deploy-api-docker.sh
+            APP_DIR=/opt/flaptalk \
+            ENV_FILE=/etc/flaptalk/api.env \
+            COMPOSE_FILE=/opt/flaptalk/deploy/docker-compose.api.yml \
+            /opt/flaptalk/scripts/deploy-api-docker.sh
+
+      - name: Verify health endpoint
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          API_IMAGE: ${{ steps.deploy.outputs.api_image }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: API_IMAGE
+          script: |
+            for attempt in {1..12}; do
+              if curl --fail --silent http://127.0.0.1:3000/health >/dev/null; then
+                echo "Healthcheck passed on attempt ${attempt}."
+                exit 0
+              fi
+
+              echo "Healthcheck attempt ${attempt} failed. Retrying in 5 seconds..."
+              sleep 5
+            done
+
+            docker compose -f /opt/flaptalk/deploy/docker-compose.api.yml ps
+            docker compose -f /opt/flaptalk/deploy/docker-compose.api.yml logs --tail=100 api
+            exit 1
+
+      - name: Write deployment summary
+        run: |
+          {
+            echo "## Deployment Summary"
+            echo ""
+            echo "- Environment: ${{ steps.target.outputs.name }}"
+            echo "- Image: \`${{ steps.deploy.outputs.api_image }}\`"
+            echo "- Healthcheck: \`http://127.0.0.1:3000/health\`"
+            echo ""
+            echo "### Rollback"
+            echo ""
+            echo "Use \`Run workflow\` and pass a previous \`image_tag\` to redeploy an earlier image."
+          } >> "$GITHUB_STEP_SUMMARY"

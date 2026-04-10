@@ -1,0 +1,51 @@
+<form class="auth-form" novalidate (submit)="onSubmit($event)">
+  <header class="auth-form__header">
+    <p class="auth-form__eyebrow">{{ formContent.eyebrow }}</p>
+    <p class="auth-form__description">{{ formContent.description }}</p>
+  </header>
+
+  <div class="auth-form__fields">
+    <app-text-input-field
+      [autocomplete]="autocomplete.email"
+      [field]="emailField()"
+      [inputId]="fieldIds.loginEmail"
+      [label]="labels.email"
+      [placeholder]="placeholders.email"
+      [showErrors]="showErrors()"
+      type="email"
+    />
+
+    <app-text-input-field
+      [autocomplete]="autocomplete.currentPassword"
+      [field]="passwordField()"
+      [inputId]="fieldIds.loginPassword"
+      [label]="labels.password"
+      [placeholder]="placeholders.password"
+      [showErrors]="showErrors()"
+      type="password"
+    />
+  </div>
+
+  <section class="auth-form__support">
+    <p class="auth-form__support-title">Designed for calm, secure re-entry</p>
+
+    <ul class="auth-form__highlights">
+      @for (highlight of formContent.highlights; track highlight) {
+        <li>{{ highlight }}</li>
+      }
+    </ul>
+  </section>
+
+  <div class="auth-form__actions">
+    <app-button
+      appearance="primary"
+      class="auth-form__submit"
+      [disabled]="isPending()"
+      [fluid]="true"
+      size="large"
+      type="submit"
+    >
+      {{ isPending() ? pendingSubmitLabel() : submitLabel() }}
+    </app-button>
+  </div>
+</form>

@@ -1,0 +1,21 @@
+<div
+  class="ui-switcher"
+  [attr.aria-label]="ariaLabel()"
+  [style.--switcher-active-index]="activeIndex()"
+  [style.--switcher-option-count]="visibleOptionCount()"
+  role="group"
+>
+  <span class="ui-switcher__indicator"></span>
+
+  @for (option of options(); track option.value) {
+    <button
+      type="button"
+      class="ui-switcher__button"
+      [attr.aria-pressed]="option.value === value()"
+      [class.ui-switcher__button--active]="option.value === value()"
+      (click)="selectOption(option.value)"
+    >
+      <span class="ui-switcher__button-label">{{ option.label }}</span>
+    </button>
+  }
+</div>

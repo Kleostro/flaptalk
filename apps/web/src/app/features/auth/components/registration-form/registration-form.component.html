@@ -1,0 +1,57 @@
+<form class="auth-form" novalidate (submit)="onSubmit($event)">
+  <header class="auth-form__header">
+    <p class="auth-form__eyebrow">{{ formContent.eyebrow }}</p>
+    <p class="auth-form__description">{{ formContent.description }}</p>
+  </header>
+
+  <div class="auth-form__fields">
+    <app-text-input-field
+      [autocomplete]="autocomplete.email"
+      [field]="emailField()"
+      [inputId]="fieldIds.registrationEmail"
+      [label]="labels.email"
+      [placeholder]="placeholders.email"
+      [showErrors]="showErrors()"
+      type="email"
+    />
+
+    <app-text-input-field
+      [autocomplete]="autocomplete.newPassword"
+      [field]="passwordField()"
+      [hint]="passwordRequirements.join(' ')"
+      [inputId]="fieldIds.registrationPassword"
+      [label]="labels.password"
+      [placeholder]="placeholders.password"
+      [showErrors]="showErrors()"
+      type="password"
+    />
+
+    <app-text-input-field
+      [autocomplete]="autocomplete.confirmPassword"
+      [errors]="confirmPasswordErrors()"
+      [field]="repeatPasswordField()"
+      [inputId]="fieldIds.registrationConfirmPassword"
+      [label]="labels.confirmPassword"
+      [placeholder]="placeholders.confirmPassword"
+      [showErrors]="showErrors()"
+      type="password"
+    />
+  </div>
+
+  <ul class="auth-form__requirements">
+    @for (requirement of passwordRequirements; track requirement) {
+      <li>{{ requirement }}</li>
+    }
+  </ul>
+
+  <app-button
+    appearance="primary"
+    class="auth-form__submit"
+    [disabled]="isPending()"
+    [fluid]="true"
+    size="large"
+    type="submit"
+  >
+    {{ isPending() ? pendingSubmitLabel() : submitLabel() }}
+  </app-button>
+</form>

@@ -1,0 +1,39 @@
+name: Semgrep
+
+on:
+  pull_request:
+    paths:
+      - 'apps/**'
+      - 'deploy/**'
+      - 'scripts/**'
+      - 'Dockerfile'
+      - 'package.json'
+      - 'bun.lock'
+      - 'tsconfig.base.json'
+      - '.github/workflows/**'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'apps/**'
+      - 'deploy/**'
+      - 'scripts/**'
+      - 'Dockerfile'
+      - 'package.json'
+      - 'bun.lock'
+      - 'tsconfig.base.json'
+      - '.github/workflows/**'
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: semgrep scan --config auto --error --exclude apps/api/src/generated

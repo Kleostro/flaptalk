@@ -1,0 +1,126 @@
+.workspace-room-page {
+  &__canvas-header {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    margin-block-end: 1.25rem;
+  }
+
+  &__canvas-copy {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  &__canvas-kicker {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__title {
+    margin: 0;
+
+    font-size: clamp(2.1rem, 2.8vw, 3rem);
+    font-weight: 700;
+    line-height: 0.98;
+    text-wrap: balance;
+    letter-spacing: -0.06em;
+  }
+
+  &__description,
+  &__helper {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+
+  &__description {
+    max-inline-size: 33rem;
+  }
+
+  &__dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.85fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  &__primary-column,
+  &__secondary-column,
+  &__panel,
+  &__stat-list,
+  &__details {
+    display: grid;
+  }
+
+  &__primary-column,
+  &__secondary-column {
+    gap: 1.25rem;
+  }
+
+  &__panel {
+    gap: 1.25rem;
+    min-block-size: 100%;
+  }
+
+  &__details,
+  &__stat-list {
+    gap: 0.75rem;
+  }
+
+  &__detail,
+  &__stat-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+
+    padding-block: 0.2rem;
+
+    dt,
+    span {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    dd,
+    strong {
+      margin: 0;
+
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: end;
+    }
+  }
+
+  form.workspace-room-page__panel {
+    gap: 1rem;
+  }
+
+  &__reply-form {
+    display: grid;
+    gap: 1rem;
+    padding-block-start: 0.25rem;
+    border-block-start: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 74%, transparent);
+  }
+
+  @media (width < 84rem) {
+    &__dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (width < 72rem) {
+    &__canvas-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+}

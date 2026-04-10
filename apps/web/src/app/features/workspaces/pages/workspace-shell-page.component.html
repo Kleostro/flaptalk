@@ -1,0 +1,47 @@
+<app-shell>
+  <div appShellTitle class="workspace-shell-page__topbar-title">
+    <span class="workspace-shell-page__topbar-kicker">Workspace</span>
+    <strong>{{ topbarTitle() }}</strong>
+  </div>
+
+  <div appShellActions class="workspace-shell-page__topbar-actions">
+    <div class="workspace-shell-page__action-icons" aria-label="Workspace actions">
+      <button class="workspace-shell-page__icon-button" type="button">
+        <span aria-hidden="true">⌕</span>
+      </button>
+
+      <button
+        class="workspace-shell-page__icon-button workspace-shell-page__icon-button--notification"
+        type="button"
+      >
+        <span aria-hidden="true">◌</span>
+      </button>
+    </div>
+
+    <span class="workspace-shell-page__topbar-chip">
+      {{ hasWorkspace() ? currentWorkspaceRole() : 'Setup' }}
+    </span>
+
+    <div class="workspace-shell-page__avatar" aria-label="Current member">
+      {{ userInitials() }}
+    </div>
+
+    <app-button appearance="tertiary" [disabled]="isLogoutPending()" (click)="logout()">
+      {{ isLogoutPending() ? 'Ending session...' : 'Log out' }}
+    </app-button>
+  </div>
+
+  <app-workspace-sidebar
+    appShellSidebar
+    [activeRoomId]="selectedRoom()?.id ?? null"
+    [hasWorkspace]="hasWorkspace()"
+    [homeActive]="isHomeRoute()"
+    [roomCount]="roomCount()"
+    [rooms]="rooms()"
+    [totalUnreadCount]="totalUnreadMessageCount()"
+    [unreadMessageCountByRoomId]="unreadMessageCountByRoomId()"
+    [userEmail]="user()?.email"
+  />
+
+  <router-outlet appShellContent />
+</app-shell>

@@ -1,0 +1,29 @@
+:host {
+  display: flex;
+  flex: 1 1 auto;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: 100%;
+}
+
+.card {
+  display: flex;
+  flex: 1 1 auto;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: 100%;
+  padding: var(--panel-padding);
+  border: var(--border-width-thin) solid color-mix(in oklch, var(--outline-subtle) 82%, transparent);
+  border-radius: 1.75rem;
+
+  background: color-mix(in oklch, var(--surface-elevated) 99%, transparent);
+  box-shadow: var(--shadow-panel);
+}
+
+@media (width < 48rem) {
+  .card {
+    padding: var(--panel-padding-compact);
+  }
+}

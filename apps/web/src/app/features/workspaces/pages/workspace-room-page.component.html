@@ -1,0 +1,151 @@
+<div class="workspace-room-page__canvas-header">
+  <div class="workspace-room-page__canvas-copy">
+    <span class="workspace-room-page__canvas-kicker">Room canvas</span>
+    <h1 class="workspace-room-page__title">
+      @if (selectedRoom()) {
+        {{ selectedRoom()?.name }}
+      } @else {
+        Room unavailable
+      }
+    </h1>
+  </div>
+
+  <p class="workspace-room-page__description">
+    @if (selectedRoom()) {
+      Real-time messaging lives here now. Threads and catch-up layers will grow from this room feed
+      next.
+    } @else {
+      The selected room could not be restored from the current workspace context.
+    }
+  </p>
+</div>
+
+<div class="workspace-room-page__dashboard-grid">
+  <section class="workspace-room-page__primary-column">
+    <app-card>
+      <div class="workspace-room-page__panel">
+        <app-shell-panel-header tag="Room feed" [title]="selectedRoom()?.name ?? 'Room feed'" />
+
+        <app-workspace-room-feed
+          [activeThreadMessageId]="selectedThreadRootMessage()?.id ?? null"
+          [currentReadMessageId]="lastReadMessageId()"
+          [isPending]="isMessageCollectionPending()"
+          [messages]="messages()"
+          [room]="selectedRoom()"
+          (selectThread)="openThread($event)"
+          (visibleMessageChange)="handleVisibleMessageChange($event)"
+        />
+      </div>
+    </app-card>
+
+    @if (selectedRoom()) {
+      <app-card>
+        <form class="workspace-room-page__panel" (submit)="createMessage($event)">
+          <app-shell-panel-header tag="Composer" title="Send message" />
+
+          <app-textarea-field
+            autocomplete="off"
+            [field]="messageForm.body"
+            hint="Messages stay flat for now. Threads will grow from this room feed next."
+            inputId="room-message-body"
+            label="Message"
+            placeholder="Share an update, question, or prompt for the room."
+            [rows]="5"
+            [showErrors]="showMessageFormErrors()"
+          />
+
+          <app-button [disabled]="isCreateMessagePending()" [fluid]="true" type="submit">
+            {{ isCreateMessagePending() ? 'Sending message...' : 'Send message' }}
+          </app-button>
+        </form>
+      </app-card>
+    }
+  </section>
+
+  <section class="workspace-room-page__secondary-column">
+    <app-card>
+      <div class="workspace-room-page__panel">
+        <app-shell-panel-header
+          [tag]="hasSelectedThread() ? 'Live' : 'Thread'"
+          title="Thread panel"
+        />
+
+        <app-workspace-thread-panel
+          [currentReadMessageId]="lastReadMessageId()"
+          [isPending]="isThreadPending()"
+          [replies]="selectedThreadReplies()"
+          [rootMessage]="selectedThreadRootMessage()"
+          (visibleMessageChange)="handleVisibleMessageChange($event)"
+        />
+
+        @if (hasSelectedThread()) {
+          <form class="workspace-room-page__reply-form" (submit)="createReply($event)">
+            <app-shell-panel-header tag="Reply" title="Continue thread" />
+
+            <app-textarea-field
+              autocomplete="off"
+              [field]="replyForm.body"
+              hint="Replies attach directly to the selected thread root."
+              inputId="thread-reply-body"
+              label="Reply"
+              placeholder="Add context, answer the question, or continue the discussion."
+              [rows]="4"
+              [showErrors]="showReplyFormErrors()"
+            />
+
+            <app-button [disabled]="isCreateMessagePending()" [fluid]="true" type="submit">
+              {{ isCreateMessagePending() ? 'Sending reply...' : 'Send reply' }}
+            </app-button>
+          </form>
+        }
+      </div>
+    </app-card>
+
+    <app-card>
+      <div class="workspace-room-page__panel">
+        <app-shell-panel-header tag="Context" title="Room details" />
+
+        @if (selectedRoom()?.description) {
+          <p class="workspace-room-page__helper">{{ selectedRoom()?.description }}</p>
+        } @else {
+          <p class="workspace-room-page__helper">
+            This room does not have a description yet. It is ready to grow into a structured
+            discussion surface.
+          </p>
+        }
+
+        <dl class="workspace-room-page__details">
+          <div class="workspace-room-page__detail">
+            <dt>Room ID</dt>
+            <dd>{{ selectedRoom()?.id ?? '—' }}</dd>
+          </div>
+
+          <div class="workspace-room-page__detail">
+            <dt>Slug</dt>
+            <dd>{{ selectedRoom()?.slug ?? '—' }}</dd>
+          </div>
+
+          <div class="workspace-room-page__detail">
+            <dt>Workspace</dt>
+            <dd>{{ currentWorkspace()?.name ?? '—' }}</dd>
+          </div>
+        </dl>
+      </div>
+    </app-card>
+
+    <app-card>
+      <div class="workspace-room-page__panel">
+        <app-shell-panel-header tag="Status" title="Discussion health" />
+
+        <div class="workspace-room-page__stat-list">
+          @for (stat of roomHealthRows(); track stat.label) {
+            <div class="workspace-room-page__stat-row">
+              <span>{{ stat.label }}</span>
+              <strong>{{ stat.value }}</strong>
+            </div>
+          }
+        </div>
+      </div>
+    </app-card>
+  </section>
+</div>

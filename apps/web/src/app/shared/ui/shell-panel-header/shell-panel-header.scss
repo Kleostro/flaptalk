@@ -1,0 +1,37 @@
+.shell-panel-header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-block-size: 2.625rem;
+    padding-inline: 1rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+    border-radius: 1rem;
+
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-primary);
+
+    background: color-mix(in oklch, var(--surface-base) 15%, transparent);
+  }
+}
+
+@media (width < 48rem) {
+  .shell-panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
