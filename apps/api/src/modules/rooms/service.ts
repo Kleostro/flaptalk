@@ -1,7 +1,7 @@
 import Elysia from 'elysia';
 
 import { prisma } from '@api/db/prisma';
-import { DomainError } from '@api/errors/domain-error';
+import { assertWorkspaceMember, assertWorkspaceOwner } from '@api/modules/workspaces/access';
 import { roomSelect, serializeRoom } from '@api/modules/rooms/public-room';
 
 import type { CreateRoomRequestBody } from '@flaptalk/api-contract';
@@ -26,23 +26,6 @@ function createRoomSlugBase(name: string): string {
 }
 
 export class RoomsService {
-  private async getWorkspaceMembership(params: {
-    readonly userId: number;
-    readonly workspaceId: number;
-  }) {
-    return prisma.workspaceMember.findUnique({
-      select: {
-        role: true,
-      },
-      where: {
-        workspaceId_userId: {
-          userId: params.userId,
-          workspaceId: params.workspaceId,
-        },
-      },
-    });
-  }
-
   private async resolveAvailableRoomSlug(params: {
     readonly name: string;
     readonly workspaceId: number;
@@ -80,18 +63,12 @@ export class RoomsService {
     readonly workspaceId: number;
     readonly room: CreateRoomRequestBody;
   }) {
-    const workspaceMembership = await this.getWorkspaceMembership({
+    await assertWorkspaceOwner({
+      errorCode: 'room_forbidden',
+      errorMessage: 'Only workspace owners can create rooms.',
       userId: params.userId,
       workspaceId: params.workspaceId,
     });
-
-    if (!workspaceMembership) {
-      throw new DomainError(404, 'workspace_not_found', 'Workspace not found.');
-    }
-
-    if (workspaceMembership.role !== 'OWNER') {
-      throw new DomainError(403, 'room_forbidden', 'Only workspace owners can create rooms.');
-    }
 
     const normalizedName = normalizeRoomName(params.room.name);
     const roomSlug = await this.resolveAvailableRoomSlug({
@@ -116,11 +93,7 @@ export class RoomsService {
     readonly userId: number;
     readonly workspaceId: number;
   }) {
-    const workspaceMembership = await this.getWorkspaceMembership(params);
-
-    if (!workspaceMembership) {
-      throw new DomainError(404, 'workspace_not_found', 'Workspace not found.');
-    }
+    await assertWorkspaceMember(params);
 
     const rooms = await prisma.room.findMany({
       orderBy: [

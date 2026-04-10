@@ -19,6 +19,22 @@ export const WorkspacePlain = t.Object(
 
 export const WorkspaceRelations = t.Object(
   {
+    invites: t.Array(
+      t.Object(
+        {
+          id: t.Integer(),
+          workspaceId: t.Integer(),
+          createdById: t.Integer(),
+          token: t.String(),
+          email: __nullable__(t.String()),
+          expiresAt: t.Date(),
+          usedAt: __nullable__(t.Date()),
+          createdAt: t.Date(),
+        },
+        { additionalProperties: false },
+      ),
+      { additionalProperties: false },
+    ),
     owner: t.Object(
       {
         id: t.Integer(),
@@ -83,6 +99,22 @@ export const WorkspacePlainInputUpdate = t.Object(
 
 export const WorkspaceRelationsInputCreate = t.Object(
   {
+    invites: t.Optional(
+      t.Object(
+        {
+          connect: t.Array(
+            t.Object(
+              {
+                id: t.Integer({ additionalProperties: false }),
+              },
+              { additionalProperties: false },
+            ),
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
     owner: t.Object(
       {
         connect: t.Object(
@@ -133,6 +165,31 @@ export const WorkspaceRelationsInputCreate = t.Object(
 export const WorkspaceRelationsInputUpdate = t.Partial(
   t.Object(
     {
+      invites: t.Partial(
+        t.Object(
+          {
+            connect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+            disconnect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+          },
+          { additionalProperties: false },
+        ),
+      ),
       owner: t.Object(
         {
           connect: t.Object(
@@ -280,6 +337,7 @@ export const WorkspaceSelect = t.Partial(
       ownerId: t.Boolean(),
       createdAt: t.Boolean(),
       updatedAt: t.Boolean(),
+      invites: t.Boolean(),
       owner: t.Boolean(),
       members: t.Boolean(),
       rooms: t.Boolean(),
@@ -292,6 +350,7 @@ export const WorkspaceSelect = t.Partial(
 export const WorkspaceInclude = t.Partial(
   t.Object(
     {
+      invites: t.Boolean(),
       owner: t.Boolean(),
       members: t.Boolean(),
       rooms: t.Boolean(),

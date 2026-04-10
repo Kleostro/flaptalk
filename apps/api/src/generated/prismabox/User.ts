@@ -32,6 +32,22 @@ export const UserRelations = t.Object(
       ),
       { additionalProperties: false },
     ),
+    createdInvites: t.Array(
+      t.Object(
+        {
+          id: t.Integer(),
+          workspaceId: t.Integer(),
+          createdById: t.Integer(),
+          token: t.String(),
+          email: __nullable__(t.String()),
+          expiresAt: t.Date(),
+          usedAt: __nullable__(t.Date()),
+          createdAt: t.Date(),
+        },
+        { additionalProperties: false },
+      ),
+      { additionalProperties: false },
+    ),
     ownedWorkspaces: t.Array(
       t.Object(
         {
@@ -107,6 +123,22 @@ export const UserRelationsInputCreate = t.Object(
         { additionalProperties: false },
       ),
     ),
+    createdInvites: t.Optional(
+      t.Object(
+        {
+          connect: t.Array(
+            t.Object(
+              {
+                id: t.Integer({ additionalProperties: false }),
+              },
+              { additionalProperties: false },
+            ),
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
     ownedWorkspaces: t.Optional(
       t.Object(
         {
@@ -163,6 +195,31 @@ export const UserRelationsInputUpdate = t.Partial(
   t.Object(
     {
       authoredMessages: t.Partial(
+        t.Object(
+          {
+            connect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+            disconnect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+          },
+          { additionalProperties: false },
+        ),
+      ),
+      createdInvites: t.Partial(
         t.Object(
           {
             connect: t.Array(
@@ -343,6 +400,7 @@ export const UserSelect = t.Partial(
       createdAt: t.Boolean(),
       updatedAt: t.Boolean(),
       authoredMessages: t.Boolean(),
+      createdInvites: t.Boolean(),
       ownedWorkspaces: t.Boolean(),
       roomReadStates: t.Boolean(),
       workspaceMemberships: t.Boolean(),
@@ -356,6 +414,7 @@ export const UserInclude = t.Partial(
   t.Object(
     {
       authoredMessages: t.Boolean(),
+      createdInvites: t.Boolean(),
       ownedWorkspaces: t.Boolean(),
       roomReadStates: t.Boolean(),
       workspaceMemberships: t.Boolean(),

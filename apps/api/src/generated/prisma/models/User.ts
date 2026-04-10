@@ -217,6 +217,7 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   authoredMessages?: Prisma.MessageListRelationFilter
+  createdInvites?: Prisma.InviteListRelationFilter
   ownedWorkspaces?: Prisma.WorkspaceListRelationFilter
   roomReadStates?: Prisma.RoomReadStateListRelationFilter
   workspaceMemberships?: Prisma.WorkspaceMemberListRelationFilter
@@ -229,6 +230,7 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   authoredMessages?: Prisma.MessageOrderByRelationAggregateInput
+  createdInvites?: Prisma.InviteOrderByRelationAggregateInput
   ownedWorkspaces?: Prisma.WorkspaceOrderByRelationAggregateInput
   roomReadStates?: Prisma.RoomReadStateOrderByRelationAggregateInput
   workspaceMemberships?: Prisma.WorkspaceMemberOrderByRelationAggregateInput
@@ -244,6 +246,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   authoredMessages?: Prisma.MessageListRelationFilter
+  createdInvites?: Prisma.InviteListRelationFilter
   ownedWorkspaces?: Prisma.WorkspaceListRelationFilter
   roomReadStates?: Prisma.RoomReadStateListRelationFilter
   workspaceMemberships?: Prisma.WorkspaceMemberListRelationFilter
@@ -279,6 +282,7 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   authoredMessages?: Prisma.MessageCreateNestedManyWithoutAuthorInput
+  createdInvites?: Prisma.InviteCreateNestedManyWithoutCreatedByInput
   ownedWorkspaces?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
   roomReadStates?: Prisma.RoomReadStateCreateNestedManyWithoutUserInput
   workspaceMemberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -291,6 +295,7 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   authoredMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutAuthorInput
+  createdInvites?: Prisma.InviteUncheckedCreateNestedManyWithoutCreatedByInput
   ownedWorkspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
   roomReadStates?: Prisma.RoomReadStateUncheckedCreateNestedManyWithoutUserInput
   workspaceMemberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -302,6 +307,7 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authoredMessages?: Prisma.MessageUpdateManyWithoutAuthorNestedInput
+  createdInvites?: Prisma.InviteUpdateManyWithoutCreatedByNestedInput
   ownedWorkspaces?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
   roomReadStates?: Prisma.RoomReadStateUpdateManyWithoutUserNestedInput
   workspaceMemberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -314,6 +320,7 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authoredMessages?: Prisma.MessageUncheckedUpdateManyWithoutAuthorNestedInput
+  createdInvites?: Prisma.InviteUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedWorkspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
   roomReadStates?: Prisma.RoomReadStateUncheckedUpdateManyWithoutUserNestedInput
   workspaceMemberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -451,12 +458,27 @@ export type UserUpdateOneRequiredWithoutRoomReadStatesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRoomReadStatesInput, Prisma.UserUpdateWithoutRoomReadStatesInput>, Prisma.UserUncheckedUpdateWithoutRoomReadStatesInput>
 }
 
+export type UserCreateNestedOneWithoutCreatedInvitesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedInvitesInput, Prisma.UserUncheckedCreateWithoutCreatedInvitesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedInvitesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCreatedInvitesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedInvitesInput, Prisma.UserUncheckedCreateWithoutCreatedInvitesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedInvitesInput
+  upsert?: Prisma.UserUpsertWithoutCreatedInvitesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCreatedInvitesInput, Prisma.UserUpdateWithoutCreatedInvitesInput>, Prisma.UserUncheckedUpdateWithoutCreatedInvitesInput>
+}
+
 export type UserCreateWithoutOwnedWorkspacesInput = {
   email: string
   hashedPassword: string
   createdAt?: Date | string
   updatedAt?: Date | string
   authoredMessages?: Prisma.MessageCreateNestedManyWithoutAuthorInput
+  createdInvites?: Prisma.InviteCreateNestedManyWithoutCreatedByInput
   roomReadStates?: Prisma.RoomReadStateCreateNestedManyWithoutUserInput
   workspaceMemberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
 }
@@ -468,6 +490,7 @@ export type UserUncheckedCreateWithoutOwnedWorkspacesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   authoredMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutAuthorInput
+  createdInvites?: Prisma.InviteUncheckedCreateNestedManyWithoutCreatedByInput
   roomReadStates?: Prisma.RoomReadStateUncheckedCreateNestedManyWithoutUserInput
   workspaceMemberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
 }
@@ -494,6 +517,7 @@ export type UserUpdateWithoutOwnedWorkspacesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authoredMessages?: Prisma.MessageUpdateManyWithoutAuthorNestedInput
+  createdInvites?: Prisma.InviteUpdateManyWithoutCreatedByNestedInput
   roomReadStates?: Prisma.RoomReadStateUpdateManyWithoutUserNestedInput
   workspaceMemberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
 }
@@ -505,6 +529,7 @@ export type UserUncheckedUpdateWithoutOwnedWorkspacesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authoredMessages?: Prisma.MessageUncheckedUpdateManyWithoutAuthorNestedInput
+  createdInvites?: Prisma.InviteUncheckedUpdateManyWithoutCreatedByNestedInput
   roomReadStates?: Prisma.RoomReadStateUncheckedUpdateManyWithoutUserNestedInput
   workspaceMemberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -515,6 +540,7 @@ export type UserCreateWithoutWorkspaceMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   authoredMessages?: Prisma.MessageCreateNestedManyWithoutAuthorInput
+  createdInvites?: Prisma.InviteCreateNestedManyWithoutCreatedByInput
   ownedWorkspaces?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
   roomReadStates?: Prisma.RoomReadStateCreateNestedManyWithoutUserInput
 }
@@ -526,6 +552,7 @@ export type UserUncheckedCreateWithoutWorkspaceMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   authoredMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutAuthorInput
+  createdInvites?: Prisma.InviteUncheckedCreateNestedManyWithoutCreatedByInput
   ownedWorkspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
   roomReadStates?: Prisma.RoomReadStateUncheckedCreateNestedManyWithoutUserInput
 }
@@ -552,6 +579,7 @@ export type UserUpdateWithoutWorkspaceMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authoredMessages?: Prisma.MessageUpdateManyWithoutAuthorNestedInput
+  createdInvites?: Prisma.InviteUpdateManyWithoutCreatedByNestedInput
   ownedWorkspaces?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
   roomReadStates?: Prisma.RoomReadStateUpdateManyWithoutUserNestedInput
 }
@@ -563,6 +591,7 @@ export type UserUncheckedUpdateWithoutWorkspaceMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authoredMessages?: Prisma.MessageUncheckedUpdateManyWithoutAuthorNestedInput
+  createdInvites?: Prisma.InviteUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedWorkspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
   roomReadStates?: Prisma.RoomReadStateUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -572,6 +601,7 @@ export type UserCreateWithoutAuthoredMessagesInput = {
   hashedPassword: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  createdInvites?: Prisma.InviteCreateNestedManyWithoutCreatedByInput
   ownedWorkspaces?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
   roomReadStates?: Prisma.RoomReadStateCreateNestedManyWithoutUserInput
   workspaceMemberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -583,6 +613,7 @@ export type UserUncheckedCreateWithoutAuthoredMessagesInput = {
   hashedPassword: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  createdInvites?: Prisma.InviteUncheckedCreateNestedManyWithoutCreatedByInput
   ownedWorkspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
   roomReadStates?: Prisma.RoomReadStateUncheckedCreateNestedManyWithoutUserInput
   workspaceMemberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -609,6 +640,7 @@ export type UserUpdateWithoutAuthoredMessagesInput = {
   hashedPassword?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdInvites?: Prisma.InviteUpdateManyWithoutCreatedByNestedInput
   ownedWorkspaces?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
   roomReadStates?: Prisma.RoomReadStateUpdateManyWithoutUserNestedInput
   workspaceMemberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -620,6 +652,7 @@ export type UserUncheckedUpdateWithoutAuthoredMessagesInput = {
   hashedPassword?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdInvites?: Prisma.InviteUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedWorkspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
   roomReadStates?: Prisma.RoomReadStateUncheckedUpdateManyWithoutUserNestedInput
   workspaceMemberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -631,6 +664,7 @@ export type UserCreateWithoutRoomReadStatesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   authoredMessages?: Prisma.MessageCreateNestedManyWithoutAuthorInput
+  createdInvites?: Prisma.InviteCreateNestedManyWithoutCreatedByInput
   ownedWorkspaces?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
   workspaceMemberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
 }
@@ -642,6 +676,7 @@ export type UserUncheckedCreateWithoutRoomReadStatesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   authoredMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutAuthorInput
+  createdInvites?: Prisma.InviteUncheckedCreateNestedManyWithoutCreatedByInput
   ownedWorkspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
   workspaceMemberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
 }
@@ -668,6 +703,7 @@ export type UserUpdateWithoutRoomReadStatesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authoredMessages?: Prisma.MessageUpdateManyWithoutAuthorNestedInput
+  createdInvites?: Prisma.InviteUpdateManyWithoutCreatedByNestedInput
   ownedWorkspaces?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
   workspaceMemberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
 }
@@ -679,7 +715,70 @@ export type UserUncheckedUpdateWithoutRoomReadStatesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authoredMessages?: Prisma.MessageUncheckedUpdateManyWithoutAuthorNestedInput
+  createdInvites?: Prisma.InviteUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedWorkspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
+  workspaceMemberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCreatedInvitesInput = {
+  email: string
+  hashedPassword: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  authoredMessages?: Prisma.MessageCreateNestedManyWithoutAuthorInput
+  ownedWorkspaces?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
+  roomReadStates?: Prisma.RoomReadStateCreateNestedManyWithoutUserInput
+  workspaceMemberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCreatedInvitesInput = {
+  id?: number
+  email: string
+  hashedPassword: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  authoredMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutAuthorInput
+  ownedWorkspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
+  roomReadStates?: Prisma.RoomReadStateUncheckedCreateNestedManyWithoutUserInput
+  workspaceMemberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCreatedInvitesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedInvitesInput, Prisma.UserUncheckedCreateWithoutCreatedInvitesInput>
+}
+
+export type UserUpsertWithoutCreatedInvitesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCreatedInvitesInput, Prisma.UserUncheckedUpdateWithoutCreatedInvitesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedInvitesInput, Prisma.UserUncheckedCreateWithoutCreatedInvitesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCreatedInvitesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCreatedInvitesInput, Prisma.UserUncheckedUpdateWithoutCreatedInvitesInput>
+}
+
+export type UserUpdateWithoutCreatedInvitesInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  hashedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  authoredMessages?: Prisma.MessageUpdateManyWithoutAuthorNestedInput
+  ownedWorkspaces?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
+  roomReadStates?: Prisma.RoomReadStateUpdateManyWithoutUserNestedInput
+  workspaceMemberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCreatedInvitesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  hashedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  authoredMessages?: Prisma.MessageUncheckedUpdateManyWithoutAuthorNestedInput
+  ownedWorkspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
+  roomReadStates?: Prisma.RoomReadStateUncheckedUpdateManyWithoutUserNestedInput
   workspaceMemberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -690,6 +789,7 @@ export type UserUncheckedUpdateWithoutRoomReadStatesInput = {
 
 export type UserCountOutputType = {
   authoredMessages: number
+  createdInvites: number
   ownedWorkspaces: number
   roomReadStates: number
   workspaceMemberships: number
@@ -697,6 +797,7 @@ export type UserCountOutputType = {
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   authoredMessages?: boolean | UserCountOutputTypeCountAuthoredMessagesArgs
+  createdInvites?: boolean | UserCountOutputTypeCountCreatedInvitesArgs
   ownedWorkspaces?: boolean | UserCountOutputTypeCountOwnedWorkspacesArgs
   roomReadStates?: boolean | UserCountOutputTypeCountRoomReadStatesArgs
   workspaceMemberships?: boolean | UserCountOutputTypeCountWorkspaceMembershipsArgs
@@ -717,6 +818,13 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
  */
 export type UserCountOutputTypeCountAuthoredMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.MessageWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCreatedInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InviteWhereInput
 }
 
 /**
@@ -748,6 +856,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   authoredMessages?: boolean | Prisma.User$authoredMessagesArgs<ExtArgs>
+  createdInvites?: boolean | Prisma.User$createdInvitesArgs<ExtArgs>
   ownedWorkspaces?: boolean | Prisma.User$ownedWorkspacesArgs<ExtArgs>
   roomReadStates?: boolean | Prisma.User$roomReadStatesArgs<ExtArgs>
   workspaceMemberships?: boolean | Prisma.User$workspaceMembershipsArgs<ExtArgs>
@@ -781,6 +890,7 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "hashedPassword" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   authoredMessages?: boolean | Prisma.User$authoredMessagesArgs<ExtArgs>
+  createdInvites?: boolean | Prisma.User$createdInvitesArgs<ExtArgs>
   ownedWorkspaces?: boolean | Prisma.User$ownedWorkspacesArgs<ExtArgs>
   roomReadStates?: boolean | Prisma.User$roomReadStatesArgs<ExtArgs>
   workspaceMemberships?: boolean | Prisma.User$workspaceMembershipsArgs<ExtArgs>
@@ -793,6 +903,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     authoredMessages: Prisma.$MessagePayload<ExtArgs>[]
+    createdInvites: Prisma.$InvitePayload<ExtArgs>[]
     ownedWorkspaces: Prisma.$WorkspacePayload<ExtArgs>[]
     roomReadStates: Prisma.$RoomReadStatePayload<ExtArgs>[]
     workspaceMemberships: Prisma.$WorkspaceMemberPayload<ExtArgs>[]
@@ -1198,6 +1309,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   authoredMessages<T extends Prisma.User$authoredMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$authoredMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdInvites<T extends Prisma.User$createdInvitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ownedWorkspaces<T extends Prisma.User$ownedWorkspacesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedWorkspacesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   roomReadStates<T extends Prisma.User$roomReadStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$roomReadStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RoomReadStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   workspaceMemberships<T extends Prisma.User$workspaceMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workspaceMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkspaceMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1649,6 +1761,30 @@ export type User$authoredMessagesArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.MessageScalarFieldEnum | Prisma.MessageScalarFieldEnum[]
+}
+
+/**
+ * User.createdInvites
+ */
+export type User$createdInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Invite
+   */
+  select?: Prisma.InviteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Invite
+   */
+  omit?: Prisma.InviteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InviteInclude<ExtArgs> | null
+  where?: Prisma.InviteWhereInput
+  orderBy?: Prisma.InviteOrderByWithRelationInput | Prisma.InviteOrderByWithRelationInput[]
+  cursor?: Prisma.InviteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InviteScalarFieldEnum | Prisma.InviteScalarFieldEnum[]
 }
 
 /**

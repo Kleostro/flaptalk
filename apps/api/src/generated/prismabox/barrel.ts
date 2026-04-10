@@ -5,5 +5,6 @@ export * from "./WorkspaceMember";
 export * from "./Room";
 export * from "./Message";
 export * from "./RoomReadState";
+export * from "./Invite";
 export * from "./__nullable__";
 export * from "./__transformDate__";

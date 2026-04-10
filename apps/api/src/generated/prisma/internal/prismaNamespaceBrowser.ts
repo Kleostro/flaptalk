@@ -56,7 +56,8 @@ export const ModelName = {
   WorkspaceMember: 'WorkspaceMember',
   Room: 'Room',
   Message: 'Message',
-  RoomReadState: 'RoomReadState'
+  RoomReadState: 'RoomReadState',
+  Invite: 'Invite'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -145,6 +146,20 @@ export const RoomReadStateScalarFieldEnum = {
 } as const
 
 export type RoomReadStateScalarFieldEnum = (typeof RoomReadStateScalarFieldEnum)[keyof typeof RoomReadStateScalarFieldEnum]
+
+
+export const InviteScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  createdById: 'createdById',
+  token: 'token',
+  email: 'email',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type InviteScalarFieldEnum = (typeof InviteScalarFieldEnum)[keyof typeof InviteScalarFieldEnum]
 
 
 export const SortOrder = {

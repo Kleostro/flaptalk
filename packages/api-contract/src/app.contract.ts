@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia';
 
 import { AuthModel, createSessionCookieModel } from './models/auth';
 import { ErrorModel } from './models/error';
+import { InvitesModel } from './models/invites';
 import { MessagesModel } from './models/messages';
 import { ReadStatesModel } from './models/read-states';
 import { RoomsModel } from './models/rooms';
@@ -62,6 +63,19 @@ function createContractReadState() {
   };
 }
 
+function createContractInvite() {
+  return {
+    createdAt: new Date(0).toISOString(),
+    createdById: 0,
+    email: 'invitee@flaptalk.app',
+    expiresAt: new Date(72 * 60 * 60 * 1000).toISOString(),
+    id: 0,
+    token: 'invite_token',
+    usedAt: null,
+    workspaceId: 0,
+  };
+}
+
 const sessionCookieModel = createSessionCookieModel();
 
 const HealthResponseModel = t.Object({
@@ -93,6 +107,7 @@ export const appContract = new Elysia({
 })
   .model(ErrorModel)
   .model(AuthModel)
+  .model(InvitesModel)
   .model(MessagesModel)
   .model(ReadStatesModel)
   .model(UsersModel)
@@ -212,6 +227,60 @@ export const appContract = new Elysia({
           },
         },
       )
+      .get(
+        '/:workspaceId/members',
+        () => ({
+          members: [
+            {
+              joinedAt: new Date(0).toISOString(),
+              role: 'owner' as const,
+              user: createContractUser(),
+            },
+          ],
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            workspaceId: t.Numeric(),
+          }),
+          response: {
+            200: 'workspaces.members.list.response',
+            401: 'error.response',
+            404: 'error.response',
+          },
+        },
+      )
+      .post('/:workspaceId/invites', () => createContractInvite(), {
+        body: 'invites.create.body',
+        cookie: sessionCookieModel,
+        params: t.Object({
+          workspaceId: t.Numeric(),
+        }),
+        response: {
+          200: 'invites.create.response',
+          401: 'error.response',
+          403: 'error.response',
+          404: 'error.response',
+        },
+      })
+      .get(
+        '/:workspaceId/invites',
+        () => ({
+          invites: [createContractInvite()],
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            workspaceId: t.Numeric(),
+          }),
+          response: {
+            200: 'invites.list.response',
+            401: 'error.response',
+            403: 'error.response',
+            404: 'error.response',
+          },
+        },
+      )
       .post('/:workspaceId/rooms', () => createContractRoom(), {
         body: 'rooms.create.body',
         cookie: sessionCookieModel,
@@ -239,6 +308,48 @@ export const appContract = new Elysia({
             200: 'rooms.list.response',
             401: 'error.response',
             404: 'error.response',
+          },
+        },
+      ),
+  )
+  .group('/invites', (app) =>
+    app
+      .get(
+        '/:token',
+        () => ({
+          expiresAt: new Date(72 * 60 * 60 * 1000).toISOString(),
+          invite: createContractInvite(),
+          isExpired: false,
+          isUsed: false,
+          workspace: createContractWorkspace(),
+        }),
+        {
+          params: t.Object({
+            token: t.String(),
+          }),
+          response: {
+            200: 'invites.preview.response',
+            404: 'error.response',
+          },
+        },
+      )
+      .post(
+        '/:token/accept',
+        () => ({
+          role: 'member' as const,
+          workspace: createContractWorkspace(),
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            token: t.String(),
+          }),
+          response: {
+            200: 'invites.accept.response',
+            401: 'error.response',
+            403: 'error.response',
+            404: 'error.response',
+            409: 'error.response',
           },
         },
       ),

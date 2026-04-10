@@ -11,6 +11,7 @@ model Workspace {
   ownerId     Int               @map("owner_id")
   createdAt   DateTime          @default(now()) @map("created_at")
   updatedAt   DateTime          @updatedAt @map("updated_at")
+  invites     Invite[]
   owner       User              @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members     WorkspaceMember[]
   rooms       Room[]
@@ -84,4 +85,21 @@ model RoomReadState {
   @@index([userId])
   @@index([lastReadMessageId])
   @@map("room_read_states")
+}
+
+model Invite {
+  id          Int       @id @default(autoincrement())
+  workspaceId Int       @map("workspace_id")
+  createdById Int       @map("created_by_id")
+  token       String    @unique
+  email       String?
+  expiresAt   DateTime  @map("expires_at")
+  usedAt      DateTime? @map("used_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  createdBy   User      @relation("InviteCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@index([token, usedAt])
+  @@map("invites")
 }
