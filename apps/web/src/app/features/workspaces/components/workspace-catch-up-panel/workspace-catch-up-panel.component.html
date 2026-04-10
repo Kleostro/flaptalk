@@ -2,25 +2,37 @@
   <div class="workspace-catch-up-panel">
     @if (isPending()) {
       <app-empty-state description="Restoring unread counts and recent room activity..." />
-    } @else if (recentRoomActivity().length > 0) {
+    } @else if (catchUpItems().length > 0) {
       <div class="workspace-catch-up-panel__activity-list">
-        @for (roomActivity of recentRoomActivity(); track roomActivity.room.id) {
+        @for (roomActivity of catchUpItems(); track roomActivity.roomId) {
           <app-entity-list-item>
             <div entityIdentity class="workspace-catch-up-panel__activity-heading">
-              <strong>{{ roomActivity.room.name }}</strong>
-              @if (roomActivity.unreadMessageCount > 0) {
-                <app-pill entityBadge appearance="accent" size="small">
-                  {{ roomActivity.unreadMessageCount }}
-                </app-pill>
-              }
+              <strong>{{ roomActivity.roomName }}</strong>
+              <span>
+                {{ getSecondaryMeta(roomActivity) }}
+              </span>
             </div>
 
-            <p>
-              {{
-                roomActivity.lastMessage?.body ||
-                  'This room is configured and ready for its first unread activity.'
-              }}
-            </p>
+            <div class="workspace-catch-up-panel__activity-meta">
+              @if (roomActivity.unreadMessageCount > 0) {
+                <app-pill appearance="accent" size="small">{{ roomActivity.unreadLabel }}</app-pill>
+              } @else {
+                <app-pill size="small">{{ roomActivity.unreadLabel }}</app-pill>
+              }
+
+              <app-pill appearance="outline" size="small">{{ roomActivity.contextLabel }}</app-pill>
+            </div>
+
+            <p>{{ roomActivity.preview }}</p>
+
+            <a
+              entityAside
+              class="workspace-catch-up-panel__resume-link"
+              [queryParams]="getResumeQueryParams(roomActivity)"
+              [routerLink]="getRoomRoute(roomActivity.roomId)"
+            >
+              {{ roomActivity.resumeLabel }}
+            </a>
           </app-entity-list-item>
         }
       </div>

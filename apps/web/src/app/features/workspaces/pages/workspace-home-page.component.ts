@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { type WorkspaceCatchUpItem } from '@web/app/features/workspaces/types/workspace-catch-up-item.model';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { ToastService } from '@web/app/core/services/toast.service';
@@ -144,20 +145,11 @@ export class WorkspaceHomePageComponent {
     APP_ROUTE_PATHS.workspaceSetupRoomsNew,
   ];
   public readonly ownerSetupLink = ['/', APP_ROUTE_PATHS.workspace, APP_ROUTE_PATHS.workspaceSetup];
-  public readonly recentRoomActivity = computed(() =>
-    [...this.workspaceFacadeService.workspaceActivity().rooms]
-      .sort((leftRoomActivity, rightRoomActivity) => {
-        const rightTimestamp = Date.parse(
-          rightRoomActivity.lastMessage?.createdAt ?? new Date(0).toISOString(),
-        );
-        const leftTimestamp = Date.parse(
-          leftRoomActivity.lastMessage?.createdAt ?? new Date(0).toISOString(),
-        );
-
-        return rightTimestamp - leftTimestamp;
-      })
-      .reverse()
-      .slice(0, RECENT_ROOM_ACTIVITY_LIMIT),
+  public readonly primaryCatchUpItem = computed<null | WorkspaceCatchUpItem>(
+    () => this.workspaceFacadeService.continueReadingItems()[0] ?? null,
+  );
+  public readonly recentRoomActivity = computed<readonly WorkspaceCatchUpItem[]>(() =>
+    this.workspaceFacadeService.continueReadingItems().slice(0, RECENT_ROOM_ACTIVITY_LIMIT),
   );
   public readonly roomCount = computed(() => this.workspaceFacadeService.roomCount());
   public readonly roomModel = this.workspaceFormFactoryService.createRoomModel();
@@ -239,5 +231,44 @@ export class WorkspaceHomePageComponent {
           this.toastService.success(result);
         },
       });
+  }
+
+  public getContinueReadingDescription(item: WorkspaceCatchUpItem): string {
+    if (item.threadRootMessageId) {
+      return [
+        `A thread continuation is waiting in ${item.roomName}.`,
+        'Jump directly into the discussion where the latest reply landed.',
+      ].join(' ');
+    }
+
+    if (item.unreadMessageCount > 0) {
+      return [
+        `Unread room activity is waiting in ${item.roomName}.`,
+        'Resume from the first unread message and rebuild context quickly.',
+      ].join(' ');
+    }
+
+    return [
+      `The latest discussion in ${item.roomName} is still fresh.`,
+      'Re-open the room and continue from the newest message.',
+    ].join(' ');
+  }
+
+  public getContinueReadingQueryParams(item: WorkspaceCatchUpItem): {
+    readonly resume: string;
+    readonly thread?: string;
+  } {
+    return item.threadRootMessageId
+      ? {
+          resume: item.resumeMode,
+          thread: String(item.threadRootMessageId),
+        }
+      : {
+          resume: item.resumeMode,
+        };
+  }
+
+  public getContinueReadingRoute(item: WorkspaceCatchUpItem): string[] {
+    return ['/', APP_ROUTE_PATHS.workspace, 'rooms', String(item.roomId)];
   }
 }

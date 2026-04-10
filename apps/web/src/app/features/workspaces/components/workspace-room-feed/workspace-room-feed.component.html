@@ -13,10 +13,17 @@
   } @else if (messages().length > 0) {
     <div class="workspace-room-feed__message-list">
       @for (message of messages(); track message.id) {
+        @if (isFirstUnreadMessage(message.id)) {
+          <div class="workspace-room-feed__unread-marker">
+            <span>First unread</span>
+          </div>
+        }
+
         <article
           #messageItem
           class="workspace-room-feed__message-item"
           [class.workspace-room-feed__message-item--active]="activeThreadMessageId() === message.id"
+          [class.workspace-room-feed__message-item--unread]="isMessageUnread(message.id)"
           [attr.data-message-id]="message.id"
         >
           <div class="workspace-room-feed__message-avatar" aria-hidden="true">

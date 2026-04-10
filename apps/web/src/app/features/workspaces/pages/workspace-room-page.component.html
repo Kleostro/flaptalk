@@ -14,6 +14,7 @@
           [currentReadMessageId]="lastReadMessageId()"
           [isPending]="isMessageCollectionPending()"
           [messages]="messages()"
+          [resumeMode]="roomResumeMode()"
           [room]="selectedRoom()"
           (selectThread)="openThread($event)"
           (visibleMessageChange)="handleVisibleMessageChange($event)"
