@@ -63,6 +63,19 @@ function createContractReadState() {
   };
 }
 
+function createContractCatchUpItem() {
+  return {
+    contextType: 'thread_reply' as const,
+    lastActivityAt: new Date(0).toISOString(),
+    lastAuthor: createContractUser(),
+    preview: 'A thread continuation is waiting in this room.',
+    resumeMode: 'unread' as const,
+    room: createContractRoom(),
+    threadRootMessageId: 0,
+    unreadMessageCount: 3,
+  };
+}
+
 function createContractInvite() {
   return {
     createdAt: new Date(0).toISOString(),
@@ -355,32 +368,51 @@ export const appContract = new Elysia({
       ),
   )
   .group('/workspaces', (app) =>
-    app.get(
-      '/:workspaceId/activity',
-      () => ({
-        rooms: [
-          {
-            lastMessage: createContractMessage(),
-            readState: createContractReadState(),
-            room: createContractRoom(),
-            unreadMessageCount: 3,
-          },
-        ],
-        unreadMessageCount: 3,
-        unreadRoomCount: 1,
-      }),
-      {
-        cookie: sessionCookieModel,
-        params: t.Object({
-          workspaceId: t.Numeric(),
+    app
+      .get(
+        '/:workspaceId/activity',
+        () => ({
+          rooms: [
+            {
+              lastMessage: createContractMessage(),
+              readState: createContractReadState(),
+              room: createContractRoom(),
+              unreadMessageCount: 3,
+            },
+          ],
+          unreadMessageCount: 3,
+          unreadRoomCount: 1,
         }),
-        response: {
-          200: 'readStates.activity.response',
-          401: 'error.response',
-          404: 'error.response',
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            workspaceId: t.Numeric(),
+          }),
+          response: {
+            200: 'readStates.activity.response',
+            401: 'error.response',
+            404: 'error.response',
+          },
         },
-      },
-    ),
+      )
+      .get(
+        '/:workspaceId/catch-up',
+        () => ({
+          items: [createContractCatchUpItem()],
+          primaryItem: createContractCatchUpItem(),
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            workspaceId: t.Numeric(),
+          }),
+          response: {
+            200: 'readStates.catchUp.response',
+            401: 'error.response',
+            404: 'error.response',
+          },
+        },
+      ),
   )
   .group('/rooms', (app) =>
     app

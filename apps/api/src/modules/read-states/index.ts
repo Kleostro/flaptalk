@@ -89,4 +89,36 @@ export const readStatesModule = new Elysia({
         404: 'error.response',
       },
     },
+  )
+  .get(
+    '/workspaces/:workspaceId/catch-up',
+    async ({
+      authJwt,
+      cookie,
+      params,
+      readStatesService,
+    }: {
+      readonly authJwt: AuthJwtVerifier;
+      readonly cookie: Record<string, { value?: string | undefined }>;
+      readonly params: {
+        readonly workspaceId: number;
+      };
+      readonly readStatesService: ReadStatesServiceType;
+    }) => {
+      const userId = await requireAuthenticatedUserId({ authJwt, cookie });
+
+      return readStatesService.getWorkspaceCatchUp({
+        userId,
+        workspaceId: params.workspaceId,
+      });
+    },
+    {
+      cookie: workspaceSessionCookieModel,
+      params: WorkspaceParamsModel,
+      response: {
+        200: 'readStates.catchUp.response',
+        401: 'error.response',
+        404: 'error.response',
+      },
+    },
   );
