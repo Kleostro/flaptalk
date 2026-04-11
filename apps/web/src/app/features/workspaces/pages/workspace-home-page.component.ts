@@ -153,7 +153,7 @@ export class WorkspaceHomePageComponent {
     this.workspaceFacadeService
       .catchUpItems()
       .map((item) => createWorkspaceCatchUpViewModel(item))
-      .filter((item) => item.roomId !== this.featuredCatchUpItem()?.roomId),
+      .filter((item) => item.catchUpKey !== this.featuredCatchUpItem()?.catchUpKey),
   );
   public readonly roomCount = computed(() => this.workspaceFacadeService.roomCount());
   public readonly shouldShowRecentCatchUp = computed(

@@ -126,6 +126,33 @@
     color: var(--text-primary);
   }
 
+  &__continue-thread {
+    display: grid;
+    gap: 0.35rem;
+
+    padding: 0.9rem 1rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 76%, transparent);
+    border-radius: 1rem;
+
+    background: color-mix(in oklch, var(--surface-base) 10%, transparent);
+
+    strong {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--text-primary);
+    }
+  }
+
   &__continue-link {
     display: inline-flex;
     align-items: center;

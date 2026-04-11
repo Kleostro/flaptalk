@@ -4,7 +4,7 @@
       <app-empty-state description="Restoring unread counts and recent room activity..." />
     } @else if (catchUpItems().length > 0) {
       <div class="workspace-catch-up-panel__activity-list">
-        @for (roomActivity of catchUpItems(); track roomActivity.roomId) {
+        @for (roomActivity of catchUpItems(); track roomActivity.catchUpKey) {
           <app-entity-list-item>
             <div entityIdentity class="workspace-catch-up-panel__activity-heading">
               <strong>{{ roomActivity.roomName }}</strong>
@@ -20,6 +20,13 @@
 
               <app-pill appearance="outline" size="small">{{ roomActivity.contextLabel }}</app-pill>
             </div>
+
+            @if (roomActivity.threadPreview) {
+              <p>
+                <strong>Thread context:</strong>
+                {{ roomActivity.threadPreview }}
+              </p>
+            }
 
             <p>{{ roomActivity.preview }}</p>
 
