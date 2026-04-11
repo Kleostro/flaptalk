@@ -32,6 +32,7 @@ export class WorkspaceRoomFeedComponent {
   public readonly isPending = input.required<boolean>();
   public readonly messages = input.required<readonly Message[]>();
   public readonly resumeMode = input<WorkspaceRoomFeedResumeMode>('default');
+  public readonly resumeTargetMessageId = input<null | number>(null);
   public readonly room = input<null | Room>(null);
   public readonly selectThread = output<number>();
   public readonly visibleMessageChange = output<number>();
@@ -63,6 +64,15 @@ export class WorkspaceRoomFeedComponent {
     messages: readonly Message[],
     resumeMode: WorkspaceRoomFeedResumeMode,
   ): null | number {
+    const explicitResumeTargetMessageId = this.resumeTargetMessageId();
+
+    if (
+      explicitResumeTargetMessageId !== null &&
+      messages.some((message) => message.id === explicitResumeTargetMessageId)
+    ) {
+      return explicitResumeTargetMessageId;
+    }
+
     if (messages.length === 0) {
       return null;
     }

@@ -13,6 +13,7 @@ export interface WorkspaceCatchUpViewModel {
   readonly preview: string;
   readonly queryParams: {
     readonly resume: string;
+    readonly target?: string;
     readonly thread?: string;
   };
   readonly resumeLabel: string;
@@ -53,14 +54,19 @@ export function createWorkspaceCatchUpViewModel(
     : hasUnreadMessages
       ? 'Resume unread'
       : 'Open room';
-  const queryParams = item.threadRootMessageId
-    ? {
-        resume: item.resumeMode,
-        thread: String(item.threadRootMessageId),
-      }
-    : {
-        resume: item.resumeMode,
-      };
+  const queryParams = {
+    ...(item.resumeTargetMessageId
+      ? {
+          target: String(item.resumeTargetMessageId),
+        }
+      : {}),
+    ...(item.threadRootMessageId
+      ? {
+          thread: String(item.threadRootMessageId),
+        }
+      : {}),
+    resume: item.resumeMode,
+  };
   const catchUpKey = item.threadRootMessageId
     ? `thread:${item.threadRootMessageId}`
     : `room:${item.room.id}`;

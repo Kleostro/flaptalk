@@ -24,6 +24,7 @@
           [isPending]="isMessageCollectionPending()"
           [messages]="messages()"
           [resumeMode]="roomResumeMode()"
+          [resumeTargetMessageId]="resumeTargetMessageId()"
           [room]="selectedRoom()"
           (selectThread)="openThread($event)"
           (visibleMessageChange)="handleVisibleMessageChange($event)"

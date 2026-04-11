@@ -76,6 +76,7 @@ export class WorkspaceRoomPageComponent {
   public readonly messages = computed(() => this.workspaceFacadeService.messages());
   public readonly replyModel = this.workspaceFormFactoryService.createMessageModel();
   public readonly replyForm = this.workspaceFormFactoryService.createMessageForm(this.replyModel);
+  public readonly resumeTargetMessageId = signal<null | number>(null);
   public readonly roomResumeMode = signal<WorkspaceRoomFeedResumeMode>('default');
   public readonly selectedRoom = computed(() => this.workspaceFacadeService.selectedRoom());
   public readonly selectedThreadReplies = computed(() =>
@@ -115,6 +116,7 @@ export class WorkspaceRoomPageComponent {
 
     this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       const resumeParam = params.get('resume');
+      const resumeTargetParam = this.parseRouteEntityId(params.get('target'));
       const threadParam = this.parseRouteEntityId(params.get('thread'));
 
       if (resumeParam === 'unread') {
@@ -124,6 +126,8 @@ export class WorkspaceRoomPageComponent {
       } else {
         this.roomResumeMode.set('default');
       }
+
+      this.resumeTargetMessageId.set(resumeTargetParam);
 
       if (threadParam !== null) {
         this.workspaceFacadeService.selectThread(threadParam);
