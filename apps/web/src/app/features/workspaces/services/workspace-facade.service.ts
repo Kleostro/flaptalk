@@ -7,6 +7,7 @@ import {
   type Room,
   type RoomReadState,
   type WorkspaceAccess,
+  type WorkspaceCatchUpItem,
   type WorkspaceMember,
   type WorkspaceRoomActivity,
 } from '@flaptalk/api-contract';
@@ -17,7 +18,6 @@ import { type AuthSubmissionResult } from '@web/app/features/auth/models/auth-su
 import { AuthFacadeService } from '@web/app/features/auth/services/auth-facade.service';
 import { WorkspaceApiService } from '@web/app/features/workspaces/services/workspace-api.service';
 import { type CreateInvite } from '@web/app/features/workspaces/types/create-invite.model';
-import { type WorkspaceCatchUpItem } from '@web/app/features/workspaces/types/workspace-catch-up-item.model';
 import { type CreateMessage } from '@web/app/features/workspaces/types/create-message.model';
 import { type CreateRoom } from '@web/app/features/workspaces/types/create-room.model';
 import { type CreateWorkspace } from '@web/app/features/workspaces/types/create-workspace.model';
@@ -29,16 +29,27 @@ interface WorkspaceActivityState {
   readonly unreadRoomCount: number;
 }
 
+interface WorkspaceCatchUpState {
+  readonly items: readonly WorkspaceCatchUpItem[];
+  readonly primaryItem: null | WorkspaceCatchUpItem;
+}
+
 const EMPTY_WORKSPACE_ACTIVITY: WorkspaceActivityState = {
   rooms: [],
   unreadMessageCount: 0,
   unreadRoomCount: 0,
 };
 
+const EMPTY_WORKSPACE_CATCH_UP: WorkspaceCatchUpState = {
+  items: [],
+  primaryItem: null,
+};
+
 @Injectable({ providedIn: 'root' })
 export class WorkspaceFacadeService {
   private readonly acceptInvitePendingState = signal(false);
   private readonly authFacadeService = inject(AuthFacadeService);
+  private readonly catchUpRequestVersion = signal(0);
   private readonly createInvitePendingState = signal(false);
   private readonly createMessagePendingState = signal(false);
   private readonly createRoomPendingState = signal(false);
@@ -177,6 +188,20 @@ export class WorkspaceFacadeService {
         ? of(EMPTY_WORKSPACE_ACTIVITY)
         : this.workspaceApiService.getWorkspaceActivity(params.workspaceId),
   });
+  private readonly workspaceCatchUpResource = rxResource<
+    WorkspaceCatchUpState,
+    { readonly version: number; readonly workspaceId: null | number }
+  >({
+    defaultValue: EMPTY_WORKSPACE_CATCH_UP,
+    params: () => ({
+      version: this.catchUpRequestVersion(),
+      workspaceId: this.currentWorkspace()?.id ?? null,
+    }),
+    stream: ({ params }) =>
+      params.workspaceId === null
+        ? of(EMPTY_WORKSPACE_CATCH_UP)
+        : this.workspaceApiService.getWorkspaceCatchUp(params.workspaceId),
+  });
 
   public readonly invites = computed(() => this.inviteCollectionResource.value());
   public readonly activeInviteCount = computed(
@@ -184,55 +209,8 @@ export class WorkspaceFacadeService {
   );
   public readonly canManageInvites = computed(() => this.currentWorkspaceRole() === 'owner');
   public readonly canManageRooms = computed(() => this.currentWorkspaceRole() === 'owner');
-  public readonly workspaceActivity = computed(() => this.workspaceActivityResource.value());
-  public readonly continueReadingRooms = computed(() =>
-    [...this.workspaceActivity().rooms].sort((leftRoomActivity, rightRoomActivity) => {
-      const unreadDelta =
-        Number(leftRoomActivity.unreadMessageCount > 0) -
-        Number(rightRoomActivity.unreadMessageCount > 0);
-
-      if (unreadDelta !== 0) {
-        return unreadDelta;
-      }
-
-      const leftTimestamp = Date.parse(
-        leftRoomActivity.lastMessage?.createdAt ?? new Date(0).toISOString(),
-      );
-      const rightTimestamp = Date.parse(
-        rightRoomActivity.lastMessage?.createdAt ?? new Date(0).toISOString(),
-      );
-
-      return leftTimestamp - rightTimestamp;
-    }),
-  );
-  public readonly continueReadingItems = computed<readonly WorkspaceCatchUpItem[]>(() =>
-    this.continueReadingRooms().map((roomActivity) => {
-      const hasUnreadMessages = roomActivity.unreadMessageCount > 0;
-      const isThreadReply =
-        roomActivity.lastMessage?.parentMessageId !== null &&
-        roomActivity.lastMessage?.parentMessageId !== undefined;
-
-      return {
-        contextLabel: isThreadReply ? 'Thread reply' : 'Room message',
-        lastActivityAt: roomActivity.lastMessage?.createdAt ?? null,
-        lastAuthorEmail: roomActivity.lastMessage?.author.email ?? null,
-        preview:
-          roomActivity.lastMessage?.body ??
-          'This room is configured and ready for the next wave of activity.',
-        resumeLabel: hasUnreadMessages ? 'Resume unread' : 'Open room',
-        resumeMode: hasUnreadMessages ? 'unread' : 'latest',
-        roomId: roomActivity.room.id,
-        roomName: roomActivity.room.name,
-        threadRootMessageId: isThreadReply
-          ? (roomActivity.lastMessage?.parentMessageId ?? null)
-          : null,
-        unreadLabel: hasUnreadMessages
-          ? `${roomActivity.unreadMessageCount} unread`
-          : 'Recently active',
-        unreadMessageCount: roomActivity.unreadMessageCount,
-      };
-    }),
-  );
+  public readonly workspaceCatchUp = computed(() => this.workspaceCatchUpResource.value());
+  public readonly catchUpItems = computed(() => this.workspaceCatchUp().items);
   public readonly messages = computed(() => this.messageCollectionResource.value());
   public readonly messageCount = computed(() => this.messages().length);
   public readonly hasMessages = computed(() => this.messageCount() > 0);
@@ -266,6 +244,9 @@ export class WorkspaceFacadeService {
   public readonly isWorkspaceActivityPending = computed(() =>
     this.workspaceActivityResource.isLoading(),
   );
+  public readonly isWorkspaceCatchUpPending = computed(() =>
+    this.workspaceCatchUpResource.isLoading(),
+  );
   public readonly isWorkspaceCollectionPending = computed(() =>
     this.workspaceCollectionResource.isLoading(),
   );
@@ -278,7 +259,9 @@ export class WorkspaceFacadeService {
     }));
   });
   public readonly memberCount = computed(() => this.members().length);
+  public readonly primaryCatchUpItem = computed(() => this.workspaceCatchUp().primaryItem);
   public readonly selectedThreadReplies = computed(() => this.selectedThread()?.replies ?? []);
+  public readonly workspaceActivity = computed(() => this.workspaceActivityResource.value());
   public readonly unreadMessageCount = computed(() => this.workspaceActivity().unreadMessageCount);
   public readonly unreadMessageCountByRoomId = computed(() => {
     const roomActivityEntries = this.workspaceActivity().rooms.map(
@@ -300,6 +283,58 @@ export class WorkspaceFacadeService {
       ),
       unreadRoomCount: rooms.filter((roomActivity) => roomActivity.unreadMessageCount > 0).length,
     };
+  }
+
+  private refreshWorkspaceContextData(): void {
+    this.roomRequestVersion.update((version) => version + 1);
+    this.inviteRequestVersion.update((version) => version + 1);
+    this.memberRequestVersion.update((version) => version + 1);
+    this.readStateRequestVersion.update((version) => version + 1);
+    this.catchUpRequestVersion.update((version) => version + 1);
+  }
+
+  private resetWorkspaceContextState(): void {
+    this.inviteCollectionResource.set([]);
+    this.memberCollectionResource.set([]);
+    this.messageCollectionResource.set([]);
+    this.roomCollectionResource.set([]);
+    this.selectedRoomIdState.set(null);
+    this.threadResource.set(null);
+    this.selectedThreadMessageIdState.set(null);
+    this.workspaceActivityResource.set(EMPTY_WORKSPACE_ACTIVITY);
+    this.workspaceCatchUpResource.set(EMPTY_WORKSPACE_CATCH_UP);
+  }
+
+  private updateCreatedMessageState(roomId: number, createdMessage: Message): void {
+    if (createdMessage.parentMessageId === null) {
+      this.messageCollectionResource.set([...this.messages(), createdMessage]);
+    } else {
+      const selectedThreadRootMessage = this.selectedThreadRootMessage();
+
+      if (selectedThreadRootMessage?.id === createdMessage.parentMessageId) {
+        const selectedThread = this.selectedThread();
+
+        if (selectedThread) {
+          this.threadResource.set({
+            replies: [...selectedThread.replies, createdMessage],
+            rootMessage: selectedThread.rootMessage,
+          });
+        }
+      }
+    }
+
+    this.updateWorkspaceActivityRoom(roomId, (roomActivity) => ({
+      ...roomActivity,
+      lastMessage: createdMessage,
+      readState: {
+        lastReadMessageId: createdMessage.id,
+        roomId,
+        updatedAt: new Date().toISOString(),
+        userId: createdMessage.author.id,
+      },
+      unreadMessageCount: 0,
+    }));
+    this.catchUpRequestVersion.update((version) => version + 1);
   }
 
   private updateWorkspaceActivityRoom(
@@ -327,18 +362,8 @@ export class WorkspaceFacadeService {
         ];
 
         this.workspaceCollectionResource.set(nextWorkspaces);
-        this.roomCollectionResource.set([]);
-        this.messageCollectionResource.set([]);
-        this.selectedRoomIdState.set(null);
-        this.threadResource.set(null);
-        this.selectedThreadMessageIdState.set(null);
-        this.workspaceActivityResource.set(EMPTY_WORKSPACE_ACTIVITY);
-        this.inviteCollectionResource.set([]);
-        this.memberCollectionResource.set([]);
-        this.roomRequestVersion.update((version) => version + 1);
-        this.inviteRequestVersion.update((version) => version + 1);
-        this.memberRequestVersion.update((version) => version + 1);
-        this.readStateRequestVersion.update((version) => version + 1);
+        this.resetWorkspaceContextState();
+        this.refreshWorkspaceContextData();
       }),
       map((workspaceAccess) => ({
         level: TOAST_LEVEL.success,
@@ -390,34 +415,7 @@ export class WorkspaceFacadeService {
 
     return this.workspaceApiService.createMessage(roomId, message).pipe(
       tap((createdMessage) => {
-        if (createdMessage.parentMessageId === null) {
-          this.messageCollectionResource.set([...this.messages(), createdMessage]);
-        } else {
-          const selectedThreadRootMessage = this.selectedThreadRootMessage();
-
-          if (selectedThreadRootMessage?.id === createdMessage.parentMessageId) {
-            const selectedThread = this.selectedThread();
-
-            if (selectedThread) {
-              this.threadResource.set({
-                replies: [...selectedThread.replies, createdMessage],
-                rootMessage: selectedThread.rootMessage,
-              });
-            }
-          }
-        }
-
-        this.updateWorkspaceActivityRoom(roomId, (roomActivity) => ({
-          ...roomActivity,
-          lastMessage: createdMessage,
-          readState: {
-            lastReadMessageId: createdMessage.id,
-            roomId,
-            updatedAt: new Date().toISOString(),
-            userId: createdMessage.author.id,
-          },
-          unreadMessageCount: 0,
-        }));
+        this.updateCreatedMessageState(roomId, createdMessage);
       }),
       map(() => ({
         level: TOAST_LEVEL.success,
@@ -447,6 +445,7 @@ export class WorkspaceFacadeService {
             },
           ]),
         );
+        this.catchUpRequestVersion.update((version) => version + 1);
         this.clearSelectedThread();
         this.selectedRoomIdState.set(createdRoom.id);
       }),
@@ -467,14 +466,8 @@ export class WorkspaceFacadeService {
     return this.workspaceApiService.createWorkspace(workspace).pipe(
       tap((createdWorkspaceAccess) => {
         this.workspaceCollectionResource.set([createdWorkspaceAccess, ...this.workspaces()]);
-        this.inviteCollectionResource.set([]);
-        this.memberCollectionResource.set([]);
-        this.messageCollectionResource.set([]);
-        this.roomCollectionResource.set([]);
-        this.selectedRoomIdState.set(null);
-        this.threadResource.set(null);
-        this.selectedThreadMessageIdState.set(null);
-        this.workspaceActivityResource.set(EMPTY_WORKSPACE_ACTIVITY);
+        this.resetWorkspaceContextState();
+        this.catchUpRequestVersion.update((version) => version + 1);
       }),
       map((createdWorkspaceAccess) => ({
         level: TOAST_LEVEL.success,
@@ -539,9 +532,14 @@ export class WorkspaceFacadeService {
                 : 0
               : 0),
         }));
+        this.catchUpRequestVersion.update((version) => version + 1);
       }),
       map(() => void 0),
     );
+  }
+
+  public refreshCatchUp(): void {
+    this.catchUpRequestVersion.update((version) => version + 1);
   }
 
   public refreshInvitePreview(): void {
@@ -577,11 +575,21 @@ export class WorkspaceFacadeService {
   }
 
   public selectRoom(roomId: number): void {
+    if (!Number.isInteger(roomId) || roomId <= 0) {
+      this.clearSelectedRoom();
+      return;
+    }
+
     this.clearSelectedThread();
     this.selectedRoomIdState.set(roomId);
   }
 
   public selectThread(messageId: number): void {
+    if (!Number.isInteger(messageId) || messageId <= 0) {
+      this.clearSelectedThread();
+      return;
+    }
+
     this.selectedThreadMessageIdState.set(messageId);
   }
 

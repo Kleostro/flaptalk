@@ -5,6 +5,7 @@ export const APP_ROUTE_PATHS = {
   root: '',
   workspace: 'workspace',
   workspaceSetup: 'setup',
+  workspaceSetupMembers: 'members',
   workspaceSetupRooms: 'rooms',
   workspaceSetupRoomsNew: 'new',
 } as const;

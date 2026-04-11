@@ -8,13 +8,11 @@
           <app-entity-list-item>
             <div entityIdentity class="workspace-catch-up-panel__activity-heading">
               <strong>{{ roomActivity.roomName }}</strong>
-              <span>
-                {{ getSecondaryMeta(roomActivity) }}
-              </span>
+              <span>{{ roomActivity.secondaryMeta }}</span>
             </div>
 
             <div class="workspace-catch-up-panel__activity-meta">
-              @if (roomActivity.unreadMessageCount > 0) {
+              @if (roomActivity.hasUnreadMessages) {
                 <app-pill appearance="accent" size="small">{{ roomActivity.unreadLabel }}</app-pill>
               } @else {
                 <app-pill size="small">{{ roomActivity.unreadLabel }}</app-pill>
@@ -28,8 +26,8 @@
             <a
               entityAside
               class="workspace-catch-up-panel__resume-link"
-              [queryParams]="getResumeQueryParams(roomActivity)"
-              [routerLink]="getRoomRoute(roomActivity.roomId)"
+              [queryParams]="roomActivity.queryParams"
+              [routerLink]="roomActivity.roomLink"
             >
               {{ roomActivity.resumeLabel }}
             </a>

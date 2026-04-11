@@ -6,6 +6,7 @@ import {
   type Room,
   type RoomReadState,
   type WorkspaceAccess,
+  type WorkspaceCatchUpItem,
   type WorkspaceMember,
   type WorkspaceRoomActivity,
 } from '@flaptalk/api-contract';
@@ -245,6 +246,23 @@ export class WorkspaceApiService {
         throw new Error(this.getErrorMessage(response, 'Unable to load workspace activity.'));
       },
       'Unable to load workspace activity.',
+    );
+  }
+
+  public getWorkspaceCatchUp(workspaceId: number): Observable<{
+    readonly items: WorkspaceCatchUpItem[];
+    readonly primaryItem: null | WorkspaceCatchUpItem;
+  }> {
+    return this.createRequest$(
+      () => api.workspaces({ workspaceId })['catch-up'].get(),
+      (response) => {
+        if (response.data?.items) {
+          return response.data;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to load workspace catch-up.'));
+      },
+      'Unable to load workspace catch-up.',
     );
   }
 

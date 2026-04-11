@@ -9,18 +9,16 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 
-import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { ToastService } from '@web/app/core/services/toast.service';
 import { WorkspaceRoomFeedComponent } from '@web/app/features/workspaces/components/workspace-room-feed/workspace-room-feed.component';
 import { type WorkspaceRoomFeedResumeMode } from '@web/app/features/workspaces/components/workspace-room-feed/workspace-room-feed.component';
 import { WorkspaceThreadPanelComponent } from '@web/app/features/workspaces/components/workspace-thread-panel/workspace-thread-panel.component';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
 import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/services/workspace-form.factory.service';
-import { type BreadcrumbItem } from '@web/app/shared/ui/breadcrumbs/breadcrumbs.component';
+import { createWorkspaceRoomViewModel } from '@web/app/features/workspaces/view-models/workspace-room.view-model';
 import { ButtonComponent } from '@web/app/shared/ui/button/button';
 import { CardComponent } from '@web/app/shared/ui/card/card';
 import { KeyValueListComponent } from '@web/app/shared/ui/key-value-list/key-value-list.component';
-import { type KeyValueListItem } from '@web/app/shared/ui/key-value-list/key-value-list.models';
 import { PageHeaderComponent } from '@web/app/shared/ui/page-header/page-header.component';
 import { ShellSectionCardComponent } from '@web/app/shared/ui/shell-section-card/shell-section-card.component';
 import { ShellPanelHeaderComponent } from '@web/app/shared/ui/shell-panel-header/shell-panel-header';
@@ -50,17 +48,6 @@ export class WorkspaceRoomPageComponent {
   private readonly workspaceFacadeService = inject(WorkspaceFacadeService);
   private readonly workspaceFormFactoryService = inject(WorkspaceFormFactoryService);
 
-  public readonly selectedRoom = computed(() => this.workspaceFacadeService.selectedRoom());
-  public readonly breadcrumbs = computed<readonly BreadcrumbItem[]>(() => [
-    {
-      href: ['/', APP_ROUTE_PATHS.workspace],
-      label: 'Workspace',
-    },
-    {
-      href: null,
-      label: this.selectedRoom()?.name ?? 'Room',
-    },
-  ]);
   public readonly currentWorkspace = computed(() => this.workspaceFacadeService.currentWorkspace());
   public readonly currentWorkspaceRole = computed(() =>
     this.workspaceFacadeService.currentWorkspaceRole(),
@@ -89,45 +76,18 @@ export class WorkspaceRoomPageComponent {
   public readonly messages = computed(() => this.workspaceFacadeService.messages());
   public readonly replyModel = this.workspaceFormFactoryService.createMessageModel();
   public readonly replyForm = this.workspaceFormFactoryService.createMessageForm(this.replyModel);
-  public readonly roomDetailItems = computed<readonly KeyValueListItem[]>(() => [
-    {
-      label: 'Room ID',
-      value: this.selectedRoom()?.id ? String(this.selectedRoom()?.id) : '—',
-    },
-    {
-      label: 'Slug',
-      value: this.selectedRoom()?.slug ?? '—',
-    },
-    {
-      label: 'Workspace',
-      value: this.currentWorkspace()?.name ?? '—',
-    },
-  ]);
-  public readonly roomHeaderDescription = computed(() =>
-    this.selectedRoom()
-      ? 'Real-time messaging lives here now. Threads and catch-up layers will grow from this room feed next.'
-      : 'The selected room could not be restored from the current workspace context.',
-  );
-  public readonly roomHeaderTitle = computed(() => this.selectedRoom()?.name ?? 'Room unavailable');
-  public readonly roomHealthRows = computed<readonly KeyValueListItem[]>(() => [
-    {
-      label: 'Messages',
-      value: String(this.messageCount()).padStart(2, '0'),
-    },
-    {
-      label: 'Unread',
-      value: String(this.workspaceFacadeService.getSelectedRoomUnreadCount()).padStart(2, '0'),
-    },
-    {
-      label: 'Owner access',
-      value: this.currentWorkspaceRole() === 'owner' ? 'Yes' : 'No',
-    },
-    {
-      label: 'Thread layer',
-      value: this.hasSelectedThread() ? 'Open' : 'Ready',
-    },
-  ]);
   public readonly roomResumeMode = signal<WorkspaceRoomFeedResumeMode>('default');
+  public readonly selectedRoom = computed(() => this.workspaceFacadeService.selectedRoom());
+  public readonly roomViewModel = computed(() =>
+    createWorkspaceRoomViewModel({
+      currentWorkspaceName: this.currentWorkspace()?.name ?? null,
+      currentWorkspaceRole: this.currentWorkspaceRole(),
+      hasSelectedThread: this.hasSelectedThread(),
+      messageCount: this.messageCount(),
+      room: this.selectedRoom(),
+      unreadMessageCount: this.workspaceFacadeService.getSelectedRoomUnreadCount(),
+    }),
+  );
   public readonly selectedThreadReplies = computed(() =>
     this.workspaceFacadeService.selectedThreadReplies(),
   );
@@ -143,16 +103,16 @@ export class WorkspaceRoomPageComponent {
 
   constructor() {
     this.activatedRoute.paramMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-      const roomId = Number(params.get('roomId'));
+      const roomId = this.parseRouteEntityId(params.get('roomId'));
 
-      if (Number.isFinite(roomId)) {
+      if (roomId !== null) {
         this.workspaceFacadeService.selectRoom(roomId);
       }
     });
 
     this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       const resumeParam = params.get('resume');
-      const threadParam = Number(params.get('thread'));
+      const threadParam = this.parseRouteEntityId(params.get('thread'));
 
       if (resumeParam === 'unread') {
         this.roomResumeMode.set('first-unread');
@@ -162,7 +122,7 @@ export class WorkspaceRoomPageComponent {
         this.roomResumeMode.set('default');
       }
 
-      if (Number.isFinite(threadParam)) {
+      if (threadParam !== null) {
         this.workspaceFacadeService.selectThread(threadParam);
         return;
       }
@@ -204,6 +164,16 @@ export class WorkspaceRoomPageComponent {
       message: error instanceof Error ? error.message : fallbackMessage,
       title,
     });
+  }
+
+  private parseRouteEntityId(rawValue: null | string): null | number {
+    if (!rawValue || !/^\d+$/.test(rawValue)) {
+      return null;
+    }
+
+    const parsedValue = Number(rawValue);
+
+    return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : null;
   }
 
   private resetReplyForm(rootMessageId: number): void {

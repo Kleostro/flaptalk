@@ -1,13 +1,13 @@
 <app-page-header
-  [breadcrumbs]="breadcrumbs()"
-  [description]="roomHeaderDescription()"
+  [breadcrumbs]="roomViewModel().breadcrumbs"
+  [description]="roomViewModel().headerDescription"
   kicker="Room canvas"
-  [title]="roomHeaderTitle()"
+  [title]="roomViewModel().headerTitle"
 />
 
 <div class="workspace-room-page__dashboard-grid">
   <section class="workspace-room-page__primary-column">
-    <app-shell-section-card tag="Room feed" [title]="selectedRoom()?.name ?? 'Room feed'">
+    <app-shell-section-card tag="Room feed" [title]="roomViewModel().feedTitle">
       <div class="workspace-room-page__panel">
         <app-workspace-room-feed
           [activeThreadMessageId]="selectedThreadRootMessage()?.id ?? null"
@@ -47,7 +47,7 @@
   </section>
 
   <section class="workspace-room-page__secondary-column">
-    <app-shell-section-card [tag]="hasSelectedThread() ? 'Live' : 'Thread'" title="Thread panel">
+    <app-shell-section-card [tag]="roomViewModel().threadPanelTag" title="Thread panel">
       <div class="workspace-room-page__panel">
         <app-workspace-thread-panel
           [currentReadMessageId]="lastReadMessageId()"
@@ -82,22 +82,15 @@
 
     <app-shell-section-card tag="Context" title="Room details">
       <div class="workspace-room-page__panel">
-        @if (selectedRoom()?.description) {
-          <p class="workspace-room-page__helper">{{ selectedRoom()?.description }}</p>
-        } @else {
-          <p class="workspace-room-page__helper">
-            This room does not have a description yet. It is ready to grow into a structured
-            discussion surface.
-          </p>
-        }
+        <p class="workspace-room-page__helper">{{ roomViewModel().roomDescription }}</p>
 
-        <app-key-value-list [items]="roomDetailItems()" />
+        <app-key-value-list [items]="roomViewModel().detailItems" />
       </div>
     </app-shell-section-card>
 
     <app-shell-section-card tag="Status" title="Discussion health">
       <div class="workspace-room-page__panel">
-        <app-key-value-list [items]="roomHealthRows()" />
+        <app-key-value-list [items]="roomViewModel().healthRows" />
       </div>
     </app-shell-section-card>
   </section>

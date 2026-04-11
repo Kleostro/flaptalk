@@ -1,8 +1,10 @@
 import { Routes } from '@angular/router';
 
 import { WorkspaceHomePageComponent } from '@web/app/features/workspaces/pages/workspace-home-page.component';
+import { WorkspaceMembersPageComponent } from '@web/app/features/workspaces/pages/workspace-members-page.component';
 import { WorkspaceRoomCreatePageComponent } from '@web/app/features/workspaces/pages/workspace-room-create-page.component';
 import { WorkspaceRoomPageComponent } from '@web/app/features/workspaces/pages/workspace-room-page.component';
+import { WorkspaceRoomsPageComponent } from '@web/app/features/workspaces/pages/workspace-rooms-page.component';
 import { WorkspaceShellPageComponent } from '@web/app/features/workspaces/pages/workspace-shell-page.component';
 import { WorkspaceSetupPageComponent } from '@web/app/features/workspaces/pages/workspace-setup-page.component';
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
@@ -22,6 +24,14 @@ export const WORKSPACE_ROUTES: Routes = [
       {
         component: WorkspaceSetupPageComponent,
         path: APP_ROUTE_PATHS.workspaceSetup,
+      },
+      {
+        component: WorkspaceRoomsPageComponent,
+        path: `${APP_ROUTE_PATHS.workspaceSetup}/${APP_ROUTE_PATHS.workspaceSetupRooms}`,
+      },
+      {
+        component: WorkspaceMembersPageComponent,
+        path: `${APP_ROUTE_PATHS.workspaceSetup}/${APP_ROUTE_PATHS.workspaceSetupMembers}`,
       },
       {
         component: WorkspaceRoomCreatePageComponent,

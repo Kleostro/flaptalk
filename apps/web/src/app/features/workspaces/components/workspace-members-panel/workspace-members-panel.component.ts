@@ -21,6 +21,9 @@ import { ShellSectionCardComponent } from '@web/app/shared/ui/shell-section-card
   templateUrl: './workspace-members-panel.component.html',
 })
 export class WorkspaceMembersPanelComponent {
+  public readonly emptyDescription = input(
+    'No visible members yet. Accepted invites will start filling this roster.',
+  );
   public readonly hasWorkspace = input.required<boolean>();
   public readonly isPending = input.required<boolean>();
   public readonly members = input.required<readonly WorkspaceMemberRow[]>();

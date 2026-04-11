@@ -5,9 +5,7 @@
     } @else if (isPending()) {
       <app-empty-state description="Restoring the current member list..." />
     } @else if (members().length === 0) {
-      <app-empty-state
-        description="No visible members yet. Accepted invites will start filling this roster."
-      />
+      <app-empty-state [description]="emptyDescription()" />
     } @else {
       <div class="workspace-members-panel__list">
         @for (member of members(); track member.user.id) {

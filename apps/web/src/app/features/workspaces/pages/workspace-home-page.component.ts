@@ -8,34 +8,29 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { type WorkspaceCatchUpItem } from '@web/app/features/workspaces/types/workspace-catch-up-item.model';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { ToastService } from '@web/app/core/services/toast.service';
+import { WorkspaceCatchUpPanelComponent } from '@web/app/features/workspaces/components/workspace-catch-up-panel/workspace-catch-up-panel.component';
 import {
   WORKSPACE_PAGE_ACTIVITY_CARDS,
   WORKSPACE_PAGE_OVERVIEW_CARDS,
-  WORKSPACE_PAGE_ROOM_SETUP_HINTS,
 } from '@web/app/features/workspaces/pages/workspace-page.constants';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
 import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/services/workspace-form.factory.service';
+import { createWorkspaceCatchUpViewModel } from '@web/app/features/workspaces/view-models/workspace-catch-up.view-model';
 import { ButtonComponent } from '@web/app/shared/ui/button/button';
 import { CardComponent } from '@web/app/shared/ui/card/card';
 import { EmptyStateComponent } from '@web/app/shared/ui/empty-state/empty-state.component';
 import { KeyValueListComponent } from '@web/app/shared/ui/key-value-list/key-value-list.component';
 import { type KeyValueListItem } from '@web/app/shared/ui/key-value-list/key-value-list.models';
 import { PageHeaderComponent } from '@web/app/shared/ui/page-header/page-header.component';
-import { PillComponent } from '@web/app/shared/ui/pill/pill.component';
 import { ShellSectionCardComponent } from '@web/app/shared/ui/shell-section-card/shell-section-card.component';
 import { ShellPanelHeaderComponent } from '@web/app/shared/ui/shell-panel-header/shell-panel-header';
 import { ShellStatCardComponent } from '@web/app/shared/ui/shell-stat-card/shell-stat-card';
 import { TextInputFieldComponent } from '@web/app/shared/form/components/text-input-field/text-input-field.component';
 import { TextareaFieldComponent } from '@web/app/shared/form/components/textarea-field/textarea-field.component';
-import { WorkspaceMembersPanelComponent } from '@web/app/features/workspaces/components/workspace-members-panel/workspace-members-panel.component';
-import { WorkspaceCatchUpPanelComponent } from '@web/app/features/workspaces/components/workspace-catch-up-panel/workspace-catch-up-panel.component';
 import { WorkspaceOverviewPanelComponent } from '@web/app/features/workspaces/components/workspace-overview-panel/workspace-overview-panel.component';
-
-const RECENT_ROOM_ACTIVITY_LIMIT = 3;
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,7 +40,6 @@ const RECENT_ROOM_ACTIVITY_LIMIT = 3;
     EmptyStateComponent,
     KeyValueListComponent,
     PageHeaderComponent,
-    PillComponent,
     RouterLink,
     ShellSectionCardComponent,
     ShellPanelHeaderComponent,
@@ -53,7 +47,6 @@ const RECENT_ROOM_ACTIVITY_LIMIT = 3;
     TextInputFieldComponent,
     TextareaFieldComponent,
     WorkspaceCatchUpPanelComponent,
-    WorkspaceMembersPanelComponent,
     WorkspaceOverviewPanelComponent,
   ],
   selector: 'app-workspace-home-page',
@@ -71,27 +64,19 @@ export class WorkspaceHomePageComponent {
   );
   public readonly activityCards = WORKSPACE_PAGE_ACTIVITY_CARDS;
   public readonly canManageRooms = computed(() => this.workspaceFacadeService.canManageRooms());
-  public readonly currentWorkspaceRole = computed(() =>
-    this.workspaceFacadeService.currentWorkspaceRole(),
-  );
-  public readonly isOwner = computed(() => this.currentWorkspaceRole() === 'owner');
-  public readonly controlPanelDescription = computed(() => {
-    if (!this.hasWorkspace()) {
-      return 'Create the first workspace shell, then start shaping rooms and membership flows.';
-    }
-
-    return this.isOwner()
-      ? 'Structure, access, and room setup live here so owners can shape the workspace intentionally.'
-      : 'This surface keeps members focused on rooms, recent activity, and shared workspace context.';
-  });
-  public readonly controlPanelTitle = computed(() =>
-    this.isOwner() ? 'Owner control deck' : 'Member workspace view',
-  );
   public readonly members = computed(() => this.workspaceFacadeService.members());
   public readonly currentMember = computed(
     () => this.members().find((member) => member.isCurrentUser) ?? null,
   );
   public readonly currentWorkspace = computed(() => this.workspaceFacadeService.currentWorkspace());
+  public readonly currentWorkspaceRole = computed(() =>
+    this.workspaceFacadeService.currentWorkspaceRole(),
+  );
+  public readonly featuredCatchUpItem = computed(() => {
+    const primaryItem = this.workspaceFacadeService.primaryCatchUpItem();
+
+    return primaryItem ? createWorkspaceCatchUpViewModel(primaryItem) : null;
+  });
   public readonly hasWorkspace = computed(() => this.workspaceFacadeService.hasWorkspace());
   public readonly overviewCards = WORKSPACE_PAGE_OVERVIEW_CARDS;
   public readonly foundationDescription = computed(() =>
@@ -99,9 +84,47 @@ export class WorkspaceHomePageComponent {
       ? this.overviewCards[1].description
       : this.overviewCards[1].pendingDescription,
   );
-  public readonly hasRooms = computed(() => this.workspaceFacadeService.hasRooms());
-  public readonly hasUnreadActivity = computed(
-    () => this.workspaceFacadeService.unreadMessageCount() > 0,
+  public readonly isOwner = computed(() => this.currentWorkspaceRole() === 'owner');
+  public readonly membersLink = [
+    '/',
+    APP_ROUTE_PATHS.workspace,
+    APP_ROUTE_PATHS.workspaceSetup,
+    APP_ROUTE_PATHS.workspaceSetupMembers,
+  ];
+  public readonly roomsLink = [
+    '/',
+    APP_ROUTE_PATHS.workspace,
+    APP_ROUTE_PATHS.workspaceSetup,
+    APP_ROUTE_PATHS.workspaceSetupRooms,
+  ];
+  public readonly homeNavigationCards = computed<
+    readonly { readonly body: string; readonly link: readonly string[]; readonly title: string }[]
+  >(() =>
+    this.isOwner()
+      ? [
+          {
+            body: 'Review existing rooms and open the dedicated room-creation flow.',
+            link: this.roomsLink,
+            title: 'Rooms',
+          },
+          {
+            body: 'Manage members and invite links from one shared access surface.',
+            link: this.membersLink,
+            title: 'Members and access',
+          },
+        ]
+      : [
+          {
+            body: 'Browse the current room structure and jump into active discussion surfaces.',
+            link: this.roomsLink,
+            title: 'Rooms',
+          },
+          {
+            body: 'See who is inside the workspace and understand the shared community roster.',
+            link: this.membersLink,
+            title: 'People',
+          },
+        ],
   );
   public readonly workspaceModel = this.workspaceFormFactoryService.createWorkspaceModel();
   public readonly workspaceForm = this.workspaceFormFactoryService.createWorkspaceForm(
@@ -111,51 +134,35 @@ export class WorkspaceHomePageComponent {
   public readonly isCreateWorkspacePending = computed(() =>
     this.workspaceFacadeService.isCreateWorkspacePending(),
   );
-  public readonly isMemberCollectionPending = computed(() =>
-    this.workspaceFacadeService.isMemberCollectionPending(),
-  );
-  public readonly isWorkspaceActivityPending = computed(() =>
-    this.workspaceFacadeService.isWorkspaceActivityPending(),
+  public readonly isWorkspaceCatchUpPending = computed(() =>
+    this.workspaceFacadeService.isWorkspaceCatchUpPending(),
   );
   public readonly isWorkspaceFormSubmitted = signal(false);
   public readonly isWorkspacePending = computed(() =>
     this.workspaceFacadeService.isWorkspaceCollectionPending(),
   );
-  public readonly memberHomeHint = computed(() => {
+  public readonly memberCount = computed(() => this.workspaceFacadeService.memberCount());
+  public readonly navigationTag = computed(() => {
     if (!this.hasWorkspace()) {
-      return 'Create the first workspace shell to unlock community navigation and onboarding.';
+      return 'Next';
     }
 
-    if (!this.hasRooms()) {
-      return 'No rooms are visible yet. The workspace owner is still shaping the structure.';
-    }
-
-    if (!this.hasUnreadActivity()) {
-      return 'You are caught up. New room activity and thread changes will appear here.';
-    }
-
-    return 'Unread updates are waiting in the sidebar and catch-up feed.';
+    return this.isOwner() ? 'Owner' : 'Member';
   });
-  public readonly messageCount = computed(() => this.workspaceFacadeService.messageCount());
-  public readonly ownerCreateRoomLink = [
-    '/',
-    APP_ROUTE_PATHS.workspace,
-    APP_ROUTE_PATHS.workspaceSetup,
-    APP_ROUTE_PATHS.workspaceSetupRooms,
-    APP_ROUTE_PATHS.workspaceSetupRoomsNew,
-  ];
-  public readonly ownerSetupLink = ['/', APP_ROUTE_PATHS.workspace, APP_ROUTE_PATHS.workspaceSetup];
-  public readonly primaryCatchUpItem = computed<null | WorkspaceCatchUpItem>(
-    () => this.workspaceFacadeService.continueReadingItems()[0] ?? null,
-  );
-  public readonly recentRoomActivity = computed<readonly WorkspaceCatchUpItem[]>(() =>
-    this.workspaceFacadeService.continueReadingItems().slice(0, RECENT_ROOM_ACTIVITY_LIMIT),
+  public readonly recentCatchUpItems = computed(() =>
+    this.workspaceFacadeService
+      .catchUpItems()
+      .map((item) => createWorkspaceCatchUpViewModel(item))
+      .filter((item) => item.roomId !== this.featuredCatchUpItem()?.roomId),
   );
   public readonly roomCount = computed(() => this.workspaceFacadeService.roomCount());
-  public readonly roomModel = this.workspaceFormFactoryService.createRoomModel();
-  public readonly roomForm = this.workspaceFormFactoryService.createRoomForm(this.roomModel);
-  public readonly roomSetupHints = WORKSPACE_PAGE_ROOM_SETUP_HINTS;
-  public readonly roomsStatRows = computed<readonly KeyValueListItem[]>(() => [
+  public readonly shouldShowRecentCatchUp = computed(
+    () => this.isWorkspaceCatchUpPending() || this.recentCatchUpItems().length > 0,
+  );
+  public readonly showWorkspaceFormErrors = computed(
+    () => this.isWorkspaceFormSubmitted() || this.workspaceForm().touched(),
+  );
+  public readonly workspaceAnalyticsRows = computed<readonly KeyValueListItem[]>(() => [
     {
       label: 'Configured rooms',
       value: String(this.roomCount()).padStart(2, '0'),
@@ -168,18 +175,19 @@ export class WorkspaceHomePageComponent {
       label: 'Unread messages',
       value: String(this.workspaceFacadeService.unreadMessageCount()).padStart(2, '0'),
     },
+    {
+      label: 'Visible members',
+      value: String(this.memberCount()).padStart(2, '0'),
+    },
   ]);
-  public readonly showWorkspaceFormErrors = computed(
-    () => this.isWorkspaceFormSubmitted() || this.workspaceForm().touched(),
-  );
   public readonly workspaceCanvasDescription = computed(() => {
     if (!this.hasWorkspace()) {
-      return 'Start from a compact product shell, then expand into rooms, messages, threads, and summaries.';
+      return 'Start from a compact product shell, then expand into rooms, membership, and discussion flows.';
     }
 
     return this.isOwner()
-      ? 'This is the control surface for workspace structure, access, room setup, and future catch-up flows.'
-      : 'This is your community home for rooms, unread activity, and shared workspace context.';
+      ? 'This dashboard stays focused on workspace analytics and navigation into owner tools.'
+      : 'This dashboard keeps workspace analytics visible while navigation branches into rooms and people.';
   });
   public readonly workspaceCount = computed(() => this.workspaceFacadeService.workspaces().length);
   public readonly workspaceHeaderTitle = computed(() =>
@@ -187,6 +195,20 @@ export class WorkspaceHomePageComponent {
       ? (this.currentWorkspace()?.name ?? 'Workspace')
       : 'Create the first workspace shell.',
   );
+  public readonly workspaceStartRows = computed<readonly KeyValueListItem[]>(() => [
+    {
+      label: 'Current step',
+      value: 'Create workspace',
+    },
+    {
+      label: 'Next surface',
+      value: 'Rooms',
+    },
+    {
+      label: 'Then unlock',
+      value: 'Members and access',
+    },
+  ]);
   public readonly workspaceStateDescription = computed(() =>
     this.hasWorkspace()
       ? this.overviewCards[0].description
@@ -231,44 +253,5 @@ export class WorkspaceHomePageComponent {
           this.toastService.success(result);
         },
       });
-  }
-
-  public getContinueReadingDescription(item: WorkspaceCatchUpItem): string {
-    if (item.threadRootMessageId) {
-      return [
-        `A thread continuation is waiting in ${item.roomName}.`,
-        'Jump directly into the discussion where the latest reply landed.',
-      ].join(' ');
-    }
-
-    if (item.unreadMessageCount > 0) {
-      return [
-        `Unread room activity is waiting in ${item.roomName}.`,
-        'Resume from the first unread message and rebuild context quickly.',
-      ].join(' ');
-    }
-
-    return [
-      `The latest discussion in ${item.roomName} is still fresh.`,
-      'Re-open the room and continue from the newest message.',
-    ].join(' ');
-  }
-
-  public getContinueReadingQueryParams(item: WorkspaceCatchUpItem): {
-    readonly resume: string;
-    readonly thread?: string;
-  } {
-    return item.threadRootMessageId
-      ? {
-          resume: item.resumeMode,
-          thread: String(item.threadRootMessageId),
-        }
-      : {
-          resume: item.resumeMode,
-        };
-  }
-
-  public getContinueReadingRoute(item: WorkspaceCatchUpItem): string[] {
-    return ['/', APP_ROUTE_PATHS.workspace, 'rooms', String(item.roomId)];
   }
 }
