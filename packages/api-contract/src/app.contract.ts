@@ -89,6 +89,15 @@ function createContractInvite() {
   };
 }
 
+function createContractWorkspaceMember() {
+  return {
+    id: 0,
+    joinedAt: new Date(0).toISOString(),
+    role: 'owner' as const,
+    user: createContractUser(),
+  };
+}
+
 const sessionCookieModel = createSessionCookieModel();
 
 const HealthResponseModel = t.Object({
@@ -243,13 +252,7 @@ export const appContract = new Elysia({
       .get(
         '/:workspaceId/members',
         () => ({
-          members: [
-            {
-              joinedAt: new Date(0).toISOString(),
-              role: 'owner' as const,
-              user: createContractUser(),
-            },
-          ],
+          members: [createContractWorkspaceMember()],
         }),
         {
           cookie: sessionCookieModel,
@@ -260,6 +263,26 @@ export const appContract = new Elysia({
             200: 'workspaces.members.list.response',
             401: 'error.response',
             404: 'error.response',
+          },
+        },
+      )
+      .delete(
+        '/:workspaceId/members/:memberId',
+        () => ({
+          success: true as const,
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            memberId: t.Numeric(),
+            workspaceId: t.Numeric(),
+          }),
+          response: {
+            200: 'workspaces.members.remove.response',
+            401: 'error.response',
+            403: 'error.response',
+            404: 'error.response',
+            409: 'error.response',
           },
         },
       )
@@ -276,6 +299,25 @@ export const appContract = new Elysia({
           404: 'error.response',
         },
       })
+      .delete(
+        '/:workspaceId/invites/:inviteId',
+        () => ({
+          success: true as const,
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            inviteId: t.Numeric(),
+            workspaceId: t.Numeric(),
+          }),
+          response: {
+            200: 'invites.revoke.response',
+            401: 'error.response',
+            403: 'error.response',
+            404: 'error.response',
+          },
+        },
+      )
       .get(
         '/:workspaceId/invites',
         () => ({

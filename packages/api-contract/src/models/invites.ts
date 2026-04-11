@@ -9,6 +9,7 @@ const INVITE_TTL_HOURS_MAX = 24 * 30;
 const INVITE_TTL_HOURS_MIN = 1;
 
 export const WorkspaceMemberModel = t.Object({
+  id: t.Numeric(),
   joinedAt: t.String({
     format: 'date-time',
   }),
@@ -81,6 +82,10 @@ export const InviteTokenParamsModel = t.Object({
 
 export type InviteTokenParams = Static<typeof InviteTokenParamsModel>;
 
+const ActionSuccessResponseModel = t.Object({
+  success: t.Literal(true),
+});
+
 export const InvitesModel = {
   'invites.accept.response': t.Object({
     role: WorkspaceMemberRoleModel,
@@ -93,8 +98,10 @@ export const InvitesModel = {
     invites: t.Array(InviteModel),
   }),
   'invites.preview.response': InvitePreviewModel,
+  'invites.revoke.response': ActionSuccessResponseModel,
   'workspaces.member.entity': WorkspaceMemberModel,
   'workspaces.members.list.response': t.Object({
     members: t.Array(WorkspaceMemberModel),
   }),
+  'workspaces.members.remove.response': ActionSuccessResponseModel,
 };

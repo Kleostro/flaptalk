@@ -11,6 +11,16 @@ export const WorkspaceParamsModel = t.Object({
   workspaceId: t.Numeric(),
 });
 
+export const WorkspaceInviteParamsModel = t.Object({
+  inviteId: t.Numeric(),
+  workspaceId: t.Numeric(),
+});
+
+export const WorkspaceMemberParamsModel = t.Object({
+  memberId: t.Numeric(),
+  workspaceId: t.Numeric(),
+});
+
 export const RoomParamsModel = t.Object({
   roomId: t.Numeric(),
 });
