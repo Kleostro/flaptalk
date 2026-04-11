@@ -1,0 +1,148 @@
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [description]="memberSurfaceDescription()"
+  kicker="People"
+  title="Members and access"
+/>
+
+@if (!hasWorkspace()) {
+  <app-card>
+    <div class="workspace-members-page__panel workspace-members-page__panel--centered">
+      <app-empty-state
+        description="Members and invites appear after the first workspace exists."
+        kicker="Unavailable"
+        title="Create a workspace first"
+      />
+    </div>
+  </app-card>
+} @else {
+  <div class="workspace-members-page__layout">
+    <section class="workspace-members-page__primary-column">
+      <app-shell-section-card [tag]="memberSurfaceTag()" title="People directory">
+        <div class="workspace-members-page__panel workspace-members-page__panel--compact">
+          <label class="workspace-members-page__search-field">
+            <span>Search members</span>
+            <input
+              class="workspace-members-page__search-input"
+              [placeholder]="memberSearchPlaceholder()"
+              [value]="memberSearchTerm()"
+              (input)="updateMemberSearchTerm(($any($event.target).value ?? '').toString())"
+            />
+          </label>
+        </div>
+      </app-shell-section-card>
+
+      <app-workspace-members-panel
+        [emptyDescription]="memberEmptyStateDescription()"
+        [hasWorkspace]="hasWorkspace()"
+        [isPending]="isMemberCollectionPending()"
+        [members]="visibleMembers()"
+      />
+
+      @if (canManageInvites()) {
+        <app-workspace-invites-panel
+          [activeInviteCount]="activeInviteCount()"
+          [canManageInvites]="canManageInvites()"
+          [hasWorkspace]="hasWorkspace()"
+          [invites]="invites()"
+          [isPending]="isInviteCollectionPending()"
+          (copyInvite)="copyInviteLink($event)"
+        />
+      } @else {
+        <app-shell-section-card tag="Access" title="Invite visibility">
+          <div class="workspace-members-page__panel workspace-members-page__panel--compact">
+            <p class="workspace-members-page__helper">
+              Invite management stays with workspace owners. Members can still review the current
+              roster here and move back into active rooms when they are ready.
+            </p>
+
+            <div class="workspace-members-page__action-list">
+              <a [routerLink]="roomsLink" class="workspace-members-page__action-card">
+                <strong>Open rooms</strong>
+                <span
+                  >Return to room navigation and continue inside the shared discussion spaces.</span
+                >
+              </a>
+
+              <a [routerLink]="homeLink" class="workspace-members-page__action-card">
+                <strong>Workspace overview</strong>
+                <span
+                  >Jump back to the workspace dashboard for the shared overview and
+                  navigation.</span
+                >
+              </a>
+            </div>
+          </div>
+        </app-shell-section-card>
+      }
+    </section>
+
+    <section class="workspace-members-page__secondary-column">
+      <app-shell-section-card tag="Overview" title="Membership health">
+        <div class="workspace-members-page__panel workspace-members-page__panel--compact">
+          <app-key-value-list [items]="memberPageStats()" />
+        </div>
+      </app-shell-section-card>
+
+      @if (canManageInvites()) {
+        <app-shell-section-card tag="Owner" title="Access actions">
+          <div class="workspace-members-page__panel workspace-members-page__panel--compact">
+            <button
+              class="workspace-members-page__action-card"
+              type="button"
+              (click)="isInviteFormOpen.set(true)"
+            >
+              <strong>Create invite link</strong>
+              <span>Issue a new shareable link without leaving the members surface.</span>
+            </button>
+
+            <a [routerLink]="roomsLink" class="workspace-members-page__action-card">
+              <strong>Open rooms</strong>
+              <span>Switch to room structure and create new spaces from the rooms page.</span>
+            </a>
+          </div>
+        </app-shell-section-card>
+      }
+    </section>
+  </div>
+
+  <app-modal
+    description="Issue a new shareable workspace invite and copy it right away."
+    [isOpen]="isInviteFormOpen()"
+    tag="Access"
+    title="Create invite link"
+    (closed)="closeInviteModal()"
+  >
+    <form class="workspace-members-page__invite-form" (submit)="createInvite($event)">
+      <app-text-input-field
+        autocomplete="email"
+        [field]="inviteForm.email"
+        hint="Optional. Leave blank for a generic invite link."
+        inputId="invite-email"
+        label="Invite email"
+        placeholder="alex@flaptalk.app"
+        [showErrors]="showInviteFormErrors()"
+        type="email"
+      />
+
+      <app-text-input-field
+        autocomplete="off"
+        [field]="inviteForm.expiresInHours"
+        hint="Use hours, for example 24, 72, or 168."
+        inputId="invite-expiration"
+        label="Expires in hours"
+        placeholder="72"
+        [showErrors]="showInviteFormErrors()"
+        type="number"
+      />
+
+      <app-button
+        [disabled]="isCreateInvitePending() || isInviteInvalid()"
+        [fluid]="true"
+        type="submit"
+      >
+        {{ isCreateInvitePending() ? 'Creating invite...' : 'Create invite link' }}
+      </app-button>
+    </form>
+  </app-modal>
+}

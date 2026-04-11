@@ -1,53 +1,32 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  signal,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
-import { ToastService } from '@web/app/core/services/toast.service';
-import { WorkspaceInvitesPanelComponent } from '@web/app/features/workspaces/components/workspace-invites-panel/workspace-invites-panel.component';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
-import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/services/workspace-form.factory.service';
 import { type BreadcrumbItem } from '@web/app/shared/ui/breadcrumbs/breadcrumbs.component';
-import { ButtonComponent } from '@web/app/shared/ui/button/button';
 import { CardComponent } from '@web/app/shared/ui/card/card';
 import { EmptyStateComponent } from '@web/app/shared/ui/empty-state/empty-state.component';
 import { KeyValueListComponent } from '@web/app/shared/ui/key-value-list/key-value-list.component';
 import { type KeyValueListItem } from '@web/app/shared/ui/key-value-list/key-value-list.models';
-import { TextInputFieldComponent } from '@web/app/shared/form/components/text-input-field/text-input-field.component';
-import { ModalComponent } from '@web/app/shared/ui/modal/modal.component';
 import { PageHeaderComponent } from '@web/app/shared/ui/page-header/page-header.component';
 import { ShellSectionCardComponent } from '@web/app/shared/ui/shell-section-card/shell-section-card.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ButtonComponent,
     CardComponent,
     EmptyStateComponent,
     KeyValueListComponent,
-    ModalComponent,
     PageHeaderComponent,
     RouterLink,
     ShellSectionCardComponent,
-    TextInputFieldComponent,
-    WorkspaceInvitesPanelComponent,
   ],
   selector: 'app-workspace-setup-page',
   styleUrl: './workspace-setup-page.component.scss',
   templateUrl: './workspace-setup-page.component.html',
 })
 export class WorkspaceSetupPageComponent {
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly toastService = inject(ToastService);
   private readonly workspaceFacadeService = inject(WorkspaceFacadeService);
-  private readonly workspaceFormFactoryService = inject(WorkspaceFormFactoryService);
   protected readonly APP_ROUTE_PATHS = APP_ROUTE_PATHS;
 
   public readonly activeInviteCount = computed(() =>
@@ -65,43 +44,22 @@ export class WorkspaceSetupPageComponent {
   ];
   public readonly canManageInvites = computed(() => this.workspaceFacadeService.canManageInvites());
   public readonly canManageRooms = computed(() => this.workspaceFacadeService.canManageRooms());
-  public readonly createRoomLink = [
+  public readonly hasWorkspace = computed(() => this.workspaceFacadeService.hasWorkspace());
+  public readonly invites = computed(() => this.workspaceFacadeService.invites());
+  public readonly memberCount = computed(() => this.workspaceFacadeService.memberCount());
+  public readonly membersLink = [
+    '/',
+    APP_ROUTE_PATHS.workspace,
+    APP_ROUTE_PATHS.workspaceSetup,
+    APP_ROUTE_PATHS.workspaceSetupMembers,
+  ];
+  public readonly roomCount = computed(() => this.workspaceFacadeService.roomCount());
+  public readonly roomsLink = [
     '/',
     APP_ROUTE_PATHS.workspace,
     APP_ROUTE_PATHS.workspaceSetup,
     APP_ROUTE_PATHS.workspaceSetupRooms,
-    APP_ROUTE_PATHS.workspaceSetupRoomsNew,
   ];
-  public readonly hasWorkspace = computed(() => this.workspaceFacadeService.hasWorkspace());
-  public readonly inviteModel = this.workspaceFormFactoryService.createInviteModel();
-  public readonly inviteForm = this.workspaceFormFactoryService.createInviteForm(this.inviteModel);
-  public readonly invites = computed(() => this.workspaceFacadeService.invites());
-  public readonly isCreateInvitePending = computed(() =>
-    this.workspaceFacadeService.isCreateInvitePending(),
-  );
-  public readonly isInviteCollectionPending = computed(() =>
-    this.workspaceFacadeService.isInviteCollectionPending(),
-  );
-  public readonly isInviteFormOpen = signal(false);
-  public readonly isInviteFormSubmitted = signal(false);
-  public readonly isInviteInvalid = computed(() => {
-    if (this.inviteForm().invalid()) {
-      return true;
-    }
-
-    const normalizedEmail = this.inviteModel().email.trim();
-
-    if (normalizedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-      return true;
-    }
-
-    return (
-      this.workspaceFormFactoryService.parseInviteExpiresInHours(
-        this.inviteModel().expiresInHours,
-      ) === null
-    );
-  });
-  public readonly roomCount = computed(() => this.workspaceFacadeService.roomCount());
   public readonly setupHealthItems = computed<readonly KeyValueListItem[]>(() => [
     {
       label: 'Active invites',
@@ -115,99 +73,9 @@ export class WorkspaceSetupPageComponent {
       label: 'Configured rooms',
       value: String(this.roomCount()),
     },
+    {
+      label: 'Visible members',
+      value: String(this.memberCount()),
+    },
   ]);
-  public readonly showInviteFormErrors = computed(
-    () => this.isInviteFormSubmitted() || this.inviteForm().touched(),
-  );
-
-  private handleCreateInviteError(error: unknown): void {
-    this.toastService.error({
-      message:
-        error instanceof Error
-          ? error.message
-          : 'We could not create the invite. Please try again.',
-      title: 'Invite creation failed',
-    });
-  }
-
-  private handleCreateInviteSuccess(result: {
-    readonly invite: { readonly token: string };
-    readonly result: { readonly level: string; readonly message: string; readonly title: string };
-  }): void {
-    this.inviteModel.set({
-      email: '',
-      expiresInHours: '72',
-    });
-    this.isInviteFormSubmitted.set(false);
-    this.isInviteFormOpen.set(false);
-    this.toastService.success(result.result);
-    this.copyInviteLink(result.invite.token);
-  }
-
-  private resolveInviteLink(token: string): string {
-    return new URL(`/${APP_ROUTE_PATHS.invites}/${token}`, globalThis.location.origin).toString();
-  }
-
-  public closeInviteModal(): void {
-    this.isInviteFormOpen.set(false);
-    this.isInviteFormSubmitted.set(false);
-  }
-
-  public copyInviteLink(token: string): void {
-    void navigator.clipboard.writeText(this.resolveInviteLink(token)).then(
-      () => {
-        this.toastService.success({
-          message: 'The invite link is ready to paste into chat or email.',
-          title: 'Invite link copied',
-        });
-      },
-      () => {
-        this.toastService.error({
-          message: 'We could not copy the invite link automatically.',
-          title: 'Copy failed',
-        });
-      },
-    );
-  }
-
-  public createInvite(event: Event): void {
-    event.preventDefault();
-    this.isInviteFormSubmitted.set(true);
-
-    if (this.isInviteInvalid()) {
-      this.toastService.error({
-        message: 'Review the invite details before creating the link.',
-        title: 'Invite details are incomplete',
-      });
-      return;
-    }
-
-    const workspaceId = this.workspaceFacadeService.currentWorkspace()?.id;
-    const expiresInHours = this.workspaceFormFactoryService.parseInviteExpiresInHours(
-      this.inviteModel().expiresInHours,
-    );
-
-    if (!workspaceId || expiresInHours === null) {
-      this.toastService.error({
-        message: 'We could not resolve the current workspace or invite expiration.',
-        title: 'Invite unavailable',
-      });
-      return;
-    }
-
-    this.workspaceFacadeService
-      .createInvite(workspaceId, {
-        email: this.inviteModel().email,
-        expiresInHours: String(expiresInHours),
-      })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        error: (error: unknown) => {
-          this.handleCreateInviteError(error);
-        },
-        next: (result) => {
-          this.handleCreateInviteSuccess(result);
-        },
-      });
-  }
 }

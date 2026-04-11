@@ -55,8 +55,13 @@ export class WorkspaceRoomCreatePageComponent {
       label: 'Workspace',
     },
     {
-      href: ['/', APP_ROUTE_PATHS.workspace, APP_ROUTE_PATHS.workspaceSetup],
-      label: 'Owner setup',
+      href: [
+        '/',
+        APP_ROUTE_PATHS.workspace,
+        APP_ROUTE_PATHS.workspaceSetup,
+        APP_ROUTE_PATHS.workspaceSetupRooms,
+      ],
+      label: 'Rooms',
     },
     {
       href: null,
@@ -73,6 +78,12 @@ export class WorkspaceRoomCreatePageComponent {
     this.workspaceFacadeService.isCreateRoomPending(),
   );
   public readonly isRoomFormSubmitted = signal(false);
+  public readonly roomsLink = [
+    '/',
+    APP_ROUTE_PATHS.workspace,
+    APP_ROUTE_PATHS.workspaceSetup,
+    APP_ROUTE_PATHS.workspaceSetupRooms,
+  ];
   public readonly setupLink = ['/', APP_ROUTE_PATHS.workspace, APP_ROUTE_PATHS.workspaceSetup];
   public readonly showRoomFormErrors = computed(
     () => this.isRoomFormSubmitted() || this.roomForm().touched(),

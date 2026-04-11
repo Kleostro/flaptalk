@@ -20,63 +20,6 @@
 
 <div class="workspace-home-page__dashboard-grid">
   <section class="workspace-home-page__primary-column">
-    @if (primaryCatchUpItem(); as featuredCatchUpItem) {
-      <app-shell-section-card tag="Continue" title="Continue reading">
-        <div class="workspace-home-page__panel workspace-home-page__panel--compact">
-          <div class="workspace-home-page__continue-reading">
-            <div class="workspace-home-page__continue-copy">
-              <div class="workspace-home-page__continue-meta">
-                @if (featuredCatchUpItem.unreadMessageCount > 0) {
-                  <app-pill appearance="accent" size="small">
-                    {{ featuredCatchUpItem.unreadLabel }}
-                  </app-pill>
-                } @else {
-                  <app-pill size="small">{{ featuredCatchUpItem.unreadLabel }}</app-pill>
-                }
-
-                <app-pill appearance="outline" size="small">
-                  {{ featuredCatchUpItem.contextLabel }}
-                </app-pill>
-              </div>
-
-              <div class="workspace-home-page__continue-heading">
-                <strong>{{ featuredCatchUpItem.roomName }}</strong>
-                <span>
-                  {{
-                    featuredCatchUpItem.lastAuthorEmail
-                      ? featuredCatchUpItem.lastAuthorEmail
-                      : 'Recent workspace activity'
-                  }}
-                </span>
-              </div>
-
-              <p class="workspace-home-page__helper">
-                {{ getContinueReadingDescription(featuredCatchUpItem) }}
-              </p>
-
-              <p class="workspace-home-page__continue-preview">
-                {{ featuredCatchUpItem.preview }}
-              </p>
-            </div>
-
-            <a
-              class="workspace-home-page__continue-link"
-              [queryParams]="getContinueReadingQueryParams(featuredCatchUpItem)"
-              [routerLink]="getContinueReadingRoute(featuredCatchUpItem)"
-            >
-              {{ featuredCatchUpItem.resumeLabel }}
-            </a>
-          </div>
-        </div>
-      </app-shell-section-card>
-    }
-
-    <app-workspace-catch-up-panel
-      [activityCards]="activityCards"
-      [catchUpItems]="recentRoomActivity()"
-      [isPending]="isWorkspaceActivityPending()"
-    />
-
     @if (isWorkspacePending()) {
       <app-card>
         <div class="workspace-home-page__panel workspace-home-page__panel--centered">
@@ -135,60 +78,38 @@
   </section>
 
   <section class="workspace-home-page__secondary-column">
-    <app-shell-section-card [tag]="isOwner() ? 'Owner' : 'Member'" [title]="controlPanelTitle()">
-      <div class="workspace-home-page__panel workspace-home-page__panel--compact">
-        <p class="workspace-home-page__helper">
-          {{ controlPanelDescription() }}
-        </p>
-      </div>
-    </app-shell-section-card>
-
-    @if (isOwner() && hasWorkspace()) {
-      <app-shell-section-card tag="Owner" title="Quick actions">
+    @if (hasWorkspace()) {
+      <app-shell-section-card [tag]="navigationTag()" title="Workspace navigation">
         <div class="workspace-home-page__panel workspace-home-page__panel--compact">
           <div class="workspace-home-page__action-list">
-            <a [routerLink]="ownerSetupLink" class="workspace-home-page__action-card">
-              <strong>Open owner setup</strong>
-              <span
-                >Manage invites, review issued access links, and shape workspace structure.</span
-              >
-            </a>
-
-            <a [routerLink]="ownerCreateRoomLink" class="workspace-home-page__action-card">
-              <strong>Create room</strong>
-              <span>Open a dedicated room-setup page instead of creating rooms inside home.</span>
-            </a>
+            @for (card of homeNavigationCards(); track card.title) {
+              <a [routerLink]="card.link" class="workspace-home-page__action-card">
+                <strong>{{ card.title }}</strong>
+                <span>{{ card.body }}</span>
+              </a>
+            }
           </div>
         </div>
       </app-shell-section-card>
     } @else {
-      <app-shell-section-card tag="Member" title="Onboarding">
+      <app-shell-section-card [tag]="navigationTag()" title="What opens next">
         <div class="workspace-home-page__panel workspace-home-page__panel--compact">
           <p class="workspace-home-page__helper">
-            {{ memberHomeHint() }}
+            Once the first workspace exists, this home surface stays focused on analytics and quick
+            navigation instead of setup forms or access operations.
           </p>
 
-          @if (!hasRooms()) {
-            <div class="workspace-home-page__hint-list">
-              @for (hint of roomSetupHints; track hint) {
-                <app-pill>{{ hint }}</app-pill>
-              }
-            </div>
-          }
+          <app-key-value-list [items]="workspaceStartRows()" />
         </div>
       </app-shell-section-card>
     }
 
-    <app-shell-section-card tag="Soon" title="Active threads">
+    <app-shell-section-card tag="Analytics" title="Workspace health">
       <div class="workspace-home-page__panel workspace-home-page__panel--compact">
-        <app-key-value-list [items]="roomsStatRows()" />
+        <app-key-value-list
+          [items]="hasWorkspace() ? workspaceAnalyticsRows() : workspaceStartRows()"
+        />
       </div>
     </app-shell-section-card>
-
-    <app-workspace-members-panel
-      [hasWorkspace]="hasWorkspace()"
-      [isPending]="isMemberCollectionPending()"
-      [members]="members()"
-    />
   </section>
 </div>

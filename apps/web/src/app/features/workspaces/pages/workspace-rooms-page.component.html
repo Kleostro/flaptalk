@@ -1,0 +1,107 @@
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  description="Review the current room structure and jump into creation only when you actually need a new space."
+  kicker="Rooms"
+  title="Workspace rooms"
+/>
+
+@if (!hasWorkspace()) {
+  <app-card>
+    <div class="workspace-rooms-page__panel workspace-rooms-page__panel--centered">
+      <app-empty-state
+        description="Rooms appear after the first workspace exists."
+        kicker="Unavailable"
+        title="Create a workspace first"
+      />
+    </div>
+  </app-card>
+} @else {
+  <div class="workspace-rooms-page__layout">
+    <section class="workspace-rooms-page__primary-column">
+      <app-shell-section-card [tag]="roomSurfaceTag()" title="Existing spaces">
+        <div class="workspace-rooms-page__panel">
+          <label class="workspace-rooms-page__search-field">
+            <span>Search rooms</span>
+            <input
+              class="workspace-rooms-page__search-input"
+              [placeholder]="roomSearchPlaceholder()"
+              [value]="roomSearchTerm()"
+              (input)="updateRoomSearchTerm(($any($event.target).value ?? '').toString())"
+            />
+          </label>
+
+          @if (isRoomCollectionPending()) {
+            <app-empty-state description="Restoring the room list..." />
+          } @else if (rooms().length === 0) {
+            <app-empty-state
+              description="No rooms exist yet. The first one will define the initial structure of the workspace."
+            />
+          } @else if (visibleRooms().length === 0) {
+            <app-empty-state
+              description="No rooms match the current search. Try a broader term or clear the filter."
+            />
+          } @else {
+            <div class="workspace-rooms-page__room-list">
+              @for (room of visibleRooms(); track room.id) {
+                <a [routerLink]="getRoomLink(room.id)" class="workspace-rooms-page__room-card">
+                  <div class="workspace-rooms-page__room-heading">
+                    <strong>{{ room.name }}</strong>
+                    @if (getUnreadBadge(room.id); as unreadBadge) {
+                      <app-pill appearance="accent" size="small">{{ unreadBadge }}</app-pill>
+                    }
+                  </div>
+
+                  <span>
+                    {{ room.description || 'Room shell is ready for its first discussions.' }}
+                  </span>
+                </a>
+              }
+            </div>
+          }
+        </div>
+      </app-shell-section-card>
+    </section>
+
+    <section class="workspace-rooms-page__secondary-column">
+      <app-shell-section-card tag="Overview" title="Room analytics">
+        <div class="workspace-rooms-page__panel workspace-rooms-page__panel--compact">
+          <app-key-value-list [items]="roomStats()" />
+        </div>
+      </app-shell-section-card>
+
+      @if (canManageRooms()) {
+        <app-shell-section-card tag="Owner" title="Room actions">
+          <div class="workspace-rooms-page__panel workspace-rooms-page__panel--compact">
+            <a [routerLink]="createRoomLink" class="workspace-rooms-page__action-card">
+              <strong>Create room</strong>
+              <span>Open the dedicated creation flow instead of mixing setup into this list.</span>
+            </a>
+
+            <a [routerLink]="memberLink" class="workspace-rooms-page__action-card">
+              <strong>Open members</strong>
+              <span>Switch to membership and invite management when structure is in place.</span>
+            </a>
+          </div>
+        </app-shell-section-card>
+      } @else {
+        <app-shell-section-card tag="Navigation" title="Next surface">
+          <div class="workspace-rooms-page__panel workspace-rooms-page__panel--compact">
+            <a [routerLink]="workspaceHomeLink" class="workspace-rooms-page__action-card">
+              <strong>Workspace dashboard</strong>
+              <span
+                >Return to the shared overview when you only need context and activity health.</span
+              >
+            </a>
+
+            <a [routerLink]="memberLink" class="workspace-rooms-page__action-card">
+              <strong>People</strong>
+              <span
+                >Move into the member directory to see who is already inside the workspace.</span
+              >
+            </a>
+          </div>
+        </app-shell-section-card>
+      }
+    </section>
+  </div>
+}
