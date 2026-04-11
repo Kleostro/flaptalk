@@ -49,9 +49,11 @@ export const WorkspaceCatchUpItemModel = t.Object({
     }),
   ),
   lastAuthor: t.Nullable(PublicUserModel),
+  lastMessage: t.Nullable(MessageModel),
   preview: t.String(),
   resumeMode: WorkspaceCatchUpResumeModeModel,
   room: RoomModel,
+  threadRootMessage: t.Nullable(MessageModel),
   threadRootMessageId: t.Nullable(t.Numeric()),
   unreadMessageCount: t.Numeric(),
 });
