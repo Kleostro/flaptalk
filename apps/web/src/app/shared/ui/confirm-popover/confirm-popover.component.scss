@@ -1,0 +1,105 @@
+:host {
+  display: inline-grid;
+}
+
+.ui-confirm-popover {
+  --confirm-popover-motion-duration: 180ms;
+
+  position: relative;
+  display: inline-grid;
+
+  &__surface {
+    pointer-events: none;
+    will-change: opacity, transform;
+
+    position: absolute;
+    z-index: 24;
+
+    inline-size: min(20rem, calc(100vw - 2rem));
+    min-inline-size: 16rem;
+    padding: 0.95rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 82%, transparent);
+    border-radius: 1rem;
+
+    visibility: hidden;
+    opacity: 0;
+    background: color-mix(in oklch, var(--surface-elevated) 98%, transparent);
+    box-shadow: var(--shadow-panel);
+
+    &--below {
+      top: calc(100% + 0.625rem);
+      right: 0;
+      transform-origin: top right;
+    }
+
+    &--above {
+      right: 0;
+      bottom: calc(100% + 0.625rem);
+      transform-origin: bottom right;
+    }
+
+    &--positioned {
+      pointer-events: auto;
+      visibility: visible;
+      animation: confirm-popover-in var(--confirm-popover-motion-duration)
+        cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    &--closing {
+      pointer-events: none;
+      visibility: visible;
+      animation: confirm-popover-out var(--confirm-popover-motion-duration) ease forwards;
+    }
+  }
+
+  &__copy {
+    display: grid;
+    gap: 0.35rem;
+    margin-block-end: 0.9rem;
+  }
+
+  &__title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.015em;
+  }
+
+  &__description {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: flex-end;
+  }
+}
+
+@keyframes confirm-popover-in {
+  from {
+    transform: translateY(0.35rem) scale(0.98);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes confirm-popover-out {
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(0.25rem) scale(0.985);
+    opacity: 0;
+  }
+}

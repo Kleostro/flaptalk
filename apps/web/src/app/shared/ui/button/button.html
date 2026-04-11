@@ -3,9 +3,12 @@
   [class.ui-button--fluid]="fluid()"
   [class.ui-button--large]="size() === 'large'"
   [class.ui-button--medium]="size() === 'medium'"
+  [class.ui-button--danger]="appearance() === 'danger'"
   [class.ui-button--primary]="appearance() === 'primary'"
   [class.ui-button--secondary]="appearance() === 'secondary'"
+  [class.ui-button--success]="appearance() === 'success'"
   [class.ui-button--tertiary]="appearance() === 'tertiary'"
+  [class.ui-button--warning]="appearance() === 'warning'"
   [disabled]="disabled()"
   [type]="type()"
 >

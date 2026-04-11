@@ -25,6 +25,25 @@
             >
               Joined {{ member.joinedAt | date: 'mediumDate' }}
             </time>
+
+            @if (canRemoveMember(member)) {
+              <div entityAside class="workspace-members-panel__actions">
+                @if (isRemoving(member.id)) {
+                  <app-button appearance="tertiary" [disabled]="true" size="medium">
+                    Removing...
+                  </app-button>
+                } @else {
+                  <app-confirm-popover
+                    cancelLabel="Cancel"
+                    confirmLabel="Confirm"
+                    [description]="getRemoveDescription(member)"
+                    [title]="'Remove ' + member.user.email + '?'"
+                    triggerLabel="Remove"
+                    (confirm)="onRemoveMember(member.id)"
+                  />
+                }
+              </div>
+            }
           </app-entity-list-item>
         }
       </div>

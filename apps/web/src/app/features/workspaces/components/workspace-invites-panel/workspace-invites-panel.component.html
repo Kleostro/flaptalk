@@ -47,14 +47,30 @@
               <div entityAside class="workspace-invites-panel__actions">
                 @if (isUsed(invite)) {
                   <app-pill [caps]="true" size="small">Used</app-pill>
-                } @else {
-                  <button
-                    class="workspace-invites-panel__copy-button"
-                    type="button"
+                } @else if (invite.usedAt === null) {
+                  <app-button
+                    appearance="secondary"
+                    [disabled]="isRevoking(invite.id)"
+                    size="medium"
                     (click)="onCopyInvite(invite.token)"
                   >
                     {{ isCopied(invite.token) ? 'Copied' : 'Copy link' }}
-                  </button>
+                  </app-button>
+                }
+
+                @if (isRevoking(invite.id)) {
+                  <app-button appearance="tertiary" [disabled]="true" size="medium">
+                    Revoking...
+                  </app-button>
+                } @else {
+                  <app-confirm-popover
+                    cancelLabel="Cancel"
+                    confirmLabel="Confirm"
+                    [description]="getRevokeDescription(invite)"
+                    [title]="'Revoke invite' + (invite.email ? ' for ' + invite.email + '?' : '?')"
+                    triggerLabel="Revoke"
+                    (confirm)="onRevokeInvite(invite.id)"
+                  />
                 }
               </div>
             </app-entity-list-item>

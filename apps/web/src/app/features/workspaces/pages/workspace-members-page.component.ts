@@ -152,6 +152,8 @@ export class WorkspaceMembersPageComponent {
   public readonly memberSurfaceTag = computed(() =>
     this.canManageInvites() ? 'Owner' : 'Community',
   );
+  public readonly removingMemberId = computed(() => this.workspaceFacadeService.removingMemberId());
+  public readonly revokingInviteId = computed(() => this.workspaceFacadeService.revokingInviteId());
   public readonly roomsLink = [
     '/',
     APP_ROUTE_PATHS.workspace,
@@ -161,6 +163,17 @@ export class WorkspaceMembersPageComponent {
   public readonly showInviteFormErrors = computed(
     () => this.isInviteFormSubmitted() || this.inviteForm().touched(),
   );
+
+  private getCurrentWorkspaceId(): null | number {
+    return this.workspaceFacadeService.currentWorkspace()?.id ?? null;
+  }
+
+  private handleActionError(error: unknown, title: string, fallbackMessage: string): void {
+    this.toastService.error({
+      message: error instanceof Error ? error.message : fallbackMessage,
+      title,
+    });
+  }
 
   private handleCreateInviteError(error: unknown): void {
     this.toastService.error({
@@ -249,6 +262,64 @@ export class WorkspaceMembersPageComponent {
         },
         next: (result) => {
           this.handleCreateInviteSuccess(result);
+        },
+      });
+  }
+
+  public removeMember(memberId: number): void {
+    const workspaceId = this.getCurrentWorkspaceId();
+    const member = this.members().find((workspaceMember) => workspaceMember.id === memberId);
+
+    if (!workspaceId || !member) {
+      this.toastService.error({
+        message: 'We could not resolve the workspace member you want to remove.',
+        title: 'Member unavailable',
+      });
+      return;
+    }
+
+    this.workspaceFacadeService
+      .removeWorkspaceMember(workspaceId, memberId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: (error: unknown) => {
+          this.handleActionError(
+            error,
+            'Member removal failed',
+            'We could not remove the member. Please try again.',
+          );
+        },
+        next: (result) => {
+          this.toastService.success(result);
+        },
+      });
+  }
+
+  public revokeInvite(inviteId: number): void {
+    const workspaceId = this.getCurrentWorkspaceId();
+    const invite = this.invites().find((workspaceInvite) => workspaceInvite.id === inviteId);
+
+    if (!workspaceId || !invite) {
+      this.toastService.error({
+        message: 'We could not resolve the invite you want to revoke.',
+        title: 'Invite unavailable',
+      });
+      return;
+    }
+
+    this.workspaceFacadeService
+      .revokeInvite(workspaceId, inviteId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: (error: unknown) => {
+          this.handleActionError(
+            error,
+            'Invite revoke failed',
+            'We could not revoke the invite. Please try again.',
+          );
+        },
+        next: (result) => {
+          this.toastService.success(result);
         },
       });
   }

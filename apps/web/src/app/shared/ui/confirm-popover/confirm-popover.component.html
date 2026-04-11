@@ -1,0 +1,46 @@
+<div #hostElement class="ui-confirm-popover">
+  <app-button
+    class="ui-confirm-popover__trigger"
+    [appearance]="isDestructive() ? 'danger' : 'secondary'"
+    [disabled]="disabled()"
+    size="medium"
+    (click)="toggle()"
+    >{{ triggerLabel() }}</app-button
+  >
+
+  @if (isRendered()) {
+    <section
+      #surfaceElement
+      class="ui-confirm-popover__surface"
+      [class.ui-confirm-popover__surface--above]="placement() === 'above'"
+      [class.ui-confirm-popover__surface--below]="placement() === 'below'"
+      [class.ui-confirm-popover__surface--closing]="isClosing()"
+      [class.ui-confirm-popover__surface--positioned]="isPositioned()"
+      role="dialog"
+      aria-modal="false"
+    >
+      <div class="ui-confirm-popover__copy">
+        <strong class="ui-confirm-popover__title">{{ title() }}</strong>
+
+        @if (description()) {
+          <p class="ui-confirm-popover__description">{{ description() }}</p>
+        }
+      </div>
+
+      <div class="ui-confirm-popover__actions">
+        <app-button appearance="tertiary" size="medium" (click)="onCancelClick()">
+          {{ cancelLabel() }}
+        </app-button>
+
+        <app-button
+          class="ui-confirm-popover__confirm"
+          [appearance]="isDestructive() ? 'danger' : 'primary'"
+          size="medium"
+          (click)="onConfirmClick()"
+        >
+          {{ confirmLabel() }}
+        </app-button>
+      </div>
+    </section>
+  }
+</div>
