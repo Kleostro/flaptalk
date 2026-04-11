@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { ToastService } from '@web/app/core/services/toast.service';
@@ -18,6 +18,7 @@ import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/servic
 import { type BreadcrumbItem } from '@web/app/shared/ui/breadcrumbs/breadcrumbs.component';
 import { ButtonComponent } from '@web/app/shared/ui/button/button';
 import { CardComponent } from '@web/app/shared/ui/card/card';
+import { ConfirmPopoverComponent } from '@web/app/shared/ui/confirm-popover/confirm-popover.component';
 import { EmptyStateComponent } from '@web/app/shared/ui/empty-state/empty-state.component';
 import { KeyValueListComponent } from '@web/app/shared/ui/key-value-list/key-value-list.component';
 import { type KeyValueListItem } from '@web/app/shared/ui/key-value-list/key-value-list.models';
@@ -31,6 +32,7 @@ import { TextInputFieldComponent } from '@web/app/shared/form/components/text-in
   imports: [
     ButtonComponent,
     CardComponent,
+    ConfirmPopoverComponent,
     EmptyStateComponent,
     KeyValueListComponent,
     ModalComponent,
@@ -47,6 +49,7 @@ import { TextInputFieldComponent } from '@web/app/shared/form/components/text-in
 })
 export class WorkspaceMembersPageComponent {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
   private readonly toastService = inject(ToastService);
   private readonly workspaceFacadeService = inject(WorkspaceFacadeService);
   private readonly workspaceFormFactoryService = inject(WorkspaceFormFactoryService);
@@ -96,6 +99,9 @@ export class WorkspaceMembersPageComponent {
       ) === null
     );
   });
+  public readonly isLeaveWorkspacePending = computed(() =>
+    this.workspaceFacadeService.isLeaveWorkspacePending(),
+  );
   public readonly isMemberCollectionPending = computed(() =>
     this.workspaceFacadeService.isMemberCollectionPending(),
   );
@@ -147,7 +153,7 @@ export class WorkspaceMembersPageComponent {
   public readonly memberSurfaceDescription = computed(() =>
     this.canManageInvites()
       ? 'Review the member roster and manage invite access from the same surface.'
-      : 'Review the current workspace roster and understand who is already inside the shared space.',
+      : 'Review the current workspace roster, understand who is already inside, and manage your own membership.',
   );
   public readonly memberSurfaceTag = computed(() =>
     this.canManageInvites() ? 'Owner' : 'Community',
@@ -160,8 +166,16 @@ export class WorkspaceMembersPageComponent {
     APP_ROUTE_PATHS.workspaceSetup,
     APP_ROUTE_PATHS.workspaceSetupRooms,
   ];
+  public readonly selfMembership = computed(
+    () => this.members().find((member) => member.isCurrentUser) ?? null,
+  );
   public readonly showInviteFormErrors = computed(
     () => this.isInviteFormSubmitted() || this.inviteForm().touched(),
+  );
+  public readonly stayConnectedDescription = computed(() =>
+    this.canManageInvites()
+      ? 'Owner-level access management stays here while rooms and analytics live on their own surfaces.'
+      : 'You can review the roster here, jump back into rooms, or leave this workspace when you no longer need access.',
   );
 
   private getCurrentWorkspaceId(): null | number {
@@ -262,6 +276,55 @@ export class WorkspaceMembersPageComponent {
         },
         next: (result) => {
           this.handleCreateInviteSuccess(result);
+        },
+      });
+  }
+
+  public getLeaveWorkspaceDescription(): string {
+    const selfMembership = this.selfMembership();
+
+    return selfMembership
+      ? `${selfMembership.user.email} will lose access immediately. You can only return with a new invite.`
+      : 'You will lose access immediately. You can only return with a new invite.';
+  }
+
+  public getLeaveWorkspaceTitle(): string {
+    const selfMembership = this.selfMembership();
+
+    return selfMembership ? `Leave as ${selfMembership.user.email}?` : 'Leave workspace?';
+  }
+
+  public getOwnerLeaveDescription(): string {
+    return 'Workspace owners stay attached until ownership transfer is supported in a dedicated flow.';
+  }
+
+  public leaveWorkspace(): void {
+    const workspaceId = this.getCurrentWorkspaceId();
+
+    if (!workspaceId) {
+      this.toastService.error({
+        message: 'We could not resolve the workspace you want to leave.',
+        title: 'Workspace unavailable',
+      });
+      return;
+    }
+
+    this.workspaceFacadeService
+      .leaveWorkspace(workspaceId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: (error: unknown) => {
+          this.handleActionError(
+            error,
+            'Leave workspace failed',
+            'We could not leave the workspace. Please try again.',
+          );
+        },
+        next: (result) => {
+          this.toastService.success(result);
+          void this.router.navigate(['/', APP_ROUTE_PATHS.workspace], {
+            replaceUrl: true,
+          });
         },
       });
   }

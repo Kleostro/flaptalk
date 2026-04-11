@@ -103,6 +103,7 @@ export class WorkspaceFacadeService {
     stream: ({ params }) =>
       params.token === null ? of(null) : this.workspaceApiService.getInvitePreview(params.token),
   });
+  private readonly leaveWorkspacePendingState = signal(false);
   private readonly memberRequestVersion = signal(0);
   private readonly memberCollectionResource = rxResource<
     WorkspaceMember[],
@@ -236,6 +237,7 @@ export class WorkspaceFacadeService {
   );
   public readonly isInvitePreviewPending = computed(() => this.invitePreviewResource.isLoading());
   public readonly isInviteRevokePending = computed(() => this.revokeInvitePendingState() !== null);
+  public readonly isLeaveWorkspacePending = computed(() => this.leaveWorkspacePendingState());
   public readonly isMemberCollectionPending = computed(() =>
     this.memberCollectionResource.isLoading(),
   );
@@ -295,6 +297,12 @@ export class WorkspaceFacadeService {
     this.memberRequestVersion.update((version) => version + 1);
     this.readStateRequestVersion.update((version) => version + 1);
     this.catchUpRequestVersion.update((version) => version + 1);
+  }
+
+  private replaceWorkspaceCollection(nextWorkspaces: readonly WorkspaceAccess[]): void {
+    this.workspaceCollectionResource.set([...nextWorkspaces]);
+    this.resetWorkspaceContextState();
+    this.refreshWorkspaceContextData();
   }
 
   private resetWorkspaceContextState(): void {
@@ -365,9 +373,7 @@ export class WorkspaceFacadeService {
           ),
         ];
 
-        this.workspaceCollectionResource.set(nextWorkspaces);
-        this.resetWorkspaceContextState();
-        this.refreshWorkspaceContextData();
+        this.replaceWorkspaceCollection(nextWorkspaces);
       }),
       map((workspaceAccess) => ({
         level: TOAST_LEVEL.success,
@@ -469,9 +475,7 @@ export class WorkspaceFacadeService {
 
     return this.workspaceApiService.createWorkspace(workspace).pipe(
       tap((createdWorkspaceAccess) => {
-        this.workspaceCollectionResource.set([createdWorkspaceAccess, ...this.workspaces()]);
-        this.resetWorkspaceContextState();
-        this.catchUpRequestVersion.update((version) => version + 1);
+        this.replaceWorkspaceCollection([createdWorkspaceAccess, ...this.workspaces()]);
       }),
       map((createdWorkspaceAccess) => ({
         level: TOAST_LEVEL.success,
@@ -505,6 +509,28 @@ export class WorkspaceFacadeService {
     }
 
     return this.unreadMessageCountByRoomId().get(selectedRoomId) ?? 0;
+  }
+
+  public leaveWorkspace(workspaceId: number): Observable<AuthSubmissionResult> {
+    this.leaveWorkspacePendingState.set(true);
+
+    return this.workspaceApiService.leaveWorkspace(workspaceId).pipe(
+      tap(() => {
+        const nextWorkspaces = this.workspaces().filter(
+          (workspaceAccess) => workspaceAccess.workspace.id !== workspaceId,
+        );
+
+        this.replaceWorkspaceCollection(nextWorkspaces);
+      }),
+      map(() => ({
+        level: TOAST_LEVEL.success,
+        message: 'You left the workspace and your shell context has been updated.',
+        title: 'Workspace left',
+      })),
+      finalize(() => {
+        this.leaveWorkspacePendingState.set(false);
+      }),
+    );
   }
 
   public markRoomRead(roomId: number, lastReadMessageId: number): Observable<void> {
