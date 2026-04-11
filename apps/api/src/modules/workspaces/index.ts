@@ -147,6 +147,39 @@ export const workspacesModule = new Elysia({
     },
   )
   .delete(
+    '/:workspaceId/members/me',
+    async ({
+      authJwt,
+      cookie,
+      params,
+      workspacesService,
+    }: {
+      readonly authJwt: AuthJwtVerifier;
+      readonly cookie: Record<string, { value?: string | undefined }>;
+      readonly params: {
+        readonly workspaceId: number;
+      };
+      readonly workspacesService: WorkspacesServiceType;
+    }) => {
+      const userId = await requireAuthenticatedUserId({ authJwt, cookie });
+
+      return workspacesService.leaveWorkspace({
+        userId,
+        workspaceId: params.workspaceId,
+      });
+    },
+    {
+      cookie: workspaceSessionCookieModel,
+      params: WorkspaceParamsModel,
+      response: {
+        200: 'workspaces.members.leave.response',
+        401: 'error.response',
+        404: 'error.response',
+        409: 'error.response',
+      },
+    },
+  )
+  .delete(
     '/:workspaceId/members/:memberId',
     async ({
       authJwt,
