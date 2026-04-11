@@ -308,6 +308,34 @@ export class WorkspaceApiService {
     );
   }
 
+  public removeWorkspaceMember(workspaceId: number, memberId: number): Observable<void> {
+    return this.createRequest$(
+      () => api.workspaces({ workspaceId }).members({ memberId }).delete(),
+      (response) => {
+        if (response.data?.success === true) {
+          return void 0;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to remove the member.'));
+      },
+      'Unable to remove the member.',
+    );
+  }
+
+  public revokeInvite(workspaceId: number, inviteId: number): Observable<void> {
+    return this.createRequest$(
+      () => api.workspaces({ workspaceId }).invites({ inviteId }).delete(),
+      (response) => {
+        if (response.data?.success === true) {
+          return void 0;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to revoke the invite.'));
+      },
+      'Unable to revoke the invite.',
+    );
+  }
+
   public updateRoomReadState(roomId: number, lastReadMessageId: number): Observable<RoomReadState> {
     return this.createRequest$(
       () =>

@@ -158,6 +158,8 @@ export class WorkspaceFacadeService {
       params.roomId === null ? of([]) : this.workspaceApiService.getRoomMessages(params.roomId),
   });
   private readonly readStateRequestVersion = signal(0);
+  private readonly removeMemberPendingState = signal<null | number>(null);
+  private readonly revokeInvitePendingState = signal<null | number>(null);
   private readonly selectedThreadMessageIdState = signal<null | number>(null);
   private readonly threadRequestVersion = signal(0);
   private readonly threadResource = rxResource<
@@ -233,9 +235,11 @@ export class WorkspaceFacadeService {
     this.inviteCollectionResource.isLoading(),
   );
   public readonly isInvitePreviewPending = computed(() => this.invitePreviewResource.isLoading());
+  public readonly isInviteRevokePending = computed(() => this.revokeInvitePendingState() !== null);
   public readonly isMemberCollectionPending = computed(() =>
     this.memberCollectionResource.isLoading(),
   );
+  public readonly isMemberRemovalPending = computed(() => this.removeMemberPendingState() !== null);
   public readonly isMessageCollectionPending = computed(() =>
     this.messageCollectionResource.isLoading(),
   );
@@ -572,6 +576,59 @@ export class WorkspaceFacadeService {
 
   public refreshWorkspaces(): void {
     this.workspaceRequestVersion.update((version) => version + 1);
+  }
+
+  public removeWorkspaceMember(
+    workspaceId: number,
+    memberId: number,
+  ): Observable<AuthSubmissionResult> {
+    this.removeMemberPendingState.set(memberId);
+
+    return this.workspaceApiService.removeWorkspaceMember(workspaceId, memberId).pipe(
+      tap(() => {
+        const nextMembers = this.members().filter((member) => member.id !== memberId);
+
+        this.memberCollectionResource.set(nextMembers);
+        this.refreshMembers();
+      }),
+      map(() => ({
+        level: TOAST_LEVEL.success,
+        message: 'The member no longer has access to this workspace.',
+        title: 'Member removed',
+      })),
+      finalize(() => {
+        this.removeMemberPendingState.set(null);
+      }),
+    );
+  }
+
+  public removingMemberId(): null | number {
+    return this.removeMemberPendingState();
+  }
+
+  public revokeInvite(workspaceId: number, inviteId: number): Observable<AuthSubmissionResult> {
+    this.revokeInvitePendingState.set(inviteId);
+
+    return this.workspaceApiService.revokeInvite(workspaceId, inviteId).pipe(
+      tap(() => {
+        const nextInvites = this.invites().filter((invite) => invite.id !== inviteId);
+
+        this.inviteCollectionResource.set(nextInvites);
+        this.refreshInvites();
+      }),
+      map(() => ({
+        level: TOAST_LEVEL.success,
+        message: 'The invite link is no longer valid.',
+        title: 'Invite revoked',
+      })),
+      finalize(() => {
+        this.revokeInvitePendingState.set(null);
+      }),
+    );
+  }
+
+  public revokingInviteId(): null | number {
+    return this.revokeInvitePendingState();
   }
 
   public selectRoom(roomId: number): void {

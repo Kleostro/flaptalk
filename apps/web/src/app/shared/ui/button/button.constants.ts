@@ -1,7 +1,10 @@
 export const BUTTON_APPEARANCE = {
+  danger: 'danger',
   primary: 'primary',
   secondary: 'secondary',
+  success: 'success',
   tertiary: 'tertiary',
+  warning: 'warning',
 } as const;
 
 export type ButtonAppearance = (typeof BUTTON_APPEARANCE)[keyof typeof BUTTON_APPEARANCE];

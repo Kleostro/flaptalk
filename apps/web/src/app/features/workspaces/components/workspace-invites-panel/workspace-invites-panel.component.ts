@@ -2,6 +2,8 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 
 import { type Invite } from '@flaptalk/api-contract';
+import { ButtonComponent } from '@web/app/shared/ui/button/button';
+import { ConfirmPopoverComponent } from '@web/app/shared/ui/confirm-popover/confirm-popover.component';
 import { EmptyStateComponent } from '@web/app/shared/ui/empty-state/empty-state.component';
 import { EntityListItemComponent } from '@web/app/shared/ui/entity-list-item/entity-list-item.component';
 import { KeyValueListComponent } from '@web/app/shared/ui/key-value-list/key-value-list.component';
@@ -17,6 +19,8 @@ const INVITE_STATUS_FILTERS = ['active', 'used', 'expired', 'all'] as const;
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    ButtonComponent,
+    ConfirmPopoverComponent,
     DatePipe,
     EmptyStateComponent,
     EntityListItemComponent,
@@ -38,6 +42,8 @@ export class WorkspaceInvitesPanelComponent {
   public readonly hasWorkspace = input.required<boolean>();
   public readonly invites = input.required<readonly Invite[]>();
   public readonly isPending = input.required<boolean>();
+  public readonly revokeInvite = output<number>();
+  public readonly revokingInviteId = input<null | number>(null);
   public readonly statusFilter = signal<InviteStatusFilter>('active');
   public readonly statusFilters = INVITE_STATUS_FILTERS;
   public readonly summaryItems = computed<readonly KeyValueListItem[]>(() => [
@@ -76,8 +82,20 @@ export class WorkspaceInvitesPanelComponent {
     return new Date(invite.expiresAt).getTime() <= Date.now() ? 'Expired' : 'Active';
   }
 
+  public getRevokeDescription(invite: Invite): string {
+    if (invite.email) {
+      return `This invite for ${invite.email} will stop working immediately.`;
+    }
+
+    return 'This invite link will stop working immediately.';
+  }
+
   public isCopied(token: string): boolean {
     return this.copiedTokenState() === token;
+  }
+
+  public isRevoking(inviteId: number): boolean {
+    return this.revokingInviteId() === inviteId;
   }
 
   public isUsed(invite: Invite): boolean {
@@ -97,6 +115,10 @@ export class WorkspaceInvitesPanelComponent {
     }, INVITE_COPY_RESET_DELAY_MS);
 
     this.copyInvite.emit(token);
+  }
+
+  public onRevokeInvite(inviteId: number): void {
+    this.revokeInvite.emit(inviteId);
   }
 
   public setStatusFilter(filter: InviteStatusFilter): void {
