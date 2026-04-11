@@ -286,6 +286,24 @@ export const appContract = new Elysia({
           },
         },
       )
+      .delete(
+        '/:workspaceId/members/me',
+        () => ({
+          success: true as const,
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            workspaceId: t.Numeric(),
+          }),
+          response: {
+            200: 'workspaces.members.leave.response',
+            401: 'error.response',
+            404: 'error.response',
+            409: 'error.response',
+          },
+        },
+      )
       .post('/:workspaceId/invites', () => createContractInvite(), {
         body: 'invites.create.body',
         cookie: sessionCookieModel,

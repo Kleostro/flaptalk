@@ -181,6 +181,56 @@ export class WorkspacesService {
     };
   }
 
+  public async leaveWorkspace(params: { readonly userId: number; readonly workspaceId: number }) {
+    const membership = await prisma.workspaceMember.findUnique({
+      select: {
+        role: true,
+      },
+      where: {
+        workspaceId_userId: {
+          userId: params.userId,
+          workspaceId: params.workspaceId,
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new DomainError(404, 'workspace_not_found', 'Workspace not found.');
+    }
+
+    if (membership.role === 'OWNER') {
+      throw new DomainError(
+        409,
+        'workspace_owner_leave_forbidden',
+        'Workspace owners cannot leave until ownership is transferred.',
+      );
+    }
+
+    await prisma.$transaction(async (transaction) => {
+      await transaction.roomReadState.deleteMany({
+        where: {
+          room: {
+            workspaceId: params.workspaceId,
+          },
+          userId: params.userId,
+        },
+      });
+
+      await transaction.workspaceMember.delete({
+        where: {
+          workspaceId_userId: {
+            userId: params.userId,
+            workspaceId: params.workspaceId,
+          },
+        },
+      });
+    });
+
+    return {
+      success: true as const,
+    };
+  }
+
   public async removeWorkspaceMember(params: {
     readonly memberId: number;
     readonly userId: number;

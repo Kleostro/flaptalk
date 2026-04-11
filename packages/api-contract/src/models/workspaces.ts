@@ -4,6 +4,10 @@ const WORKSPACE_NAME_MAX_LENGTH = 120;
 const WORKSPACE_NAME_MIN_LENGTH = 1;
 const WORKSPACE_DESCRIPTION_MAX_LENGTH = 500;
 
+const WorkspaceActionSuccessResponseModel = t.Object({
+  success: t.Literal(true),
+});
+
 export const WorkspaceMemberRoleModel = t.Union([t.Literal('owner'), t.Literal('member')]);
 
 export type WorkspaceMemberRole = Static<typeof WorkspaceMemberRoleModel>;
@@ -52,6 +56,7 @@ export const WorkspacesModel = {
   'workspaces.list.response': t.Object({
     workspaces: t.Array(WorkspaceAccessModel),
   }),
+  'workspaces.members.leave.response': WorkspaceActionSuccessResponseModel,
   'workspaces.role': WorkspaceMemberRoleModel,
   'workspaces.single.response': WorkspaceAccessModel,
 };
