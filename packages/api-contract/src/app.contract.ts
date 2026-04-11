@@ -68,9 +68,11 @@ function createContractCatchUpItem() {
     contextType: 'thread_reply' as const,
     lastActivityAt: new Date(0).toISOString(),
     lastAuthor: createContractUser(),
+    lastMessage: createContractMessage(),
     preview: 'A thread continuation is waiting in this room.',
     resumeMode: 'unread' as const,
     room: createContractRoom(),
+    threadRootMessage: createContractMessage(),
     threadRootMessageId: 0,
     unreadMessageCount: 3,
   };

@@ -2,7 +2,7 @@ import Elysia from 'elysia';
 
 import { prisma } from '@api/db/prisma';
 import { DomainError } from '@api/errors/domain-error';
-import { messageSelect } from '@api/modules/messages/public-message';
+import { messageSelect, serializeMessage } from '@api/modules/messages/public-message';
 import {
   serializeWorkspaceCatchUpItem,
   serializeReadState,
@@ -188,30 +188,58 @@ export class ReadStatesService {
     readonly workspaceId: number;
   }) {
     const roomActivities = await this.buildWorkspaceRoomActivities(params);
+    const threadRootMessageIds = [
+      ...new Set(
+        roomActivities
+          .map((roomActivity) => roomActivity.lastMessage?.parentMessageId ?? null)
+          .filter((messageId): messageId is number => messageId !== null),
+      ),
+    ];
+    const threadRootMessages = await prisma.message.findMany({
+      select: messageSelect,
+      where: {
+        id: {
+          in: threadRootMessageIds,
+        },
+      },
+    });
+    const threadRootMessageById = new Map(
+      threadRootMessages.map((message) => [message.id, message]),
+    );
     const items = [...roomActivities]
       .sort((leftRoomActivity, rightRoomActivity) =>
         this.sortWorkspaceRoomActivities(leftRoomActivity, rightRoomActivity),
       )
-      .map((roomActivity) =>
-        serializeWorkspaceCatchUpItem({
-          contextType:
-            roomActivity.lastMessage?.parentMessageId === null ||
-            roomActivity.lastMessage?.parentMessageId === undefined
-              ? 'room_message'
-              : 'thread_reply',
+      .map((roomActivity) => {
+        const threadRootMessageId = roomActivity.lastMessage?.parentMessageId ?? null;
+        const threadRootMessage =
+          threadRootMessageId === null
+            ? roomActivity.lastMessage
+            : (() => {
+                const rootMessage = threadRootMessageById.get(threadRootMessageId);
+
+                return rootMessage ? serializeMessage(rootMessage) : null;
+              })();
+
+        return serializeWorkspaceCatchUpItem({
+          contextType: threadRootMessageId === null ? 'room_message' : 'thread_reply',
           lastActivityAt: roomActivity.lastMessage
             ? new Date(roomActivity.lastMessage.createdAt)
             : null,
           lastAuthor: roomActivity.lastMessage?.author ?? null,
+          lastMessage: roomActivity.lastMessage ?? null,
           preview:
-            roomActivity.lastMessage?.body ??
+            (threadRootMessageId !== null
+              ? threadRootMessage?.body
+              : roomActivity.lastMessage?.body) ??
             'This room is configured and ready for the next wave of activity.',
           resumeMode: roomActivity.unreadMessageCount > 0 ? 'unread' : 'latest',
           room: roomActivity.room,
-          threadRootMessageId: roomActivity.lastMessage?.parentMessageId ?? null,
+          threadRootMessage: threadRootMessage ?? null,
+          threadRootMessageId,
           unreadMessageCount: roomActivity.unreadMessageCount,
-        }),
-      );
+        });
+      });
 
     return {
       items,
