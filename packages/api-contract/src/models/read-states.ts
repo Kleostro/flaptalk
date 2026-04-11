@@ -43,6 +43,7 @@ export type WorkspaceCatchUpResumeMode = Static<typeof WorkspaceCatchUpResumeMod
 
 export const WorkspaceCatchUpItemModel = t.Object({
   contextType: WorkspaceCatchUpContextTypeModel,
+  firstUnreadMessage: t.Nullable(MessageModel),
   lastActivityAt: t.Nullable(
     t.String({
       format: 'date-time',
@@ -52,6 +53,7 @@ export const WorkspaceCatchUpItemModel = t.Object({
   lastMessage: t.Nullable(MessageModel),
   preview: t.String(),
   resumeMode: WorkspaceCatchUpResumeModeModel,
+  resumeTargetMessageId: t.Nullable(t.Numeric()),
   room: RoomModel,
   threadRootMessage: t.Nullable(MessageModel),
   threadRootMessageId: t.Nullable(t.Numeric()),

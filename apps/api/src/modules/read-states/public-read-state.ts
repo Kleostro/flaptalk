@@ -18,11 +18,13 @@ type SerializableWorkspaceRoomActivity = {
 
 type SerializableWorkspaceCatchUpItem = {
   readonly contextType: 'room_message' | 'thread_reply';
+  readonly firstUnreadMessage: null | ReturnType<typeof serializeMessage>;
   readonly lastActivityAt: Date | null;
   readonly lastAuthor: null | ReturnType<typeof serializeUser>;
   readonly lastMessage: null | ReturnType<typeof serializeMessage>;
   readonly preview: string;
   readonly resumeMode: 'latest' | 'unread';
+  readonly resumeTargetMessageId: null | number;
   readonly room: ReturnType<typeof serializeRoom>;
   readonly threadRootMessage: null | ReturnType<typeof serializeMessage>;
   readonly threadRootMessageId: null | number;
@@ -48,11 +50,13 @@ export function serializeWorkspaceRoomActivity(activity: SerializableWorkspaceRo
 export function serializeWorkspaceCatchUpItem(item: SerializableWorkspaceCatchUpItem) {
   return {
     contextType: item.contextType,
+    firstUnreadMessage: item.firstUnreadMessage,
     lastActivityAt: item.lastActivityAt ? item.lastActivityAt.toISOString() : null,
     lastAuthor: item.lastAuthor,
     lastMessage: item.lastMessage,
     preview: item.preview,
     resumeMode: item.resumeMode,
+    resumeTargetMessageId: item.resumeTargetMessageId,
     room: item.room,
     threadRootMessage: item.threadRootMessage,
     threadRootMessageId: item.threadRootMessageId,

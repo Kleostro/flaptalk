@@ -66,11 +66,13 @@ function createContractReadState() {
 function createContractCatchUpItem() {
   return {
     contextType: 'thread_reply' as const,
+    firstUnreadMessage: createContractMessage(),
     lastActivityAt: new Date(0).toISOString(),
     lastAuthor: createContractUser(),
     lastMessage: createContractMessage(),
     preview: 'A thread continuation is waiting in this room.',
     resumeMode: 'unread' as const,
+    resumeTargetMessageId: 0,
     room: createContractRoom(),
     threadRootMessage: createContractMessage(),
     threadRootMessageId: 0,
