@@ -78,21 +78,24 @@ export class WorkspaceRoomPageComponent {
   public readonly replyForm = this.workspaceFormFactoryService.createMessageForm(this.replyModel);
   public readonly roomResumeMode = signal<WorkspaceRoomFeedResumeMode>('default');
   public readonly selectedRoom = computed(() => this.workspaceFacadeService.selectedRoom());
+  public readonly selectedThreadReplies = computed(() =>
+    this.workspaceFacadeService.selectedThreadReplies(),
+  );
+  public readonly selectedThreadRootMessage = computed(() =>
+    this.workspaceFacadeService.selectedThreadRootMessage(),
+  );
   public readonly roomViewModel = computed(() =>
     createWorkspaceRoomViewModel({
       currentWorkspaceName: this.currentWorkspace()?.name ?? null,
       currentWorkspaceRole: this.currentWorkspaceRole(),
       hasSelectedThread: this.hasSelectedThread(),
       messageCount: this.messageCount(),
+      resumeMode: this.roomResumeMode(),
       room: this.selectedRoom(),
+      selectedThreadReplyCount: this.selectedThreadReplies().length,
+      selectedThreadRootMessage: this.selectedThreadRootMessage(),
       unreadMessageCount: this.workspaceFacadeService.getSelectedRoomUnreadCount(),
     }),
-  );
-  public readonly selectedThreadReplies = computed(() =>
-    this.workspaceFacadeService.selectedThreadReplies(),
-  );
-  public readonly selectedThreadRootMessage = computed(() =>
-    this.workspaceFacadeService.selectedThreadRootMessage(),
   );
   public readonly showMessageFormErrors = computed(
     () => this.isMessageFormSubmitted() || this.messageForm().touched(),

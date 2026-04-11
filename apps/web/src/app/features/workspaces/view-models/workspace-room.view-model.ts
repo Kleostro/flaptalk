@@ -1,4 +1,4 @@
-import { type Room, type WorkspaceMemberRole } from '@flaptalk/api-contract';
+import { type Message, type Room, type WorkspaceMemberRole } from '@flaptalk/api-contract';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { type BreadcrumbItem } from '@web/app/shared/ui/breadcrumbs/breadcrumbs.component';
@@ -11,7 +11,13 @@ export interface WorkspaceRoomViewModel {
   readonly headerDescription: string;
   readonly headerTitle: string;
   readonly healthRows: readonly KeyValueListItem[];
+  readonly resumeBanner: null | {
+    readonly description: string;
+    readonly tag: string;
+    readonly title: string;
+  };
   readonly roomDescription: string;
+  readonly threadPanelDescription: string;
   readonly threadPanelTag: string;
 }
 
@@ -20,7 +26,10 @@ interface CreateWorkspaceRoomViewModelInput {
   readonly currentWorkspaceRole: null | WorkspaceMemberRole;
   readonly hasSelectedThread: boolean;
   readonly messageCount: number;
+  readonly resumeMode: 'default' | 'first-unread' | 'latest';
   readonly room: null | Room;
+  readonly selectedThreadReplyCount: number;
+  readonly selectedThreadRootMessage: Message | null;
   readonly unreadMessageCount: number;
 }
 
@@ -36,6 +45,44 @@ export function createWorkspaceRoomViewModel(
   input: CreateWorkspaceRoomViewModelInput,
 ): WorkspaceRoomViewModel {
   const roomName = input.room?.name ?? 'Room';
+  const resumeBanner = input.hasSelectedThread
+    ? {
+        description:
+          input.resumeMode === 'default'
+            ? [
+                'You are focused on a specific discussion thread.',
+                'The thread panel keeps the root message and replies pinned together.',
+              ].join(' ')
+            : [
+                'We restored the thread context directly from catch-up',
+                'so you can continue where the latest discussion landed.',
+              ].join(' '),
+        tag: 'Resume',
+        title: `Thread context restored in ${roomName}`,
+      }
+    : input.resumeMode === 'first-unread'
+      ? {
+          description:
+            'The room feed will scroll to the first unread message so you can rebuild context from the right point.',
+          tag: 'Unread',
+          title: `Continue from the first unread message in ${roomName}`,
+        }
+      : input.resumeMode === 'latest'
+        ? {
+            description:
+              'The room feed will jump to the latest activity so you can quickly inspect the most recent room state.',
+            tag: 'Latest',
+            title: `Start from the newest activity in ${roomName}`,
+          }
+        : null;
+  const threadPanelDescription = input.hasSelectedThread
+    ? input.selectedThreadReplyCount > 0
+      ? [
+          'The selected thread has',
+          `${String(input.selectedThreadReplyCount).padStart(2, '0')} replies attached to the root message.`,
+        ].join(' ')
+      : 'The selected thread is ready for its first reply.'
+    : 'Select a root message from the room feed to pin the discussion context in this panel.';
 
   return {
     breadcrumbs: [
@@ -85,7 +132,9 @@ export function createWorkspaceRoomViewModel(
         value: input.hasSelectedThread ? 'Open' : 'Ready',
       },
     ],
+    resumeBanner,
     roomDescription: input.room?.description ?? ROOM_DESCRIPTION_FALLBACK,
+    threadPanelDescription,
     threadPanelTag: input.hasSelectedThread ? 'Live' : 'Thread',
   };
 }
