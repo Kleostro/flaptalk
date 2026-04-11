@@ -107,6 +107,50 @@
             </a>
           </div>
         </app-shell-section-card>
+      } @else {
+        <app-shell-section-card tag="Membership" title="Your access">
+          <div class="workspace-members-page__panel workspace-members-page__panel--compact">
+            <p class="workspace-members-page__helper">
+              {{ stayConnectedDescription() }}
+            </p>
+
+            <div class="workspace-members-page__action-list">
+              <a [routerLink]="roomsLink" class="workspace-members-page__action-card">
+                <strong>Open rooms</strong>
+                <span>Return to room navigation and continue inside the current workspace.</span>
+              </a>
+
+              <a [routerLink]="homeLink" class="workspace-members-page__action-card">
+                <strong>Workspace overview</strong>
+                <span>Jump back to the shared home surface and recent workspace context.</span>
+              </a>
+            </div>
+
+            @if (selfMembership()?.role === 'owner') {
+              <div class="workspace-members-page__membership-note">
+                <strong>Owners cannot leave yet</strong>
+                <span>{{ getOwnerLeaveDescription() }}</span>
+              </div>
+            } @else {
+              <div class="workspace-members-page__leave-action">
+                @if (isLeaveWorkspacePending()) {
+                  <app-button appearance="danger" [disabled]="true" size="medium">
+                    Leaving workspace...
+                  </app-button>
+                } @else {
+                  <app-confirm-popover
+                    cancelLabel="Cancel"
+                    confirmLabel="Leave"
+                    [description]="getLeaveWorkspaceDescription()"
+                    [title]="getLeaveWorkspaceTitle()"
+                    triggerLabel="Leave workspace"
+                    (confirm)="leaveWorkspace()"
+                  />
+                }
+              </div>
+            }
+          </div>
+        </app-shell-section-card>
       }
     </section>
   </div>

@@ -308,6 +308,20 @@ export class WorkspaceApiService {
     );
   }
 
+  public leaveWorkspace(workspaceId: number): Observable<void> {
+    return this.createRequest$(
+      () => api.workspaces({ workspaceId }).members.me.delete(),
+      (response) => {
+        if (response.data?.success === true) {
+          return void 0;
+        }
+
+        throw new Error(this.getErrorMessage(response, 'Unable to leave the workspace.'));
+      },
+      'Unable to leave the workspace.',
+    );
+  }
+
   public removeWorkspaceMember(workspaceId: number, memberId: number): Observable<void> {
     return this.createRequest$(
       () => api.workspaces({ workspaceId }).members({ memberId }).delete(),
