@@ -111,6 +111,43 @@ export class InvitesService {
     return serializeInvitePreview(invite);
   }
 
+  public async revokeInvite(params: {
+    readonly inviteId: number;
+    readonly userId: number;
+    readonly workspaceId: number;
+  }) {
+    await assertWorkspaceOwner({
+      errorCode: 'invite_forbidden',
+      errorMessage: 'Only workspace owners can revoke invites.',
+      userId: params.userId,
+      workspaceId: params.workspaceId,
+    });
+
+    const invite = await prisma.invite.findUnique({
+      select: {
+        id: true,
+        workspaceId: true,
+      },
+      where: {
+        id: params.inviteId,
+      },
+    });
+
+    if (!invite || invite.workspaceId !== params.workspaceId) {
+      throw new DomainError(404, 'invite_not_found', 'Invite not found.');
+    }
+
+    await prisma.invite.delete({
+      where: {
+        id: invite.id,
+      },
+    });
+
+    return {
+      success: true as const,
+    };
+  }
+
   public async acceptInvite(params: { readonly token: string; readonly userId: number }) {
     const [invite, user] = await Promise.all([
       prisma.invite.findUnique({

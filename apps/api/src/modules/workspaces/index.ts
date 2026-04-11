@@ -3,6 +3,8 @@ import { Elysia } from 'elysia';
 import { authPlugin, type AuthJwtVerifier } from '@api/modules/auth/plugin';
 import {
   requireAuthenticatedUserId,
+  WorkspaceInviteParamsModel,
+  WorkspaceMemberParamsModel,
   workspaceSessionCookieModel,
   WorkspaceParamsModel,
 } from '@api/modules/workspaces/route-helpers';
@@ -144,6 +146,42 @@ export const workspacesModule = new Elysia({
       },
     },
   )
+  .delete(
+    '/:workspaceId/members/:memberId',
+    async ({
+      authJwt,
+      cookie,
+      params,
+      workspacesService,
+    }: {
+      readonly authJwt: AuthJwtVerifier;
+      readonly cookie: Record<string, { value?: string | undefined }>;
+      readonly params: {
+        readonly memberId: number;
+        readonly workspaceId: number;
+      };
+      readonly workspacesService: WorkspacesServiceType;
+    }) => {
+      const userId = await requireAuthenticatedUserId({ authJwt, cookie });
+
+      return workspacesService.removeWorkspaceMember({
+        memberId: params.memberId,
+        userId,
+        workspaceId: params.workspaceId,
+      });
+    },
+    {
+      cookie: workspaceSessionCookieModel,
+      params: WorkspaceMemberParamsModel,
+      response: {
+        200: 'workspaces.members.remove.response',
+        401: 'error.response',
+        403: 'error.response',
+        404: 'error.response',
+        409: 'error.response',
+      },
+    },
+  )
   .post(
     '/:workspaceId/invites',
     async ({
@@ -175,6 +213,41 @@ export const workspacesModule = new Elysia({
       params: WorkspaceParamsModel,
       response: {
         200: 'invites.create.response',
+        401: 'error.response',
+        403: 'error.response',
+        404: 'error.response',
+      },
+    },
+  )
+  .delete(
+    '/:workspaceId/invites/:inviteId',
+    async ({
+      authJwt,
+      cookie,
+      invitesService,
+      params,
+    }: {
+      readonly authJwt: AuthJwtVerifier;
+      readonly cookie: Record<string, { value?: string | undefined }>;
+      readonly invitesService: InvitesServiceType;
+      readonly params: {
+        readonly inviteId: number;
+        readonly workspaceId: number;
+      };
+    }) => {
+      const userId = await requireAuthenticatedUserId({ authJwt, cookie });
+
+      return invitesService.revokeInvite({
+        inviteId: params.inviteId,
+        userId,
+        workspaceId: params.workspaceId,
+      });
+    },
+    {
+      cookie: workspaceSessionCookieModel,
+      params: WorkspaceInviteParamsModel,
+      response: {
+        200: 'invites.revoke.response',
         401: 'error.response',
         403: 'error.response',
         404: 'error.response',

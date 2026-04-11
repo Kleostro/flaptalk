@@ -180,6 +180,89 @@ export class WorkspacesService {
       members: members.map((member) => serializeWorkspaceMember(member)),
     };
   }
+
+  public async removeWorkspaceMember(params: {
+    readonly memberId: number;
+    readonly userId: number;
+    readonly workspaceId: number;
+  }) {
+    const workspaceAccess = await prisma.workspaceMember.findUnique({
+      select: {
+        role: true,
+      },
+      where: {
+        workspaceId_userId: {
+          userId: params.userId,
+          workspaceId: params.workspaceId,
+        },
+      },
+    });
+
+    if (!workspaceAccess) {
+      throw new DomainError(404, 'workspace_not_found', 'Workspace not found.');
+    }
+
+    if (workspaceAccess.role !== 'OWNER') {
+      throw new DomainError(
+        403,
+        'workspace_member_forbidden',
+        'Only workspace owners can remove members.',
+      );
+    }
+
+    const member = await prisma.workspaceMember.findUnique({
+      select: {
+        id: true,
+        role: true,
+        userId: true,
+        workspaceId: true,
+      },
+      where: {
+        id: params.memberId,
+      },
+    });
+
+    if (!member || member.workspaceId !== params.workspaceId) {
+      throw new DomainError(404, 'workspace_member_not_found', 'Workspace member not found.');
+    }
+
+    if (member.role === 'OWNER') {
+      throw new DomainError(
+        409,
+        'workspace_member_owner_protected',
+        'Workspace owners cannot be removed through this action.',
+      );
+    }
+
+    if (member.userId === params.userId) {
+      throw new DomainError(
+        409,
+        'workspace_member_self_removal_forbidden',
+        'Use a dedicated leave flow instead of removing yourself as a member.',
+      );
+    }
+
+    await prisma.$transaction(async (transaction) => {
+      await transaction.roomReadState.deleteMany({
+        where: {
+          room: {
+            workspaceId: params.workspaceId,
+          },
+          userId: member.userId,
+        },
+      });
+
+      await transaction.workspaceMember.delete({
+        where: {
+          id: member.id,
+        },
+      });
+    });
+
+    return {
+      success: true as const,
+    };
+  }
 }
 
 export type WorkspacesServiceType = WorkspacesService;

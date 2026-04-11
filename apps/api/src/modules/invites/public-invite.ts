@@ -13,6 +13,7 @@ const inviteSelect = {
 } as const;
 
 const workspaceMemberSelect = {
+  id: true,
   joinedAt: true,
   role: true,
   user: {
@@ -58,6 +59,7 @@ type SerializableInvitePreview = SerializableInvite & {
 };
 
 type SerializableWorkspaceMember = {
+  readonly id: number;
   readonly joinedAt: Date;
   readonly role: 'MEMBER' | 'OWNER';
   readonly user: {
@@ -89,6 +91,7 @@ export function serializeInvitePreview(invite: SerializableInvitePreview) {
 
 export function serializeWorkspaceMember(member: SerializableWorkspaceMember) {
   return {
+    id: member.id,
     joinedAt: member.joinedAt.toISOString(),
     role: member.role.toLowerCase() as 'member' | 'owner',
     user: serializeUser(member.user),
