@@ -11,9 +11,14 @@ import { RouterLink } from '@angular/router';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { ToastService } from '@web/app/core/services/toast.service';
-import { WORKSPACE_PAGE_OVERVIEW_CARDS } from '@web/app/features/workspaces/pages/workspace-page.constants';
+import { WorkspaceCatchUpPanelComponent } from '@web/app/features/workspaces/components/workspace-catch-up-panel/workspace-catch-up-panel.component';
+import {
+  WORKSPACE_PAGE_ACTIVITY_CARDS,
+  WORKSPACE_PAGE_OVERVIEW_CARDS,
+} from '@web/app/features/workspaces/pages/workspace-page.constants';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
 import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/services/workspace-form.factory.service';
+import { createWorkspaceCatchUpViewModel } from '@web/app/features/workspaces/view-models/workspace-catch-up.view-model';
 import { ButtonComponent } from '@web/app/shared/ui/button/button';
 import { CardComponent } from '@web/app/shared/ui/card/card';
 import { EmptyStateComponent } from '@web/app/shared/ui/empty-state/empty-state.component';
@@ -41,6 +46,7 @@ import { WorkspaceOverviewPanelComponent } from '@web/app/features/workspaces/co
     ShellStatCardComponent,
     TextInputFieldComponent,
     TextareaFieldComponent,
+    WorkspaceCatchUpPanelComponent,
     WorkspaceOverviewPanelComponent,
   ],
   selector: 'app-workspace-home-page',
@@ -56,6 +62,7 @@ export class WorkspaceHomePageComponent {
   public readonly activeInviteCount = computed(() =>
     this.workspaceFacadeService.activeInviteCount(),
   );
+  public readonly activityCards = WORKSPACE_PAGE_ACTIVITY_CARDS;
   public readonly canManageRooms = computed(() => this.workspaceFacadeService.canManageRooms());
   public readonly members = computed(() => this.workspaceFacadeService.members());
   public readonly currentMember = computed(
@@ -65,6 +72,11 @@ export class WorkspaceHomePageComponent {
   public readonly currentWorkspaceRole = computed(() =>
     this.workspaceFacadeService.currentWorkspaceRole(),
   );
+  public readonly featuredCatchUpItem = computed(() => {
+    const primaryItem = this.workspaceFacadeService.primaryCatchUpItem();
+
+    return primaryItem ? createWorkspaceCatchUpViewModel(primaryItem) : null;
+  });
   public readonly hasWorkspace = computed(() => this.workspaceFacadeService.hasWorkspace());
   public readonly overviewCards = WORKSPACE_PAGE_OVERVIEW_CARDS;
   public readonly foundationDescription = computed(() =>
@@ -122,6 +134,9 @@ export class WorkspaceHomePageComponent {
   public readonly isCreateWorkspacePending = computed(() =>
     this.workspaceFacadeService.isCreateWorkspacePending(),
   );
+  public readonly isWorkspaceCatchUpPending = computed(() =>
+    this.workspaceFacadeService.isWorkspaceCatchUpPending(),
+  );
   public readonly isWorkspaceFormSubmitted = signal(false);
   public readonly isWorkspacePending = computed(() =>
     this.workspaceFacadeService.isWorkspaceCollectionPending(),
@@ -134,7 +149,16 @@ export class WorkspaceHomePageComponent {
 
     return this.isOwner() ? 'Owner' : 'Member';
   });
+  public readonly recentCatchUpItems = computed(() =>
+    this.workspaceFacadeService
+      .catchUpItems()
+      .map((item) => createWorkspaceCatchUpViewModel(item))
+      .filter((item) => item.roomId !== this.featuredCatchUpItem()?.roomId),
+  );
   public readonly roomCount = computed(() => this.workspaceFacadeService.roomCount());
+  public readonly shouldShowRecentCatchUp = computed(
+    () => this.isWorkspaceCatchUpPending() || this.recentCatchUpItems().length > 0,
+  );
   public readonly showWorkspaceFormErrors = computed(
     () => this.isWorkspaceFormSubmitted() || this.workspaceForm().touched(),
   );

@@ -575,11 +575,21 @@ export class WorkspaceFacadeService {
   }
 
   public selectRoom(roomId: number): void {
+    if (!Number.isInteger(roomId) || roomId <= 0) {
+      this.clearSelectedRoom();
+      return;
+    }
+
     this.clearSelectedThread();
     this.selectedRoomIdState.set(roomId);
   }
 
   public selectThread(messageId: number): void {
+    if (!Number.isInteger(messageId) || messageId <= 0) {
+      this.clearSelectedThread();
+      return;
+    }
+
     this.selectedThreadMessageIdState.set(messageId);
   }
 

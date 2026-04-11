@@ -38,6 +38,59 @@
         [workspaceCount]="workspaceCount()"
         [workspaceRole]="currentWorkspaceRole()"
       />
+
+      <app-shell-section-card tag="Resume" title="Continue reading">
+        <div class="workspace-home-page__panel workspace-home-page__panel--compact">
+          @if (isWorkspaceCatchUpPending()) {
+            <app-empty-state description="Restoring your highest-priority reading context..." />
+          } @else if (featuredCatchUpItem(); as featuredCatchUpItem) {
+            <div class="workspace-home-page__continue-reading">
+              <div class="workspace-home-page__continue-copy">
+                <div class="workspace-home-page__continue-heading">
+                  <strong>{{ featuredCatchUpItem.roomName }}</strong>
+                  <span>{{ featuredCatchUpItem.secondaryMeta }}</span>
+                </div>
+
+                <p class="workspace-home-page__continue-preview">
+                  {{ featuredCatchUpItem.description }}
+                </p>
+
+                <div class="workspace-home-page__hint-list">
+                  <span class="workspace-home-page__hint-chip">
+                    {{ featuredCatchUpItem.unreadLabel }}
+                  </span>
+                  <span class="workspace-home-page__hint-chip">
+                    {{ featuredCatchUpItem.contextLabel }}
+                  </span>
+                  <span class="workspace-home-page__hint-chip">
+                    {{ featuredCatchUpItem.authorLabel }}
+                  </span>
+                </div>
+              </div>
+
+              <a
+                class="workspace-home-page__continue-link"
+                [queryParams]="featuredCatchUpItem.queryParams"
+                [routerLink]="featuredCatchUpItem.roomLink"
+              >
+                {{ featuredCatchUpItem.resumeLabel }}
+              </a>
+            </div>
+          } @else {
+            <app-empty-state
+              description="As unread room activity accumulates, the highest-priority context will stay pinned here."
+            />
+          }
+        </div>
+      </app-shell-section-card>
+
+      @if (shouldShowRecentCatchUp()) {
+        <app-workspace-catch-up-panel
+          [activityCards]="activityCards"
+          [catchUpItems]="recentCatchUpItems()"
+          [isPending]="isWorkspaceCatchUpPending()"
+        />
+      }
     } @else {
       <app-card>
         <form class="workspace-home-page__panel" (submit)="createWorkspace($event)">

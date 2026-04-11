@@ -103,16 +103,16 @@ export class WorkspaceRoomPageComponent {
 
   constructor() {
     this.activatedRoute.paramMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-      const roomId = Number(params.get('roomId'));
+      const roomId = this.parseRouteEntityId(params.get('roomId'));
 
-      if (Number.isFinite(roomId)) {
+      if (roomId !== null) {
         this.workspaceFacadeService.selectRoom(roomId);
       }
     });
 
     this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       const resumeParam = params.get('resume');
-      const threadParam = Number(params.get('thread'));
+      const threadParam = this.parseRouteEntityId(params.get('thread'));
 
       if (resumeParam === 'unread') {
         this.roomResumeMode.set('first-unread');
@@ -122,7 +122,7 @@ export class WorkspaceRoomPageComponent {
         this.roomResumeMode.set('default');
       }
 
-      if (Number.isFinite(threadParam)) {
+      if (threadParam !== null) {
         this.workspaceFacadeService.selectThread(threadParam);
         return;
       }
@@ -164,6 +164,16 @@ export class WorkspaceRoomPageComponent {
       message: error instanceof Error ? error.message : fallbackMessage,
       title,
     });
+  }
+
+  private parseRouteEntityId(rawValue: null | string): null | number {
+    if (!rawValue || !/^\d+$/.test(rawValue)) {
+      return null;
+    }
+
+    const parsedValue = Number(rawValue);
+
+    return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : null;
   }
 
   private resetReplyForm(rootMessageId: number): void {
