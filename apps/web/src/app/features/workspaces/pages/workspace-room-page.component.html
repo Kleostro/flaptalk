@@ -7,6 +7,15 @@
 
 <div class="workspace-room-page__dashboard-grid">
   <section class="workspace-room-page__primary-column">
+    @if (roomViewModel().resumeBanner; as resumeBanner) {
+      <app-card>
+        <div class="workspace-room-page__panel workspace-room-page__panel--compact">
+          <app-shell-panel-header [tag]="resumeBanner.tag" [title]="resumeBanner.title" />
+          <p class="workspace-room-page__helper">{{ resumeBanner.description }}</p>
+        </div>
+      </app-card>
+    }
+
     <app-shell-section-card tag="Room feed" [title]="roomViewModel().feedTitle">
       <div class="workspace-room-page__panel">
         <app-workspace-room-feed
@@ -49,6 +58,10 @@
   <section class="workspace-room-page__secondary-column">
     <app-shell-section-card [tag]="roomViewModel().threadPanelTag" title="Thread panel">
       <div class="workspace-room-page__panel">
+        <p class="workspace-room-page__helper">
+          {{ roomViewModel().threadPanelDescription }}
+        </p>
+
         <app-workspace-thread-panel
           [currentReadMessageId]="lastReadMessageId()"
           [isPending]="isThreadPending()"

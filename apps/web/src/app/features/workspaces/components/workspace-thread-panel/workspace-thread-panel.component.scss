@@ -3,6 +3,7 @@
   gap: 1rem;
 
   &__state,
+  &__summary,
   &__message {
     display: grid;
     gap: 0.9rem;
@@ -13,6 +14,24 @@
     border-radius: 1rem;
 
     background: color-mix(in oklch, var(--surface-base) 12%, transparent);
+  }
+
+  &__summary {
+    gap: 0.35rem;
+
+    strong {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.015em;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
   }
 
   &__message {

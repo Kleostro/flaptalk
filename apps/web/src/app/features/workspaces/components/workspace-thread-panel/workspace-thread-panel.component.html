@@ -12,6 +12,21 @@
       <p>We are loading the root message and its replies.</p>
     </div>
   } @else {
+    <div class="workspace-thread-panel__summary">
+      <strong>
+        {{
+          replies().length > 0 ? replies().length + ' replies in this thread' : 'Thread root ready'
+        }}
+      </strong>
+      <p>
+        {{
+          replies().length > 0
+            ? 'Replies stay attached to the root message so the discussion can be resumed without losing context.'
+            : 'This root message is waiting for the first reply.'
+        }}
+      </p>
+    </div>
+
     <article
       #threadMessageItem
       class="workspace-thread-panel__message workspace-thread-panel__message--root"
