@@ -55,6 +55,18 @@
                   {{ featuredCatchUpItem.description }}
                 </p>
 
+                @if (featuredCatchUpItem.threadPreview) {
+                  <div class="workspace-home-page__continue-thread">
+                    <strong>Thread context</strong>
+                    <p>{{ featuredCatchUpItem.threadPreview }}</p>
+                  </div>
+                }
+
+                <div class="workspace-home-page__continue-thread">
+                  <strong>{{ featuredCatchUpItem.latestPreviewLabel }}</strong>
+                  <p>{{ featuredCatchUpItem.preview }}</p>
+                </div>
+
                 <div class="workspace-home-page__hint-list">
                   <span class="workspace-home-page__hint-chip">
                     {{ featuredCatchUpItem.unreadLabel }}
