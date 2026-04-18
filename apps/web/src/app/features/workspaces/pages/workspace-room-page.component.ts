@@ -16,24 +16,14 @@ import { WorkspaceThreadPanelComponent } from '@web/app/features/workspaces/comp
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
 import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/services/workspace-form.factory.service';
 import { createWorkspaceRoomViewModel } from '@web/app/features/workspaces/view-models/workspace-room.view-model';
+import { WorkspaceMessageComposerComponent } from '@web/app/features/workspaces/components/workspace-message-composer/workspace-message-composer.component';
 import { ButtonComponent } from '@web/app/shared/ui/button/button';
-import { CardComponent } from '@web/app/shared/ui/card/card';
-import { KeyValueListComponent } from '@web/app/shared/ui/key-value-list/key-value-list.component';
-import { PageHeaderComponent } from '@web/app/shared/ui/page-header/page-header.component';
-import { ShellSectionCardComponent } from '@web/app/shared/ui/shell-section-card/shell-section-card.component';
-import { ShellPanelHeaderComponent } from '@web/app/shared/ui/shell-panel-header/shell-panel-header';
-import { TextareaFieldComponent } from '@web/app/shared/form/components/textarea-field/textarea-field.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ButtonComponent,
-    CardComponent,
-    KeyValueListComponent,
-    PageHeaderComponent,
-    ShellSectionCardComponent,
-    ShellPanelHeaderComponent,
-    TextareaFieldComponent,
+    WorkspaceMessageComposerComponent,
     WorkspaceRoomFeedComponent,
     WorkspaceThreadPanelComponent,
   ],
@@ -48,11 +38,7 @@ export class WorkspaceRoomPageComponent {
   private readonly workspaceFacadeService = inject(WorkspaceFacadeService);
   private readonly workspaceFormFactoryService = inject(WorkspaceFormFactoryService);
 
-  public readonly currentWorkspace = computed(() => this.workspaceFacadeService.currentWorkspace());
-  public readonly currentWorkspaceRole = computed(() =>
-    this.workspaceFacadeService.currentWorkspaceRole(),
-  );
-  public readonly hasMessages = computed(() => this.workspaceFacadeService.hasMessages());
+  public readonly currentUserId = computed(() => this.workspaceFacadeService.currentUserId());
   public readonly hasSelectedThread = computed(() =>
     this.workspaceFacadeService.hasSelectedThread(),
   );
@@ -65,6 +51,9 @@ export class WorkspaceRoomPageComponent {
   public readonly isMessageFormSubmitted = signal(false);
   public readonly isReplyFormSubmitted = signal(false);
   public readonly isThreadPending = computed(() => this.workspaceFacadeService.isThreadPending());
+  public readonly isThreadRailOpen = computed(
+    () => this.isThreadPending() || this.hasSelectedThread(),
+  );
   public readonly lastReadMessageId = computed(
     () => this.workspaceFacadeService.getSelectedRoomReadState()?.lastReadMessageId ?? null,
   );
@@ -87,15 +76,11 @@ export class WorkspaceRoomPageComponent {
   );
   public readonly roomViewModel = computed(() =>
     createWorkspaceRoomViewModel({
-      currentWorkspaceName: this.currentWorkspace()?.name ?? null,
-      currentWorkspaceRole: this.currentWorkspaceRole(),
       hasSelectedThread: this.hasSelectedThread(),
-      messageCount: this.messageCount(),
       resumeMode: this.roomResumeMode(),
       room: this.selectedRoom(),
       selectedThreadReplyCount: this.selectedThreadReplies().length,
       selectedThreadRootMessage: this.selectedThreadRootMessage(),
-      unreadMessageCount: this.workspaceFacadeService.getSelectedRoomUnreadCount(),
     }),
   );
   public readonly showMessageFormErrors = computed(
@@ -266,6 +251,15 @@ export class WorkspaceRoomPageComponent {
       .subscribe({
         error: () => undefined,
       });
+  }
+
+  public closeThread(): void {
+    this.workspaceFacadeService.clearSelectedThread();
+    this.isReplyFormSubmitted.set(false);
+    this.replyModel.set({
+      body: '',
+      parentMessageId: null,
+    });
   }
 
   public createMessage(event: Event): void {

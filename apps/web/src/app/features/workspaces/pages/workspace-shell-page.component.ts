@@ -9,6 +9,10 @@ import { AuthFacadeService } from '@web/app/features/auth/services/auth-facade.s
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
 import { WorkspaceSidebarComponent } from '@web/app/features/workspaces/components/workspace-sidebar/workspace-sidebar.component';
 import { AppShellComponent } from '@web/app/shared/ui/app-shell/app-shell';
+import {
+  type BreadcrumbItem,
+  BreadcrumbsComponent,
+} from '@web/app/shared/ui/breadcrumbs/breadcrumbs.component';
 import { ButtonComponent } from '@web/app/shared/ui/button/button';
 import { PillComponent } from '@web/app/shared/ui/pill/pill.component';
 
@@ -16,6 +20,7 @@ import { PillComponent } from '@web/app/shared/ui/pill/pill.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AppShellComponent,
+    BreadcrumbsComponent,
     ButtonComponent,
     PillComponent,
     RouterOutlet,
@@ -54,13 +59,9 @@ export class WorkspaceShellPageComponent {
   public readonly isOwner = computed(() => this.currentWorkspaceRole() === 'owner');
   public readonly roomCount = computed(() => this.workspaceFacadeService.roomCount());
   public readonly rooms = computed(() => this.workspaceFacadeService.rooms());
-  public readonly topbarTitle = computed(() => {
-    if (this.isSetupRoute()) {
-      return 'Owner setup';
-    }
-
-    return this.selectedRoom()?.name ?? this.currentWorkspace()?.name ?? 'Workspace Home';
-  });
+  public readonly topbarBreadcrumbs = computed<readonly BreadcrumbItem[]>(() =>
+    this.buildTopbarBreadcrumbs(this.currentUrl()),
+  );
   public readonly totalUnreadMessageCount = computed(() =>
     this.workspaceFacadeService.unreadMessageCount(),
   );
@@ -84,6 +85,113 @@ export class WorkspaceShellPageComponent {
 
     return initials || 'FT';
   });
+
+  private buildOwnerSetupBreadcrumbs(currentUrl: string): null | readonly BreadcrumbItem[] {
+    const createRoomRoutePrefix =
+      this.buildWorkspaceSetupRoutePrefix(APP_ROUTE_PATHS.workspaceSetupRooms) +
+      `/${APP_ROUTE_PATHS.workspaceSetupRoomsNew}`;
+    if (currentUrl.startsWith(createRoomRoutePrefix)) {
+      return this.createRoomSetupBreadcrumbs();
+    }
+
+    if (
+      currentUrl.startsWith(
+        this.buildWorkspaceSetupRoutePrefix(APP_ROUTE_PATHS.workspaceSetupRooms),
+      )
+    ) {
+      return this.createSimpleWorkspaceBreadcrumb('Rooms');
+    }
+
+    if (
+      currentUrl.startsWith(
+        this.buildWorkspaceSetupRoutePrefix(APP_ROUTE_PATHS.workspaceSetupMembers),
+      )
+    ) {
+      return this.createSimpleWorkspaceBreadcrumb('Members');
+    }
+
+    return this.isSetupRoute() ? this.createSimpleWorkspaceBreadcrumb('Owner setup') : null;
+  }
+
+  private buildSelectedRoomBreadcrumbs(): null | readonly BreadcrumbItem[] {
+    const selectedRoom = this.selectedRoom();
+
+    if (!selectedRoom) {
+      return null;
+    }
+
+    return [
+      {
+        href: ['/', APP_ROUTE_PATHS.workspace],
+        label: 'Workspace',
+      },
+      {
+        href: null,
+        label: selectedRoom.name,
+      },
+    ];
+  }
+
+  private buildTopbarBreadcrumbs(currentUrl: string): readonly BreadcrumbItem[] {
+    const ownerSetupBreadcrumbs = this.buildOwnerSetupBreadcrumbs(currentUrl);
+
+    if (ownerSetupBreadcrumbs) {
+      return ownerSetupBreadcrumbs;
+    }
+
+    const selectedRoomBreadcrumbs = this.buildSelectedRoomBreadcrumbs();
+
+    if (selectedRoomBreadcrumbs) {
+      return selectedRoomBreadcrumbs;
+    }
+
+    return [
+      {
+        href: null,
+        label: this.currentWorkspace()?.name ?? 'Workspace home',
+      },
+    ];
+  }
+
+  private buildWorkspaceRootBreadcrumb(): BreadcrumbItem {
+    return {
+      href: ['/', APP_ROUTE_PATHS.workspace],
+      label: 'Workspace',
+    };
+  }
+
+  private buildWorkspaceSetupRoutePrefix(segment: string): string {
+    return `/${APP_ROUTE_PATHS.workspace}/${APP_ROUTE_PATHS.workspaceSetup}/${segment}`;
+  }
+
+  private createRoomSetupBreadcrumbs(): readonly BreadcrumbItem[] {
+    return [
+      this.buildWorkspaceRootBreadcrumb(),
+      {
+        href: [
+          '/',
+          APP_ROUTE_PATHS.workspace,
+          APP_ROUTE_PATHS.workspaceSetup,
+          APP_ROUTE_PATHS.workspaceSetupRooms,
+        ],
+        label: 'Rooms',
+      },
+      {
+        href: null,
+        label: 'Create room',
+      },
+    ];
+  }
+
+  private createSimpleWorkspaceBreadcrumb(label: string): readonly BreadcrumbItem[] {
+    return [
+      this.buildWorkspaceRootBreadcrumb(),
+      {
+        href: null,
+        label,
+      },
+    ];
+  }
 
   public logout(): void {
     this.authFacadeService.logout().subscribe({

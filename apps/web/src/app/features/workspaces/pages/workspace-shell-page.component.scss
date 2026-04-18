@@ -1,26 +1,8 @@
 .workspace-shell-page {
   &__topbar-title {
     display: flex;
-    gap: 1rem;
     align-items: center;
-
-    strong {
-      overflow: hidden;
-
-      font-size: 1rem;
-      font-weight: 600;
-      text-overflow: ellipsis;
-      letter-spacing: -0.02em;
-      white-space: nowrap;
-    }
-  }
-
-  &__topbar-kicker {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    min-inline-size: 0;
   }
 
   &__topbar-actions {

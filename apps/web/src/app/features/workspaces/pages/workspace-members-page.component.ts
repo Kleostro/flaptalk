@@ -15,7 +15,6 @@ import { WorkspaceInvitesPanelComponent } from '@web/app/features/workspaces/com
 import { WorkspaceMembersPanelComponent } from '@web/app/features/workspaces/components/workspace-members-panel/workspace-members-panel.component';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
 import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/services/workspace-form.factory.service';
-import { type BreadcrumbItem } from '@web/app/shared/ui/breadcrumbs/breadcrumbs.component';
 import { ButtonComponent } from '@web/app/shared/ui/button/button';
 import { CardComponent } from '@web/app/shared/ui/card/card';
 import { ConfirmPopoverComponent } from '@web/app/shared/ui/confirm-popover/confirm-popover.component';
@@ -58,16 +57,6 @@ export class WorkspaceMembersPageComponent {
   public readonly activeInviteCount = computed(() =>
     this.workspaceFacadeService.activeInviteCount(),
   );
-  public readonly breadcrumbs: readonly BreadcrumbItem[] = [
-    {
-      href: ['/', APP_ROUTE_PATHS.workspace],
-      label: 'Workspace',
-    },
-    {
-      href: null,
-      label: 'Members',
-    },
-  ];
   public readonly canManageInvites = computed(() => this.workspaceFacadeService.canManageInvites());
   public readonly hasWorkspace = computed(() => this.workspaceFacadeService.hasWorkspace());
   public readonly homeLink = ['/', APP_ROUTE_PATHS.workspace];

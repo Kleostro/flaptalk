@@ -1,0 +1,50 @@
+:host {
+  --workspace-date-divider-offset: 0.75rem;
+  --workspace-date-divider-surface: color-mix(in oklch, var(--surface-elevated) 88%, transparent);
+
+  pointer-events: none;
+
+  position: sticky;
+  z-index: 3;
+  inset-block-start: var(--workspace-date-divider-offset);
+
+  display: block;
+}
+
+.workspace-message-date-divider {
+  transform: translateY(0) scale(1);
+
+  display: flex;
+  justify-content: center;
+
+  opacity: 1;
+
+  transition:
+    opacity var(--motion-duration-normal) ease,
+    transform var(--motion-duration-normal) ease;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-block-size: 1.7rem;
+    padding-inline: 0.8rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 72%, transparent);
+    border-radius: var(--radius-pill);
+
+    font-size: 0.69rem;
+    font-weight: 700;
+    color: color-mix(in oklch, var(--text-secondary) 92%, white 6%);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+
+    opacity: 0.98;
+    background: var(--workspace-date-divider-surface);
+    backdrop-filter: blur(18px) saturate(1.08);
+    box-shadow:
+      0 0.3rem 0.85rem color-mix(in oklch, black 8%, transparent),
+      inset 0 1px 0 color-mix(in oklch, white 10%, transparent);
+  }
+}

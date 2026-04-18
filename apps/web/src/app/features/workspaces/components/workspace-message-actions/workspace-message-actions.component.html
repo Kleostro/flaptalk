@@ -1,0 +1,7 @@
+<div class="workspace-message-actions">
+  @if (showThreadAction()) {
+    <app-button appearance="tertiary" size="small" type="button" (click)="threadAction.emit()">
+      {{ isThreadOpen() ? 'Thread open' : 'Open thread' }}
+    </app-button>
+  }
+</div>

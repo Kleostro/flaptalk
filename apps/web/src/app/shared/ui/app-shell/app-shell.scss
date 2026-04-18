@@ -5,7 +5,7 @@
 .app-shell {
   --shell-topbar-height: 5.375rem;
   --shell-sidebar-width: 22rem;
-
+  block-size: 100vh;
   min-block-size: 100vh;
   padding: 0 var(--page-gutter-wide) var(--page-gutter-wide);
 
@@ -15,8 +15,7 @@
     inset-block-start: 0;
     inset-inline: 0;
 
-    display: grid;
-    grid-template-columns: var(--shell-sidebar-width) minmax(0, 1fr) auto;
+    display: flex;
     gap: 0;
     align-items: center;
 
@@ -37,6 +36,7 @@
 
   &__topbar-brand {
     display: flex;
+    flex: 0 0 var(--shell-sidebar-width);
     gap: 0.9rem;
     align-items: center;
 
@@ -46,8 +46,9 @@
   }
 
   &__brand-mark {
-    display: inline-grid;
-    place-items: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
     inline-size: 2.875rem;
     block-size: 2.875rem;
@@ -73,14 +74,19 @@
 
   &__topbar-title {
     display: flex;
+    flex: 1 1 auto;
     align-items: center;
+
+    min-inline-size: 0;
     padding-inline: 1.5rem;
   }
 
   &__topbar-actions {
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: flex-end;
+
     padding-inline: 1.5rem;
   }
 
@@ -102,16 +108,30 @@
   }
 
   &__content-area {
+    display: flex;
+    flex-direction: column;
+
+    block-size: calc(100vh - var(--page-gutter-wide, 1.5rem));
+    min-block-size: calc(
+      100vh - var(--shell-topbar-height) - 1rem - var(--page-gutter-wide, 1.5rem)
+    );
     margin-inline-start: calc(var(--shell-sidebar-width) + 1.75rem);
-    padding-block-start: calc(var(--shell-topbar-height) + 1.5rem);
+    padding-block-start: calc(var(--shell-topbar-height) + 1rem);
     padding-inline-start: 1.25rem;
+
+    > router-outlet + * {
+      flex: 1 1 auto;
+      min-inline-size: 0;
+      min-block-size: 0;
+    }
   }
 
   @media (width < 72rem) {
     &__topbar {
       position: relative;
       inset: auto;
-      grid-template-columns: 1fr;
+      flex-direction: column;
+      align-items: stretch;
     }
 
     &__sidebar {
@@ -124,6 +144,8 @@
     }
 
     &__content-area {
+      block-size: auto;
+      min-block-size: auto;
       margin-inline-start: 0;
       padding-block-start: 1.5rem;
       padding-inline-start: 0;

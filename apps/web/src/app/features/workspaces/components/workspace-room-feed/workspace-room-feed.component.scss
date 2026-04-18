@@ -1,35 +1,142 @@
 .workspace-room-feed {
-  display: grid;
-  gap: 1rem;
+  position: relative;
 
-  &__helper {
-    margin: 0;
-    font-size: 0.92rem;
-    line-height: 1.65;
-    color: var(--text-secondary);
-  }
+  overflow: auto;
 
-  &__state {
-    display: grid;
-    gap: 1rem;
+  block-size: 100%;
+  min-block-size: 0;
+  padding: 1rem 1rem 1.25rem;
 
-    padding: 1rem 1.05rem;
-    border: var(--border-width-thin) solid
-      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
-    border-radius: 1rem;
-
-    background: color-mix(in oklch, var(--surface-base) 12%, transparent);
+  &,
+  &__message-list {
+    display: flex;
+    flex-direction: column;
   }
 
   &__message-list {
-    display: grid;
-    gap: 0.9rem;
+    flex: 1 0 auto;
+    gap: 0.85rem;
+    min-block-size: 100%;
+
+    app-workspace-message-date-divider {
+      --workspace-date-divider-offset: 0.65rem;
+    }
+  }
+
+  &__message-row {
+    min-inline-size: 0;
+  }
+
+  &__jump {
+    pointer-events: none;
+
+    position: fixed;
+    z-index: 4;
+    right: 3rem;
+    bottom: 17rem;
+    transform: translateY(0.75rem) scale(0.94);
+
+    display: inline-flex;
+    align-self: flex-end;
+
+    margin-block: auto 0;
+    margin-inline-start: auto;
+    padding-inline-end: 0.9rem;
+
+    visibility: hidden;
+    opacity: 0;
+
+    transition:
+      transform var(--motion-duration-normal) cubic-bezier(0.22, 1, 0.36, 1),
+      opacity var(--motion-duration-normal) ease,
+      visibility 0s linear var(--motion-duration-normal);
+
+    app-button {
+      pointer-events: none;
+      overflow: hidden;
+      border-radius: 999rem;
+      box-shadow:
+        0 1.1rem 2.4rem -1.1rem color-mix(in oklch, black 34%, transparent),
+        0 0.35rem 0.9rem -0.6rem color-mix(in oklch, black 24%, transparent);
+    }
+
+    &--visible {
+      pointer-events: none;
+
+      transform: translateY(0) scale(1);
+
+      visibility: visible;
+      opacity: 1;
+
+      transition-delay: 0s;
+
+      app-button {
+        pointer-events: auto;
+      }
+    }
+  }
+
+  &__jump-icon,
+  &__jump-label {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__jump-icon {
+    justify-content: center;
+
+    inline-size: 1.1rem;
+    block-size: 1.1rem;
+    margin-inline-end: 0.35rem;
+    border-radius: 999rem;
+
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent-primary);
+
+    background: color-mix(in oklch, var(--surface-accent) 70%, transparent);
+  }
+
+  &__jump-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  &__state {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+
+    min-block-size: 100%;
+    padding: 2.5rem 1.5rem;
+
+    text-align: center;
+
+    strong {
+      font-size: 1rem;
+      font-weight: 750;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      max-inline-size: 26rem;
+      margin: 0;
+
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
   }
 
   &__unread-marker {
     position: sticky;
-    z-index: 1;
-    inset-block-start: 0.75rem;
+    z-index: 2;
+    inset-block-start: 3.25rem;
 
     display: flex;
     justify-content: center;
@@ -39,131 +146,21 @@
       align-items: center;
       justify-content: center;
 
-      min-block-size: 1.7rem;
-      padding-inline: 0.75rem;
+      min-block-size: 1.75rem;
+      padding-inline: 0.8rem;
       border: var(--border-width-thin) solid
         color-mix(in oklch, var(--accent-primary) 18%, var(--outline-subtle));
       border-radius: var(--radius-pill);
 
-      font-size: 0.73rem;
+      font-size: 0.72rem;
       font-weight: 700;
       color: var(--accent-primary);
       text-transform: uppercase;
       letter-spacing: 0.08em;
 
-      background: color-mix(in oklch, var(--surface-elevated) 96%, transparent);
-      backdrop-filter: blur(14px);
-    }
-  }
-
-  &__message-item {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 0.9rem;
-    align-items: start;
-
-    padding: 1rem 1.05rem;
-    border: var(--border-width-thin) solid
-      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
-    border-radius: 1rem;
-
-    background: color-mix(in oklch, var(--surface-base) 12%, transparent);
-  }
-
-  &__message-item--active {
-    border-color: color-mix(in oklch, var(--accent-primary) 24%, var(--outline-subtle));
-    background: color-mix(in oklch, var(--surface-accent) 32%, transparent);
-  }
-
-  &__message-item--unread {
-    border-color: color-mix(in oklch, var(--accent-primary) 12%, var(--outline-subtle));
-    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--accent-primary) 8%, transparent);
-  }
-
-  &__message-avatar {
-    display: inline-grid;
-    place-items: center;
-
-    inline-size: 2.5rem;
-    block-size: 2.5rem;
-    border-radius: 0.95rem;
-
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklch, var(--surface-elevated) 96%, transparent),
-      color-mix(in oklch, var(--surface-card-muted) 96%, transparent)
-    );
-  }
-
-  &__message-body {
-    display: grid;
-    gap: 0.45rem;
-
-    p {
-      margin: 0;
-
-      font-size: 0.93rem;
-      line-height: 1.7;
-      color: var(--text-primary);
-      white-space: pre-wrap;
-    }
-  }
-
-  &__message-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-
-    strong {
-      font-size: 0.92rem;
-      font-weight: 600;
-      letter-spacing: -0.015em;
-    }
-
-    span {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-    }
-  }
-
-  &__message-actions {
-    display: flex;
-    justify-content: flex-start;
-  }
-
-  &__thread-button {
-    cursor: pointer;
-
-    min-block-size: 2.2rem;
-    padding-inline: 0.9rem;
-    border: var(--border-width-thin) solid
-      color-mix(in oklch, var(--outline-subtle) 76%, transparent);
-    border-radius: var(--radius-pill);
-
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-
-    background: color-mix(in oklch, var(--surface-base) 18%, transparent);
-
-    transition:
-      border-color var(--motion-duration-fast) ease,
-      color var(--motion-duration-fast) ease,
-      background-color var(--motion-duration-fast) ease;
-
-    &:hover,
-    &:focus-visible {
-      border-color: color-mix(in oklch, var(--accent-primary) 28%, var(--outline-subtle));
-      color: var(--text-primary);
-      background: color-mix(in oklch, var(--surface-accent) 42%, transparent);
-      outline: none;
+      background: color-mix(in oklch, var(--surface-elevated) 98%, transparent);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-subtle);
     }
   }
 }

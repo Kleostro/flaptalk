@@ -1,0 +1,13 @@
+.workspace-message-actions {
+  transform: translateY(0);
+
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  opacity: 1;
+
+  transition:
+    opacity var(--motion-duration-fast) ease,
+    transform var(--motion-duration-fast) ease;
+}

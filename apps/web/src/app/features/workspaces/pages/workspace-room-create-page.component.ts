@@ -13,7 +13,6 @@ import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { ToastService } from '@web/app/core/services/toast.service';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
 import { WorkspaceFormFactoryService } from '@web/app/features/workspaces/services/workspace-form.factory.service';
-import { type BreadcrumbItem } from '@web/app/shared/ui/breadcrumbs/breadcrumbs.component';
 import { ButtonComponent } from '@web/app/shared/ui/button/button';
 import { CardComponent } from '@web/app/shared/ui/card/card';
 import { EmptyStateComponent } from '@web/app/shared/ui/empty-state/empty-state.component';
@@ -49,25 +48,6 @@ export class WorkspaceRoomCreatePageComponent {
   private readonly workspaceFacadeService = inject(WorkspaceFacadeService);
   private readonly workspaceFormFactoryService = inject(WorkspaceFormFactoryService);
 
-  public readonly breadcrumbs: readonly BreadcrumbItem[] = [
-    {
-      href: ['/', APP_ROUTE_PATHS.workspace],
-      label: 'Workspace',
-    },
-    {
-      href: [
-        '/',
-        APP_ROUTE_PATHS.workspace,
-        APP_ROUTE_PATHS.workspaceSetup,
-        APP_ROUTE_PATHS.workspaceSetupRooms,
-      ],
-      label: 'Rooms',
-    },
-    {
-      href: null,
-      label: 'Create room',
-    },
-  ];
   public readonly canManageRooms = computed(() => this.workspaceFacadeService.canManageRooms());
   public readonly currentWorkspace = computed(() => this.workspaceFacadeService.currentWorkspace());
   public readonly existingRooms = computed(() => this.workspaceFacadeService.rooms());

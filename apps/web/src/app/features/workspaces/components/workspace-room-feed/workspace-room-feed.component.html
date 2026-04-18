@@ -1,60 +1,53 @@
-<div class="workspace-room-feed">
-  <p class="workspace-room-feed__helper">
-    {{ room()?.description || 'This room is ready for its first messages and room-level context.' }}
-  </p>
+<div #feedContainer class="workspace-room-feed" (scroll)="handleFeedScroll()">
+  <div
+    class="workspace-room-feed__jump"
+    [class.workspace-room-feed__jump--visible]="showJumpToLatest()"
+    [attr.aria-hidden]="!showJumpToLatest()"
+  >
+    <app-button appearance="secondary" size="small" type="button" (click)="jumpToLatest()">
+      <span aria-hidden="true" class="workspace-room-feed__jump-icon">↓</span>
+      <span class="workspace-room-feed__jump-label">Latest</span>
+    </app-button>
+  </div>
 
   @if (isPending()) {
     <div class="workspace-room-feed__state">
       <strong>Restoring room feed...</strong>
-      <p class="workspace-room-feed__helper">
-        We are loading the latest discussion history for this room.
-      </p>
+      <p>We are loading the latest discussion history for this room.</p>
     </div>
   } @else if (messages().length > 0) {
     <div class="workspace-room-feed__message-list">
-      @for (message of messages(); track message.id) {
+      @for (message of messages(); track message.id; let messageIndex = $index) {
+        @if (shouldShowDateDivider(messageIndex)) {
+          <app-workspace-message-date-divider [label]="getDateDividerLabel(message.createdAt)" />
+        }
+
         @if (isFirstUnreadMessage(message.id)) {
           <div class="workspace-room-feed__unread-marker">
             <span>First unread</span>
           </div>
         }
 
-        <article
+        <div
           #messageItem
-          class="workspace-room-feed__message-item"
-          [class.workspace-room-feed__message-item--active]="activeThreadMessageId() === message.id"
-          [class.workspace-room-feed__message-item--unread]="isMessageUnread(message.id)"
+          class="workspace-room-feed__message-row"
           [attr.data-message-id]="message.id"
         >
-          <div class="workspace-room-feed__message-avatar" aria-hidden="true">
-            {{ getMessageAuthorInitials(message.author.email) }}
-          </div>
-
-          <div class="workspace-room-feed__message-body">
-            <div class="workspace-room-feed__message-meta">
-              <strong>{{ message.author.email }}</strong>
-              <span>{{ message.createdAt | date: 'short' }}</span>
-            </div>
-
-            <p>{{ message.body }}</p>
-
-            <div class="workspace-room-feed__message-actions">
-              <button
-                class="workspace-room-feed__thread-button"
-                type="button"
-                (click)="openThread(message.id)"
-              >
-                {{ activeThreadMessageId() === message.id ? 'Thread open' : 'Open thread' }}
-              </button>
-            </div>
-          </div>
-        </article>
+          <app-workspace-chat-message
+            [currentUserId]="currentUserId()"
+            [isActiveThread]="activeThreadMessageId() === message.id"
+            [isUnread]="isMessageUnread(message.id)"
+            [message]="message"
+            [showThreadAction]="activeThreadMessageId() === null"
+            (threadAction)="openThread($event)"
+          />
+        </div>
       }
     </div>
   } @else {
     <div class="workspace-room-feed__state">
       <strong>No messages yet</strong>
-      <p class="workspace-room-feed__helper">
+      <p>
         Start this room with the first message to establish context for future threads and
         summaries.
       </p>

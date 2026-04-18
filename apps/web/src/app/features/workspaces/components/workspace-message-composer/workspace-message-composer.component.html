@@ -1,0 +1,27 @@
+<form class="workspace-message-composer" (submit)="handleSubmit($event)">
+  <div class="workspace-message-composer__header">
+    <strong>{{ surfaceTitle() }}</strong>
+    @if (hint()) {
+      <span>{{ hint() }}</span>
+    }
+  </div>
+
+  <div class="workspace-message-composer__field">
+    <div class="workspace-message-composer__footer">
+      <div class="workspace-message-composer__input-shell">
+        <textarea
+          [id]="inputId()"
+          class="workspace-message-composer__textarea"
+          [formField]="field()"
+          [placeholder]="placeholder()"
+          [rows]="rows()"
+          (keydown)="handleTextareaKeydown($event)"
+        ></textarea>
+
+        <app-button [disabled]="pending()" appearance="primary" size="medium" type="submit">
+          {{ pending() ? pendingLabel() : submitLabel() }}
+        </app-button>
+      </div>
+    </div>
+  </div>
+</form>

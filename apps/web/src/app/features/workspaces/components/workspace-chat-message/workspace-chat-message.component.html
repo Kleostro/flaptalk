@@ -1,0 +1,36 @@
+<article
+  class="workspace-chat-message"
+  [class.workspace-chat-message--active]="isActiveThread()"
+  [class.workspace-chat-message--own]="isOwnMessage()"
+  [class.workspace-chat-message--root]="isRootMessage()"
+  [class.workspace-chat-message--unread]="isUnread()"
+>
+  <div class="workspace-chat-message__avatar" aria-hidden="true">
+    {{ getMessageAuthorInitials(message().author.email) }}
+  </div>
+
+  <div class="workspace-chat-message__content">
+    <div class="workspace-chat-message__meta">
+      <strong>{{ isOwnMessage() ? 'You' : message().author.email }}</strong>
+      <span>{{ message().createdAt | date: 'MMM d, h:mm a' }}</span>
+    </div>
+
+    <div class="workspace-chat-message__bubble">
+      <p>{{ message().body }}</p>
+    </div>
+
+    @if (isRootMessage() || showThreadAction()) {
+      <div class="workspace-chat-message__footer">
+        @if (isRootMessage()) {
+          <span class="workspace-chat-message__thread-label">Thread root</span>
+        }
+
+        <app-workspace-message-actions
+          [isThreadOpen]="isActiveThread()"
+          [showThreadAction]="showThreadAction()"
+          (threadAction)="openThread()"
+        />
+      </div>
+    }
+  </div>
+</article>

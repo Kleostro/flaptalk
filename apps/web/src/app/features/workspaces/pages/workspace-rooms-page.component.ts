@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
-import { type BreadcrumbItem } from '@web/app/shared/ui/breadcrumbs/breadcrumbs.component';
 
 import { CardComponent } from '@web/app/shared/ui/card/card';
 import { EmptyStateComponent } from '@web/app/shared/ui/empty-state/empty-state.component';
@@ -32,16 +31,6 @@ import { ShellSectionCardComponent } from '@web/app/shared/ui/shell-section-card
 export class WorkspaceRoomsPageComponent {
   private readonly workspaceFacadeService = inject(WorkspaceFacadeService);
 
-  public readonly breadcrumbs: readonly BreadcrumbItem[] = [
-    {
-      href: ['/', APP_ROUTE_PATHS.workspace],
-      label: 'Workspace',
-    },
-    {
-      href: null,
-      label: 'Rooms',
-    },
-  ];
   public readonly canManageRooms = computed(() => this.workspaceFacadeService.canManageRooms());
   public readonly createRoomLink = [
     '/',

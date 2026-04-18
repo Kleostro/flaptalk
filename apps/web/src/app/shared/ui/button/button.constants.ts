@@ -12,6 +12,7 @@ export type ButtonAppearance = (typeof BUTTON_APPEARANCE)[keyof typeof BUTTON_AP
 export const BUTTON_SIZE = {
   large: 'large',
   medium: 'medium',
+  small: 'small',
 } as const;
 
 export type ButtonSize = (typeof BUTTON_SIZE)[keyof typeof BUTTON_SIZE];

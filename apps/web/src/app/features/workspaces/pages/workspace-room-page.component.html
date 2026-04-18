@@ -1,111 +1,122 @@
-<app-page-header
-  [breadcrumbs]="roomViewModel().breadcrumbs"
-  [description]="roomViewModel().headerDescription"
-  kicker="Room canvas"
-  [title]="roomViewModel().headerTitle"
-/>
-
-<div class="workspace-room-page__dashboard-grid">
-  <section class="workspace-room-page__primary-column">
-    @if (roomViewModel().resumeBanner; as resumeBanner) {
-      <app-card>
-        <div class="workspace-room-page__panel workspace-room-page__panel--compact">
-          <app-shell-panel-header [tag]="resumeBanner.tag" [title]="resumeBanner.title" />
-          <p class="workspace-room-page__helper">{{ resumeBanner.description }}</p>
+<div class="workspace-room-page">
+  <div class="workspace-room-page__layout">
+    <section class="workspace-room-page__chat-shell">
+      <header class="workspace-room-page__chat-header">
+        <div class="workspace-room-page__chat-heading">
+          <span class="workspace-room-page__chat-kicker">Room canvas</span>
+          <h1>{{ roomViewModel().feedTitle }}</h1>
+          <p>{{ roomViewModel().roomDescription }}</p>
         </div>
-      </app-card>
-    }
 
-    <app-shell-section-card tag="Room feed" [title]="roomViewModel().feedTitle">
-      <div class="workspace-room-page__panel">
-        <app-workspace-room-feed
-          [activeThreadMessageId]="selectedThreadRootMessage()?.id ?? null"
-          [currentReadMessageId]="lastReadMessageId()"
-          [isPending]="isMessageCollectionPending()"
-          [messages]="messages()"
-          [resumeMode]="roomResumeMode()"
-          [resumeTargetMessageId]="resumeTargetMessageId()"
-          [room]="selectedRoom()"
-          (selectThread)="openThread($event)"
-          (visibleMessageChange)="handleVisibleMessageChange($event)"
-        />
-      </div>
-    </app-shell-section-card>
+        <div class="workspace-room-page__chat-meta">
+          <span>{{ messageCount() }} messages</span>
+          @if (lastReadMessageId()) {
+            <span>Read through #{{ lastReadMessageId() }}</span>
+          }
+        </div>
+      </header>
 
-    @if (selectedRoom()) {
-      <app-card>
-        <form class="workspace-room-page__panel" (submit)="createMessage($event)">
-          <app-shell-panel-header tag="Composer" title="Send message" />
+      @if (roomViewModel().resumeBanner; as resumeBanner) {
+        <section class="workspace-room-page__resume-strip" aria-label="Resume context">
+          <div class="workspace-room-page__resume-copy">
+            <span class="workspace-room-page__resume-tag">{{ resumeBanner.tag }}</span>
+            <strong>{{ resumeBanner.title }}</strong>
+            <p>{{ resumeBanner.description }}</p>
+          </div>
+        </section>
+      }
 
-          <app-textarea-field
-            autocomplete="off"
-            [field]="messageForm.body"
-            hint="Messages stay flat for now. Threads will grow from this room feed next."
-            inputId="room-message-body"
-            label="Message"
-            placeholder="Share an update, question, or prompt for the room."
-            [rows]="5"
-            [showErrors]="showMessageFormErrors()"
+      <div class="workspace-room-page__chat-surface">
+        <div class="workspace-room-page__feed-scroll">
+          <app-workspace-room-feed
+            [activeThreadMessageId]="selectedThreadRootMessage()?.id ?? null"
+            [currentReadMessageId]="lastReadMessageId()"
+            [currentUserId]="currentUserId()"
+            [isPending]="isMessageCollectionPending()"
+            [messages]="messages()"
+            [resumeMode]="roomResumeMode()"
+            [resumeTargetMessageId]="resumeTargetMessageId()"
+            [room]="selectedRoom()"
+            (selectThread)="openThread($event)"
+            (visibleMessageChange)="handleVisibleMessageChange($event)"
           />
+        </div>
 
-          <app-button [disabled]="isCreateMessagePending()" [fluid]="true" type="submit">
-            {{ isCreateMessagePending() ? 'Sending message...' : 'Send message' }}
-          </app-button>
-        </form>
-      </app-card>
-    }
-  </section>
-
-  <section class="workspace-room-page__secondary-column">
-    <app-shell-section-card [tag]="roomViewModel().threadPanelTag" title="Thread panel">
-      <div class="workspace-room-page__panel">
-        <p class="workspace-room-page__helper">
-          {{ roomViewModel().threadPanelDescription }}
-        </p>
-
-        <app-workspace-thread-panel
-          [currentReadMessageId]="lastReadMessageId()"
-          [isPending]="isThreadPending()"
-          [replies]="selectedThreadReplies()"
-          [rootMessage]="selectedThreadRootMessage()"
-          (visibleMessageChange)="handleVisibleMessageChange($event)"
-        />
-
-        @if (hasSelectedThread()) {
-          <form class="workspace-room-page__reply-form" (submit)="createReply($event)">
-            <app-shell-panel-header tag="Reply" title="Continue thread" />
-
-            <app-textarea-field
-              autocomplete="off"
-              [field]="replyForm.body"
-              hint="Replies attach directly to the selected thread root."
-              inputId="thread-reply-body"
-              label="Reply"
-              placeholder="Add context, answer the question, or continue the discussion."
+        @if (selectedRoom()) {
+          <div class="workspace-room-page__composer-surface">
+            <app-workspace-message-composer
+              [field]="messageForm.body"
+              hint="Keep the room feed high-signal. Open a thread when a message needs deeper follow-up."
+              inputId="room-message-body"
+              [pending]="isCreateMessagePending()"
+              pendingLabel="Sending message..."
+              placeholder="Write a message to the room..."
               [rows]="4"
-              [showErrors]="showReplyFormErrors()"
+              submitLabel="Send message"
+              surfaceTitle="Room composer"
+              (submitted)="createMessage($event)"
             />
-
-            <app-button [disabled]="isCreateMessagePending()" [fluid]="true" type="submit">
-              {{ isCreateMessagePending() ? 'Sending reply...' : 'Send reply' }}
-            </app-button>
-          </form>
+          </div>
         }
       </div>
-    </app-shell-section-card>
+    </section>
 
-    <app-shell-section-card tag="Context" title="Room details">
-      <div class="workspace-room-page__panel">
-        <p class="workspace-room-page__helper">{{ roomViewModel().roomDescription }}</p>
+    <button
+      class="workspace-room-page__thread-backdrop"
+      [class.workspace-room-page__thread-backdrop--visible]="isThreadRailOpen()"
+      aria-label="Close thread"
+      type="button"
+      (click)="closeThread()"
+    ></button>
 
-        <app-key-value-list [items]="roomViewModel().detailItems" />
+    <aside
+      class="workspace-room-page__thread-rail"
+      [class.workspace-room-page__thread-rail--open]="isThreadRailOpen()"
+      [attr.aria-hidden]="!isThreadRailOpen()"
+    >
+      <div class="workspace-room-page__thread-shell">
+        <header class="workspace-room-page__thread-header">
+          <div class="workspace-room-page__thread-heading">
+            <span class="workspace-room-page__thread-kicker">{{
+              roomViewModel().threadPanelTitle
+            }}</span>
+            <h2>Thread</h2>
+            <p>{{ roomViewModel().threadPanelDescription }}</p>
+          </div>
+
+          <app-button appearance="tertiary" size="small" type="button" (click)="closeThread()">
+            Close
+          </app-button>
+        </header>
+
+        <div class="workspace-room-page__thread-scroll">
+          <app-workspace-thread-panel
+            [currentReadMessageId]="lastReadMessageId()"
+            [currentUserId]="currentUserId()"
+            [isPending]="isThreadPending()"
+            [replies]="selectedThreadReplies()"
+            [rootMessage]="selectedThreadRootMessage()"
+            (visibleMessageChange)="handleVisibleMessageChange($event)"
+          />
+        </div>
+
+        @if (hasSelectedThread()) {
+          <div class="workspace-room-page__thread-composer">
+            <app-workspace-message-composer
+              [field]="replyForm.body"
+              hint="Replies stay attached to the root message so the discussion remains easy to resume."
+              inputId="thread-reply-body"
+              [pending]="isCreateMessagePending()"
+              pendingLabel="Sending reply..."
+              placeholder="Write a reply..."
+              [rows]="3"
+              submitLabel="Send reply"
+              surfaceTitle="Reply composer"
+              (submitted)="createReply($event)"
+            />
+          </div>
+        }
       </div>
-    </app-shell-section-card>
-
-    <app-shell-section-card tag="Status" title="Discussion health">
-      <div class="workspace-room-page__panel">
-        <app-key-value-list [items]="roomViewModel().healthRows" />
-      </div>
-    </app-shell-section-card>
-  </section>
+    </aside>
+  </div>
 </div>

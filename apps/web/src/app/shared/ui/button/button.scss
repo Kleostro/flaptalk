@@ -43,6 +43,13 @@
     font-size: var(--font-size-label);
   }
 
+  &--small {
+    min-block-size: 2.1rem;
+    padding-inline: 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 650;
+  }
+
   &--primary {
     color: var(--button-primary-text);
     background: var(--button-primary-background);
