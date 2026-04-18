@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 
 import { APP_ROUTE_PATHS } from '@web/app/core/constants/app-routes.constants';
 import { WorkspaceFacadeService } from '@web/app/features/workspaces/services/workspace-facade.service';
-import { type BreadcrumbItem } from '@web/app/shared/ui/breadcrumbs/breadcrumbs.component';
 import { CardComponent } from '@web/app/shared/ui/card/card';
 import { EmptyStateComponent } from '@web/app/shared/ui/empty-state/empty-state.component';
 import { KeyValueListComponent } from '@web/app/shared/ui/key-value-list/key-value-list.component';
@@ -32,16 +31,6 @@ export class WorkspaceSetupPageComponent {
   public readonly activeInviteCount = computed(() =>
     this.workspaceFacadeService.activeInviteCount(),
   );
-  public readonly breadcrumbs: readonly BreadcrumbItem[] = [
-    {
-      href: ['/', APP_ROUTE_PATHS.workspace],
-      label: 'Workspace',
-    },
-    {
-      href: null,
-      label: 'Owner setup',
-    },
-  ];
   public readonly canManageInvites = computed(() => this.workspaceFacadeService.canManageInvites());
   public readonly canManageRooms = computed(() => this.workspaceFacadeService.canManageRooms());
   public readonly hasWorkspace = computed(() => this.workspaceFacadeService.hasWorkspace());

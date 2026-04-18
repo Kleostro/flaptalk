@@ -1,78 +1,63 @@
-<div class="workspace-thread-panel">
-  @if (!rootMessage()) {
-    <div class="workspace-thread-panel__state">
-      <strong>No thread selected</strong>
-      <p>
-        Select a root message from the room feed to open its replies and continue the discussion.
-      </p>
-    </div>
-  } @else if (isPending()) {
+<div #threadContainer class="workspace-thread-panel" (scroll)="handleThreadScroll()">
+  <div
+    class="workspace-thread-panel__jump"
+    [class.workspace-thread-panel__jump--visible]="showJumpToLatest()"
+    [attr.aria-hidden]="!showJumpToLatest()"
+  >
+    <app-button appearance="secondary" size="small" type="button" (click)="jumpToLatest()">
+      <span aria-hidden="true" class="workspace-thread-panel__jump-icon">↓</span>
+      <span class="workspace-thread-panel__jump-label">Latest</span>
+    </app-button>
+  </div>
+
+  @if (isPending()) {
     <div class="workspace-thread-panel__state">
       <strong>Restoring thread...</strong>
       <p>We are loading the root message and its replies.</p>
     </div>
-  } @else {
-    <div class="workspace-thread-panel__summary">
-      <strong>
-        {{
-          replies().length > 0 ? replies().length + ' replies in this thread' : 'Thread root ready'
-        }}
-      </strong>
-      <p>
-        {{
-          replies().length > 0
-            ? 'Replies stay attached to the root message so the discussion can be resumed without losing context.'
-            : 'This root message is waiting for the first reply.'
-        }}
-      </p>
+  } @else if (!rootMessage()) {
+    <div class="workspace-thread-panel__state">
+      <strong>No thread selected</strong>
+      <p>Select a message from the room feed to pin its replies in this rail.</p>
     </div>
-
-    <article
-      #threadMessageItem
-      class="workspace-thread-panel__message workspace-thread-panel__message--root"
-      [attr.data-message-id]="rootMessage()!.id"
-    >
-      <div class="workspace-thread-panel__avatar" aria-hidden="true">
-        {{ getMessageAuthorInitials(rootMessage()!.author.email) }}
-      </div>
-
-      <div class="workspace-thread-panel__body">
-        <div class="workspace-thread-panel__meta">
+  } @else {
+    <div class="workspace-thread-panel__root-pin">
+      <div class="workspace-thread-panel__root-summary">
+        <div class="workspace-thread-panel__root-meta">
+          <span class="workspace-thread-panel__root-tag">Thread root</span>
           <strong>{{ rootMessage()!.author.email }}</strong>
-          <span>{{ rootMessage()!.createdAt | date: 'short' }}</span>
+          <span>{{ rootMessage()!.createdAt | date: 'MMM d, h:mm a' }}</span>
         </div>
 
-        <p>{{ rootMessage()!.body }}</p>
+        <p>{{ rootMessagePreview() }}</p>
       </div>
-    </article>
+    </div>
 
     @if (replies().length > 0) {
       <div class="workspace-thread-panel__reply-list">
-        @for (reply of replies(); track reply.id) {
-          <article
+        @for (reply of replies(); track reply.id; let replyIndex = $index) {
+          @if (shouldShowDateDivider(replyIndex + 1)) {
+            <app-workspace-message-date-divider [label]="getDateDividerLabel(reply.createdAt)" />
+          }
+
+          <div
             #threadMessageItem
-            class="workspace-thread-panel__message"
+            class="workspace-thread-panel__message-row"
             [attr.data-message-id]="reply.id"
           >
-            <div class="workspace-thread-panel__avatar" aria-hidden="true">
-              {{ getMessageAuthorInitials(reply.author.email) }}
-            </div>
-
-            <div class="workspace-thread-panel__body">
-              <div class="workspace-thread-panel__meta">
-                <strong>{{ reply.author.email }}</strong>
-                <span>{{ reply.createdAt | date: 'short' }}</span>
-              </div>
-
-              <p>{{ reply.body }}</p>
-            </div>
-          </article>
+            <app-workspace-chat-message
+              [currentUserId]="currentUserId()"
+              [isUnread]="isMessageUnread(reply.id)"
+              [message]="reply"
+              [showThreadAction]="false"
+            />
+          </div>
         }
       </div>
     } @else {
-      <div class="workspace-thread-panel__state">
+      <div class="workspace-thread-panel__state workspace-thread-panel__state--compact">
         <strong>No replies yet</strong>
-        <p>This thread is ready for the first reply.</p>
+        <p>The root message is pinned above and ready for the first reply.</p>
       </div>
     }
   }

@@ -1,7 +1,6 @@
 <app-shell>
   <div appShellTitle class="workspace-shell-page__topbar-title">
-    <span class="workspace-shell-page__topbar-kicker">Workspace</span>
-    <strong>{{ topbarTitle() }}</strong>
+    <app-breadcrumbs [items]="topbarBreadcrumbs()" />
   </div>
 
   <div appShellActions class="workspace-shell-page__topbar-actions">

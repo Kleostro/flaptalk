@@ -1,14 +1,22 @@
-import { DatePipe } from '@angular/common';
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   effect,
   ElementRef,
   input,
   output,
+  signal,
+  viewChild,
   viewChildren,
 } from '@angular/core';
 import { type Message, type Room } from '@flaptalk/api-contract';
+
+import { WorkspaceChatMessageComponent } from '@web/app/features/workspaces/components/workspace-chat-message/workspace-chat-message.component';
+import { WorkspaceMessageDateDividerComponent } from '@web/app/features/workspaces/components/workspace-message-date-divider/workspace-message-date-divider.component';
+import { ListTransitionController } from '@web/app/features/workspaces/utils/list-transition-controller';
+import { ScrollAnchorController } from '@web/app/features/workspaces/utils/scroll-anchor-controller';
+import { ButtonComponent } from '@web/app/shared/ui/button/button';
 
 const VISIBILITY_THRESHOLD = 0.72;
 
@@ -16,28 +24,36 @@ export type WorkspaceRoomFeedResumeMode = 'default' | 'first-unread' | 'latest';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe],
+  imports: [ButtonComponent, WorkspaceChatMessageComponent, WorkspaceMessageDateDividerComponent],
   selector: 'app-workspace-room-feed',
   styleUrl: './workspace-room-feed.component.scss',
   templateUrl: './workspace-room-feed.component.html',
 })
 export class WorkspaceRoomFeedComponent {
+  private readonly feedContainer = viewChild<ElementRef<HTMLElement>>('feedContainer');
+  private readonly listTransitionController = new ListTransitionController();
   private readonly messageItems = viewChildren<ElementRef<HTMLElement>>('messageItem');
+  private readonly scrollAnchorController = new ScrollAnchorController();
   private readonly visibleMessageIds = new Set<number>();
   private lastAppliedResumeKey: null | string = null;
   private lastEmittedVisibleMessageId: null | number = null;
 
   public readonly activeThreadMessageId = input<null | number>(null);
   public readonly currentReadMessageId = input<null | number>(null);
+  public readonly currentUserId = input<null | number>(null);
   public readonly isPending = input.required<boolean>();
   public readonly messages = input.required<readonly Message[]>();
   public readonly resumeMode = input<WorkspaceRoomFeedResumeMode>('default');
   public readonly resumeTargetMessageId = input<null | number>(null);
   public readonly room = input<null | Room>(null);
   public readonly selectThread = output<number>();
+  public readonly showJumpToLatest = signal(false);
   public readonly visibleMessageChange = output<number>();
 
   constructor() {
+    this.initMessageTransitions();
+    this.initJumpToLatestVisibility();
+    this.initOwnMessageAutoScroll();
     this.initMessageVisibilityObserver();
     this.initResumeScroll();
   }
@@ -90,6 +106,30 @@ export class WorkspaceRoomFeedComponent {
     );
   }
 
+  private initJumpToLatestVisibility(): void {
+    afterRenderEffect(() => {
+      const container = this.feedContainer()?.nativeElement;
+
+      if (!container) {
+        return;
+      }
+
+      this.showJumpToLatest.set(
+        this.scrollAnchorController.evaluateJumpVisibility(container, this.messageItems()),
+      );
+    });
+  }
+
+  private initMessageTransitions(): void {
+    afterRenderEffect(() => {
+      this.listTransitionController.apply(this.messageItems(), (element) => {
+        const messageId = Number(element.dataset['messageId'] ?? Number.NaN);
+
+        return Number.isFinite(messageId) ? messageId : null;
+      });
+    });
+  }
+
   private initMessageVisibilityObserver(): void {
     effect((onCleanup) => {
       const elements = this.messageItems();
@@ -133,6 +173,42 @@ export class WorkspaceRoomFeedComponent {
       onCleanup(() => {
         observer.disconnect();
         this.visibleMessageIds.clear();
+      });
+    });
+  }
+
+  private initOwnMessageAutoScroll(): void {
+    afterRenderEffect(() => {
+      const container = this.feedContainer()?.nativeElement;
+      const messages = this.messages();
+      const currentUserId = this.currentUserId();
+
+      if (!container || this.isPending() || messages.length === 0 || currentUserId === null) {
+        return;
+      }
+
+      const lastMessage = messages.at(-1) ?? null;
+
+      if (lastMessage === null) {
+        return;
+      }
+
+      const tailItemChange = this.scrollAnchorController.handleTailItemChange({
+        authorId: lastMessage.author.id,
+        container,
+        currentUserId,
+        itemElements: this.messageItems(),
+        itemId: lastMessage.id,
+      });
+
+      this.showJumpToLatest.set(tailItemChange.shouldShowJumpToLatest);
+
+      if (!tailItemChange.shouldScrollToBottom) {
+        return;
+      }
+
+      queueMicrotask(() => {
+        this.scrollAnchorController.jumpToLatest(container);
       });
     });
   }
@@ -187,14 +263,48 @@ export class WorkspaceRoomFeedComponent {
     });
   }
 
-  public getMessageAuthorInitials(email: string): string {
-    const [localPart = ''] = email.split('@');
-    const initials = localPart
-      .replace(/[^a-zA-Z0-9]/g, '')
-      .slice(0, 2)
-      .toUpperCase();
+  private isSameCalendarDay(leftDate: string, rightDate: string): boolean {
+    const left = new Date(leftDate);
+    const right = new Date(rightDate);
 
-    return initials || 'FT';
+    return (
+      left.getFullYear() === right.getFullYear() &&
+      left.getMonth() === right.getMonth() &&
+      left.getDate() === right.getDate()
+    );
+  }
+
+  public getDateDividerLabel(rawDate: string): string {
+    const targetDate = new Date(rawDate);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (this.isSameCalendarDay(targetDate.toISOString(), today.toISOString())) {
+      return 'Today';
+    }
+
+    if (this.isSameCalendarDay(targetDate.toISOString(), yesterday.toISOString())) {
+      return 'Yesterday';
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: targetDate.getFullYear() === today.getFullYear() ? undefined : 'numeric',
+    }).format(targetDate);
+  }
+
+  public handleFeedScroll(): void {
+    const container = this.feedContainer()?.nativeElement;
+
+    if (!container) {
+      return;
+    }
+
+    this.showJumpToLatest.set(
+      this.scrollAnchorController.handleScroll(container, this.messageItems()),
+    );
   }
 
   public isFirstUnreadMessage(messageId: number): boolean {
@@ -209,7 +319,34 @@ export class WorkspaceRoomFeedComponent {
     return messageId > currentReadMessageId;
   }
 
+  public jumpToLatest(): void {
+    const container = this.feedContainer()?.nativeElement;
+
+    if (!container) {
+      return;
+    }
+
+    this.showJumpToLatest.set(false);
+    this.scrollAnchorController.jumpToLatest(container);
+  }
+
   public openThread(messageId: number): void {
     this.selectThread.emit(messageId);
+  }
+
+  public shouldShowDateDivider(index: number): boolean {
+    if (index === 0) {
+      return true;
+    }
+
+    const messages = this.messages();
+    const previousMessage = messages[index - 1];
+    const currentMessage = messages[index];
+
+    if (!previousMessage || !currentMessage) {
+      return false;
+    }
+
+    return !this.isSameCalendarDay(previousMessage.createdAt, currentMessage.createdAt);
   }
 }

@@ -1,105 +1,217 @@
 .workspace-thread-panel {
-  display: grid;
-  gap: 1rem;
+  --workspace-thread-divider-offset: 7.25rem;
 
-  &__state,
-  &__summary,
-  &__message {
-    display: grid;
-    gap: 0.9rem;
+  position: relative;
 
-    padding: 1rem 1.05rem;
-    border: var(--border-width-thin) solid
-      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
-    border-radius: 1rem;
+  overflow: auto;
 
-    background: color-mix(in oklch, var(--surface-base) 12%, transparent);
+  block-size: 100%;
+  min-block-size: 0;
+  padding: 0 1rem 1.25rem;
+
+  &,
+  &__reply-list {
+    display: flex;
+    flex-direction: column;
   }
 
-  &__summary {
-    gap: 0.35rem;
+  &__root-pin {
+    position: sticky;
+    z-index: 3;
+    inset-block-start: 0;
+
+    padding-block: 0.75rem 0.7rem;
+
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--surface-sidebar) 99%, transparent) 0%,
+      color-mix(in oklch, var(--surface-sidebar) 94%, transparent) 76%,
+      transparent 100%
+    );
+    backdrop-filter: blur(12px);
+  }
+
+  &__root-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+
+    padding: 0.85rem 0.95rem;
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--accent-primary) 16%, var(--outline-subtle));
+    border-radius: 1.1rem;
+
+    background: color-mix(in oklch, var(--surface-accent) 12%, var(--surface-sidebar));
+    box-shadow: var(--shadow-subtle);
+
+    p {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+
+      margin: 0;
+
+      font-size: 0.86rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+  }
+
+  &__root-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.6rem;
+    align-items: center;
 
     strong {
-      font-size: 0.88rem;
-      font-weight: 700;
+      font-size: 0.8rem;
+      font-weight: 750;
       color: var(--text-primary);
-      letter-spacing: -0.015em;
+      letter-spacing: -0.02em;
+    }
+
+    span {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+    }
+  }
+
+  &__root-tag {
+    font-weight: 800;
+    color: var(--accent-primary) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__reply-list {
+    gap: 0.85rem;
+
+    app-workspace-message-date-divider {
+      --workspace-date-divider-offset: var(--workspace-thread-divider-offset);
+      --workspace-date-divider-surface: color-mix(
+        in oklch,
+        var(--surface-sidebar) 92%,
+        transparent
+      );
+
+      z-index: 2;
+    }
+  }
+
+  &__message-row {
+    min-inline-size: 0;
+  }
+
+  &__jump {
+    pointer-events: none;
+
+    position: fixed;
+    z-index: 4;
+    right: 0;
+    bottom: 13rem;
+    transform: translateY(0.75rem) scale(0.94);
+
+    display: inline-flex;
+    align-self: flex-end;
+
+    margin-block: auto 0;
+    margin-inline-start: auto;
+    padding-inline-end: 0.9rem;
+
+    visibility: hidden;
+    opacity: 0;
+
+    transition:
+      transform var(--motion-duration-normal) cubic-bezier(0.22, 1, 0.36, 1),
+      opacity var(--motion-duration-normal) ease,
+      visibility 0s linear var(--motion-duration-normal);
+
+    app-button {
+      pointer-events: none;
+      overflow: hidden;
+      border-radius: 999rem;
+      box-shadow:
+        0 1.1rem 2.4rem -1.1rem color-mix(in oklch, black 34%, transparent),
+        0 0.35rem 0.9rem -0.6rem color-mix(in oklch, black 24%, transparent);
+    }
+
+    &--visible {
+      pointer-events: none;
+
+      transform: translateY(0) scale(1);
+
+      visibility: visible;
+      opacity: 1;
+
+      transition-delay: 0s;
+
+      app-button {
+        pointer-events: auto;
+      }
+    }
+  }
+
+  &__jump-icon,
+  &__jump-label {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__jump-icon {
+    justify-content: center;
+
+    inline-size: 1.1rem;
+    block-size: 1.1rem;
+    margin-inline-end: 0.35rem;
+    border-radius: 999rem;
+
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent-primary);
+
+    background: color-mix(in oklch, var(--surface-accent) 70%, transparent);
+  }
+
+  &__jump-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  &__state {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+
+    min-block-size: 100%;
+    padding: 2rem 1.25rem;
+
+    text-align: center;
+
+    strong {
+      font-size: 1rem;
+      font-weight: 750;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
     }
 
     p {
+      max-inline-size: 22rem;
       margin: 0;
-      font-size: 0.85rem;
+
+      font-size: 0.9rem;
       line-height: 1.6;
       color: var(--text-secondary);
     }
   }
 
-  &__message {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
-  }
-
-  &__message--root {
-    border-color: color-mix(in oklch, var(--accent-primary) 24%, var(--outline-subtle));
-    background: color-mix(in oklch, var(--surface-accent) 26%, transparent);
-  }
-
-  &__reply-list {
-    display: grid;
-    gap: 0.85rem;
-  }
-
-  &__avatar {
-    display: inline-grid;
-    place-items: center;
-
-    inline-size: 2.35rem;
-    block-size: 2.35rem;
-    border-radius: 0.9rem;
-
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklch, var(--surface-elevated) 96%, transparent),
-      color-mix(in oklch, var(--surface-card-muted) 96%, transparent)
-    );
-  }
-
-  &__body {
-    display: grid;
-    gap: 0.45rem;
-
-    p {
-      margin: 0;
-
-      font-size: 0.92rem;
-      line-height: 1.65;
-      color: var(--text-primary);
-      white-space: pre-wrap;
-    }
-  }
-
-  &__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-
-    strong {
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: -0.015em;
-    }
-
-    span,
-    p {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-    }
+  &__state--compact {
+    min-block-size: auto;
+    padding-block: 1rem 1.25rem;
   }
 }

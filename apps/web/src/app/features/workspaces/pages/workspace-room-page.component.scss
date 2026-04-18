@@ -1,86 +1,306 @@
+:host {
+  display: block;
+  block-size: 100%;
+  min-block-size: 0;
+}
+
 .workspace-room-page {
-  &__helper {
-    margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.65;
-    color: var(--text-secondary);
-  }
+  --workspace-thread-rail-width: min(28rem, calc(100vw - 3rem));
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
 
-  &__dashboard-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.85fr);
-    gap: 1.25rem;
-    align-items: start;
-  }
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: 100%;
+  min-block-size: 0;
 
-  &__primary-column,
-  &__secondary-column,
-  &__panel,
-  &__stat-list,
-  &__details {
-    display: grid;
-  }
+  &__layout {
+    position: relative;
 
-  &__primary-column,
-  &__secondary-column {
-    gap: 1.25rem;
-  }
-
-  &__panel {
-    gap: 1.25rem;
-    min-block-size: 100%;
-  }
-
-  &__panel--compact {
-    gap: 0.85rem;
-  }
-
-  &__details,
-  &__stat-list {
-    gap: 0.75rem;
-  }
-
-  &__detail,
-  &__stat-row {
+    overflow-x: clip;
     display: flex;
-    gap: 1rem;
-    align-items: center;
+    flex: 1 1 auto;
+    flex-direction: column;
+
+    inline-size: 100%;
+    min-inline-size: 0;
+    block-size: 100%;
+    min-block-size: 0;
+  }
+
+  &__chat-shell {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.9rem;
+
+    inline-size: 100%;
+    min-inline-size: 0;
+    block-size: 100%;
+    min-block-size: 0;
+  }
+
+  &__chat-header,
+  &__resume-strip,
+  &__chat-surface,
+  &__thread-shell {
+    border: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 84%, transparent);
+    border-radius: 1.5rem;
+    background: color-mix(in oklch, var(--surface-sidebar) 98%, transparent);
+    box-shadow: var(--shadow-panel);
+  }
+
+  &__chat-header,
+  &__resume-strip,
+  &__thread-header,
+  &__composer-surface,
+  &__thread-composer {
+    display: block;
+  }
+
+  &__chat-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    align-items: start;
     justify-content: space-between;
 
-    padding-block: 0.2rem;
+    padding: 0.95rem 1.25rem 0.85rem;
+  }
 
-    dt,
-    span {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-    }
+  &__chat-heading,
+  &__resume-copy,
+  &__thread-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
 
-    dd,
-    strong {
+  &__chat-kicker,
+  &__thread-kicker,
+  &__resume-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__chat-heading {
+    h1 {
       margin: 0;
 
-      font-size: 0.94rem;
-      font-weight: 600;
+      font-size: clamp(1.55rem, 2.15vw, 2.2rem);
+      font-weight: 800;
+      line-height: 1.02;
       color: var(--text-primary);
-      text-align: end;
+      letter-spacing: -0.05em;
+    }
+
+    p {
+      max-inline-size: 48rem;
+      margin: 0;
+
+      font-size: 0.86rem;
+      line-height: 1.45;
+      color: var(--text-secondary);
     }
   }
 
-  form.workspace-room-page__panel {
-    gap: 1rem;
+  &__chat-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: flex-start;
+    align-self: start;
+    justify-content: flex-end;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+
+      min-block-size: 1.7rem;
+      padding-inline: 0.7rem;
+      border: var(--border-width-thin) solid
+        color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+      border-radius: var(--radius-pill);
+
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+
+      background: color-mix(in oklch, var(--surface-base) 14%, transparent);
+    }
   }
 
-  &__reply-form {
-    display: grid;
-    gap: 1rem;
-    padding-block-start: 0.25rem;
+  &__resume-strip {
+    align-items: center;
+    padding: 0.8rem 1rem;
+    background: color-mix(in oklch, var(--surface-accent) 14%, var(--surface-sidebar));
+  }
+
+  &__resume-copy {
+    strong {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+  }
+
+  &__resume-tag {
+    color: var(--accent-primary);
+  }
+
+  &__chat-surface {
+    overflow: hidden;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+
+    inline-size: 100%;
+    min-inline-size: 0;
+    block-size: 100%;
+    min-block-size: 0;
+  }
+
+  &__feed-scroll,
+  &__thread-scroll {
+    flex: 1 1 auto;
+    block-size: 100%;
+    min-block-size: 0;
+    padding-bottom: 2rem;
+  }
+
+  &__composer-surface,
+  &__thread-composer {
+    padding: 0.85rem 1rem 1rem;
     border-block-start: var(--border-width-thin) solid
-      color-mix(in oklch, var(--outline-subtle) 74%, transparent);
+      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+    background: color-mix(in oklch, var(--surface-elevated) 94%, transparent);
   }
 
-  @media (width < 84rem) {
-    &__dashboard-grid {
-      grid-template-columns: 1fr;
+  &__thread-backdrop {
+    pointer-events: none;
+    will-change: opacity;
+    cursor: pointer;
+
+    position: absolute;
+    z-index: 7;
+    inset: 0;
+
+    border: 0;
+    border-radius: 1.5rem;
+
+    visibility: hidden;
+    opacity: 0;
+    background: color-mix(in oklch, var(--surface-overlay, black) 22%, transparent);
+
+    transition:
+      opacity var(--motion-duration-normal) ease,
+      visibility 0s linear var(--motion-duration-normal);
+
+    &--visible {
+      pointer-events: auto;
+      visibility: visible;
+      opacity: 1;
+      transition-delay: 0s;
+    }
+  }
+
+  &__thread-rail {
+    pointer-events: none;
+    will-change: transform, opacity;
+
+    position: absolute;
+    z-index: 8;
+    inset-block: 0;
+    inset-inline-end: 0;
+    transform: translateX(calc(100% + 1.5rem)) scale(0.985);
+
+    inline-size: var(--workspace-thread-rail-width);
+    max-inline-size: 100%;
+
+    visibility: hidden;
+    opacity: 0;
+
+    transition:
+      transform var(--motion-duration-normal) cubic-bezier(0.22, 1, 0.36, 1),
+      opacity var(--motion-duration-normal) ease,
+      visibility 0s linear var(--motion-duration-normal);
+
+    &--open {
+      pointer-events: auto;
+
+      transform: translateX(0) scale(1);
+
+      visibility: visible;
+      opacity: 1;
+
+      transition-delay: 0s;
+    }
+  }
+
+  &__thread-shell {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    block-size: 100%;
+    border-radius: 1.75rem 0 0 1.75rem;
+
+    box-shadow:
+      -1.5rem 0 2.5rem -1.9rem color-mix(in oklch, black 28%, transparent),
+      -0.15rem 0 0 color-mix(in oklch, var(--outline-subtle) 84%, transparent);
+  }
+
+  &__thread-header {
+    padding: 1rem 1rem 0.9rem;
+    border-block-end: var(--border-width-thin) solid
+      color-mix(in oklch, var(--outline-subtle) 78%, transparent);
+    background: color-mix(in oklch, var(--surface-elevated) 94%, transparent);
+  }
+
+  &__thread-heading {
+    h2 {
+      margin: 0;
+
+      font-size: 1.18rem;
+      font-weight: 750;
+      color: var(--text-primary);
+      letter-spacing: -0.04em;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+  }
+
+  @media (width < 72rem) {
+    --workspace-thread-rail-width: min(26rem, calc(100vw - 2rem));
+  }
+
+  @media (width < 48rem) {
+    --workspace-thread-rail-width: calc(100vw - 1rem);
+
+    &__chat-meta {
+      justify-content: flex-start;
+    }
+
+    &__thread-rail {
+      inset-inline-end: 0.5rem;
     }
   }
 }

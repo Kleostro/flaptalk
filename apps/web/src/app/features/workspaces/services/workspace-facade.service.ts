@@ -214,6 +214,7 @@ export class WorkspaceFacadeService {
   public readonly canManageRooms = computed(() => this.currentWorkspaceRole() === 'owner');
   public readonly workspaceCatchUp = computed(() => this.workspaceCatchUpResource.value());
   public readonly catchUpItems = computed(() => this.workspaceCatchUp().items);
+  public readonly currentUserId = computed(() => this.authFacadeService.user()?.id ?? null);
   public readonly messages = computed(() => this.messageCollectionResource.value());
   public readonly messageCount = computed(() => this.messages().length);
   public readonly hasMessages = computed(() => this.messageCount() > 0);

@@ -30,7 +30,9 @@
   --radius-xl: 1.5rem;
   --radius-pill: 999rem;
   --motion-duration-fast: 180ms;
+  --motion-duration-normal: 280ms;
   --shadow-soft: 0 0.75rem 1.5rem -1rem oklch(10% 0.02 252deg / 16%);
+  --shadow-subtle: var(--shadow-soft);
   --shadow-panel: 0 1.4rem 2.8rem -1.8rem oklch(10% 0.02 252deg / 24%);
   --shadow-interactive: 0 0.875rem 1.75rem -1rem
     color-mix(in oklch, var(--accent-primary) 34%, transparent);
@@ -46,6 +48,7 @@
   --surface-card-muted: oklch(97% 0.008 245deg / 94%);
   --surface-contrast: oklch(18% 0.02 252deg);
   --surface-accent: oklch(92% 0.028 205deg / 88%);
+  --surface-overlay: oklch(10% 0.02 252deg);
   --text-primary: oklch(24% 0.018 252deg);
   --text-secondary: oklch(49% 0.014 250deg);
   --text-strong: oklch(16% 0.018 252deg);
@@ -88,6 +91,7 @@
 
 :root[data-theme='dark'] {
   --shadow-soft: 0 1rem 2rem -1.25rem oklch(0% 0 0deg / 32%);
+  --shadow-subtle: var(--shadow-soft);
   --shadow-panel: 0 1.65rem 3rem -1.8rem oklch(0% 0 0deg / 44%);
   --shadow-interactive: 0 1rem 2rem -1.1rem
     color-mix(in oklch, var(--accent-primary) 34%, transparent);
@@ -101,6 +105,7 @@
   --surface-card-muted: oklch(18.2% 0.018 252deg / 98%);
   --surface-contrast: oklch(93% 0.006 245deg);
   --surface-accent: oklch(24% 0.03 205deg / 92%);
+  --surface-overlay: oklch(2% 0 0deg);
   --text-primary: oklch(95% 0.006 245deg);
   --text-secondary: oklch(74% 0.012 245deg);
   --text-strong: oklch(10% 0.018 252deg);
