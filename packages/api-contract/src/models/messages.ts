@@ -31,9 +31,21 @@ export const CreateMessageRequestBodyModel = t.Object({
 
 export type CreateMessageRequestBody = Static<typeof CreateMessageRequestBodyModel>;
 
+export const UpdateMessageRequestBodyModel = t.Object({
+  body: t.String({
+    maxLength: MESSAGE_BODY_MAX_LENGTH,
+    minLength: MESSAGE_BODY_MIN_LENGTH,
+  }),
+});
+
+export type UpdateMessageRequestBody = Static<typeof UpdateMessageRequestBodyModel>;
+
 export const MessagesModel = {
   'messages.create.body': CreateMessageRequestBodyModel,
   'messages.create.response': MessageModel,
+  'messages.delete.response': t.Object({
+    success: t.Literal(true),
+  }),
   'messages.entity': MessageModel,
   'messages.list.response': t.Object({
     messages: t.Array(MessageModel),
@@ -42,4 +54,6 @@ export const MessagesModel = {
     replies: t.Array(MessageModel),
     rootMessage: MessageModel,
   }),
+  'messages.update.body': UpdateMessageRequestBodyModel,
+  'messages.update.response': MessageModel,
 };

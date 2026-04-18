@@ -4,7 +4,7 @@ import { prisma } from '@api/db/prisma';
 import { DomainError } from '@api/errors/domain-error';
 import { messageSelect, serializeMessage } from '@api/modules/messages/public-message';
 
-import type { CreateMessageRequestBody } from '@flaptalk/api-contract';
+import type { CreateMessageRequestBody, UpdateMessageRequestBody } from '@flaptalk/api-contract';
 
 function normalizeMessageBody(body: string): string {
   return body.trim().replace(/\s+/g, ' ');
@@ -43,6 +43,37 @@ export class MessagesService {
         id: true,
         parentMessageId: true,
         roomId: true,
+        room: {
+          select: {
+            workspace: {
+              select: {
+                members: {
+                  select: {
+                    role: true,
+                  },
+                  where: {
+                    userId: params.userId,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      where: {
+        id: params.messageId,
+      },
+    });
+  }
+
+  private async getManageableMessage(params: {
+    readonly messageId: number;
+    readonly userId: number;
+  }) {
+    return prisma.message.findUnique({
+      select: {
+        authorId: true,
+        id: true,
         room: {
           select: {
             workspace: {
@@ -109,6 +140,64 @@ export class MessagesService {
     });
 
     return serializeMessage(createdMessage);
+  }
+
+  public async updateMessage(params: {
+    readonly message: UpdateMessageRequestBody;
+    readonly messageId: number;
+    readonly userId: number;
+  }) {
+    const manageableMessage = await this.getManageableMessage(params);
+
+    if (!manageableMessage || manageableMessage.room.workspace.members.length === 0) {
+      throw new DomainError(404, 'message_not_found', 'Message not found.');
+    }
+
+    if (manageableMessage.authorId !== params.userId) {
+      throw new DomainError(
+        403,
+        'message_update_forbidden',
+        'Only message authors can edit messages.',
+      );
+    }
+
+    const updatedMessage = await prisma.message.update({
+      data: {
+        body: normalizeMessageBody(params.message.body),
+      },
+      select: messageSelect,
+      where: {
+        id: params.messageId,
+      },
+    });
+
+    return serializeMessage(updatedMessage);
+  }
+
+  public async deleteMessage(params: { readonly messageId: number; readonly userId: number }) {
+    const manageableMessage = await this.getManageableMessage(params);
+
+    if (!manageableMessage || manageableMessage.room.workspace.members.length === 0) {
+      throw new DomainError(404, 'message_not_found', 'Message not found.');
+    }
+
+    if (manageableMessage.authorId !== params.userId) {
+      throw new DomainError(
+        403,
+        'message_delete_forbidden',
+        'Only message authors can delete messages.',
+      );
+    }
+
+    await prisma.message.delete({
+      where: {
+        id: params.messageId,
+      },
+    });
+
+    return {
+      success: true as const,
+    };
   }
 
   public async listMessagesForRoomMember(params: {

@@ -13,6 +13,8 @@ import {
   CreateMessageRequestBodyModel,
   ErrorModel,
   MessagesModel,
+  type UpdateMessageRequestBody,
+  UpdateMessageRequestBodyModel,
 } from '@flaptalk/api-contract';
 
 export const messagesModule = new Elysia({
@@ -118,6 +120,76 @@ export const messagesModule = new Elysia({
       response: {
         200: 'messages.thread.response',
         401: 'error.response',
+        404: 'error.response',
+      },
+    },
+  )
+  .patch(
+    '/messages/:messageId',
+    async ({
+      authJwt,
+      body,
+      cookie,
+      messagesService,
+      params,
+    }: {
+      readonly authJwt: AuthJwtVerifier;
+      readonly body: UpdateMessageRequestBody;
+      readonly cookie: Record<string, { value?: string | undefined }>;
+      readonly messagesService: MessagesServiceType;
+      readonly params: {
+        readonly messageId: number;
+      };
+    }) => {
+      const userId = await requireAuthenticatedUserId({ authJwt, cookie });
+
+      return messagesService.updateMessage({
+        message: body,
+        messageId: params.messageId,
+        userId,
+      });
+    },
+    {
+      body: UpdateMessageRequestBodyModel,
+      cookie: workspaceSessionCookieModel,
+      params: MessageParamsModel,
+      response: {
+        200: 'messages.update.response',
+        401: 'error.response',
+        403: 'error.response',
+        404: 'error.response',
+      },
+    },
+  )
+  .delete(
+    '/messages/:messageId',
+    async ({
+      authJwt,
+      cookie,
+      messagesService,
+      params,
+    }: {
+      readonly authJwt: AuthJwtVerifier;
+      readonly cookie: Record<string, { value?: string | undefined }>;
+      readonly messagesService: MessagesServiceType;
+      readonly params: {
+        readonly messageId: number;
+      };
+    }) => {
+      const userId = await requireAuthenticatedUserId({ authJwt, cookie });
+
+      return messagesService.deleteMessage({
+        messageId: params.messageId,
+        userId,
+      });
+    },
+    {
+      cookie: workspaceSessionCookieModel,
+      params: MessageParamsModel,
+      response: {
+        200: 'messages.delete.response',
+        401: 'error.response',
+        403: 'error.response',
         404: 'error.response',
       },
     },
