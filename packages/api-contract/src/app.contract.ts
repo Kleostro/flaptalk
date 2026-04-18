@@ -523,24 +523,56 @@ export const appContract = new Elysia({
       }),
   )
   .group('/messages', (app) =>
-    app.get(
-      '/:messageId/thread',
-      () => ({
-        replies: [createContractMessage()],
-        rootMessage: createContractMessage(),
-      }),
-      {
+    app
+      .get(
+        '/:messageId/thread',
+        () => ({
+          replies: [createContractMessage()],
+          rootMessage: createContractMessage(),
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            messageId: t.Numeric(),
+          }),
+          response: {
+            200: 'messages.thread.response',
+            401: 'error.response',
+            404: 'error.response',
+          },
+        },
+      )
+      .patch('/:messageId', () => createContractMessage(), {
+        body: 'messages.update.body',
         cookie: sessionCookieModel,
         params: t.Object({
           messageId: t.Numeric(),
         }),
         response: {
-          200: 'messages.thread.response',
+          200: 'messages.update.response',
           401: 'error.response',
+          403: 'error.response',
           404: 'error.response',
         },
-      },
-    ),
+      })
+      .delete(
+        '/:messageId',
+        () => ({
+          success: true as const,
+        }),
+        {
+          cookie: sessionCookieModel,
+          params: t.Object({
+            messageId: t.Numeric(),
+          }),
+          response: {
+            200: 'messages.delete.response',
+            401: 'error.response',
+            403: 'error.response',
+            404: 'error.response',
+          },
+        },
+      ),
   )
   .get(
     '/health',
