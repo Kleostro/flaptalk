@@ -44,7 +44,7 @@
     "typescript-eslint": "^8.39.1",
     "vitest": "^4.0.8",
     "@eslint/js": "^9.26.0",
-    "eslint": "^9.23.0",
+    "eslint": "^10.2.0",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-import-resolver-typescript": "^4.3.4",
     "eslint-plugin-import": "^2.31.0",
